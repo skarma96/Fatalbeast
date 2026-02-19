@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FATALBEAST</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <!-- ═══════ FIREBASE CONFIG — sostituisci con i tuoi dati ═══════ -->
@@ -12,7 +12,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, get, push, onValue, off, update, remove }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
   const firebaseConfig = {
   apiKey: "AIzaSyBn0nNetFgHN1FWqV-cV4HQ16FckTctkAA",
   authDomain: "gioco-delle-bestie.firebaseapp.com",
@@ -21,7 +20,7 @@
   storageBucket: "gioco-delle-bestie.firebasestorage.app",
   messagingSenderId: "337213136932",
   appId: "1:337213136932:web:9089ffc7eabb96073638b1"
-};
+  };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   window._fb = { db, ref, set, get, push, onValue, off, update, remove };
@@ -29,953 +28,707 @@
 </script>
 
 <style>
-/* ════════════════════ VARIABLES ════════════════════ */
+/* ═══ VARIABLES ═══════════════════════════════════════════════════════ */
 :root {
-  --bg0:    #04050a;
-  --bg1:    #080c14;
-  --bg2:    #0d1220;
-  --bg3:    #121928;
-  --bg4:    #1a2235;
-  --red:    #8b1a1a;
-  --red2:   #c0392b;
-  --red3:   #ff4136;
-  --gold:   #c8922a;
-  --gold2:  #f0b040;
-  --gold3:  #ffe580;
-  --beast:  #2d0808;
-  --text:   #e8ddd0;
-  --muted:  #6a7090;
-  --danger: #cc1111;
-  --heal:   #1fa35c;
-  --heal2:  #27d676;
-  --r:      14px;
-  --card-h: 160px;
+  --bg0:#03040a; --bg1:#07090f; --bg2:#0b1019; --bg3:#101622; --bg4:#161e2e;
+  --red:#8b1a1a; --red2:#c0392b; --red3:#ff4136;
+  --gold:#c8922a; --gold2:#f0b040; --gold3:#ffe580;
+  --text:#ede5d8; --muted:#5a6080;
+  --heal:#1a9e58; --heal2:#22c76a;
+  --danger:#cc1111; --beast:#1a0505;
+  --r:14px; --r2:10px;
 }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100%;background:var(--bg0);color:var(--text);font-family:'Barlow',sans-serif;overflow-x:hidden}
 
-/* ════════════════════ BASE ════════════════════ */
-* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html,body { width:100%; min-height:100%; background:var(--bg0); color:var(--text); font-family:'Barlow',sans-serif; overflow-x:hidden; }
+/* ═══ BACKGROUND ══════════════════════════════════════════════════════ */
+.scene-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.scene-bg::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 90% 55% at 50% -5%, rgba(139,26,26,.4) 0%, transparent 60%),
+  radial-gradient(ellipse 50% 40% at 5% 85%, rgba(200,146,42,.07) 0%, transparent 50%),
+  radial-gradient(ellipse 40% 50% at 95% 55%, rgba(139,26,26,.05) 0%, transparent 50%)}
+.scene-bg::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23080c14'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23fff' opacity='.013'/%3E%3C/svg%3E")}
+canvas#particle-canvas{position:fixed;inset:0;pointer-events:none;z-index:1}
 
-/* ════════════════════ ANIMATED BACKGROUND ════════════════════ */
-.scene-bg {
-  position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
-}
-.scene-bg::before {
-  content:''; position:absolute; inset:0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,26,26,.35) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 10% 80%, rgba(200,146,42,.08) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 60% at 90% 60%, rgba(139,26,26,.06) 0%, transparent 50%);
-}
-.scene-bg::after {
-  content:''; position:absolute; inset:0;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23080c14'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23ffffff' opacity='.015'/%3E%3C/svg%3E");
-}
-/* Animated blood drips */
-.drip {
-  position:absolute; top:-10px; width:2px; border-radius:0 0 2px 2px;
-  background:linear-gradient(to bottom, transparent, rgba(139,26,26,.6), rgba(139,26,26,.2));
-  animation:drip linear infinite;
-}
-@keyframes drip {
-  0%  { top:-10%; opacity:0; }
-  10% { opacity:1; }
-  90% { opacity:.6; }
-  100%{ top:110%; opacity:0; }
-}
-/* Floating particles */
-.particle {
-  position:absolute; border-radius:50%; pointer-events:none;
-  animation:particleFloat linear infinite;
-}
-@keyframes particleFloat {
-  0%   { transform:translateY(100vh) scale(0); opacity:0; }
-  10%  { opacity:1; }
-  90%  { opacity:.6; }
-  100% { transform:translateY(-20vh) scale(1) rotate(360deg); opacity:0; }
-}
+/* ═══ SCREENS ═════════════════════════════════════════════════════════ */
+.screen{display:none;position:relative;z-index:10;min-height:100vh;flex-direction:column;align-items:center}
+.screen.active{display:flex}
 
-/* Claw scratches overlay */
-.claws {
-  position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.04;
-  background-image:
-    repeating-linear-gradient(
-      -45deg,
-      transparent 0px, transparent 60px,
-      rgba(200,146,42,.8) 60px, rgba(200,146,42,.8) 61px,
-      transparent 61px, transparent 80px,
-      rgba(200,146,42,.8) 80px, rgba(200,146,42,.8) 81px,
-      transparent 81px, transparent 140px
-    );
-  background-size:200px 200px;
-}
+/* ═══ HOME / SETUP ════════════════════════════════════════════════════ */
+.home-wrap{width:100%;max-width:420px;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px}
+.logo-hero{text-align:center;padding:30px 0 10px}
+.logo-fatal{font-family:'Bebas Neue',sans-serif;font-size:clamp(54px,16vw,86px);letter-spacing:6px;color:var(--red2);text-shadow:0 0 40px rgba(192,57,43,.7),0 0 80px rgba(192,57,43,.3);display:block;line-height:.9}
+.logo-beast{font-family:'Bebas Neue',sans-serif;font-size:clamp(54px,16vw,86px);letter-spacing:6px;color:var(--gold2);text-shadow:0 0 40px rgba(240,176,64,.6);display:block;line-height:.9}
+.logo-tagline{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-top:8px}
+.section-card{background:linear-gradient(160deg,var(--bg3),var(--bg2));border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:16px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;font-weight:700}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+input[type=text],input[type=number]{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);padding:12px 14px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;width:100%;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
+.player-row{display:flex;gap:6px;margin-bottom:6px}
+.player-row input{flex:1}
+.btn-remove{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:var(--muted);width:36px;cursor:pointer;font-size:16px;transition:.2s}
+.btn-remove:hover{color:var(--red3);border-color:var(--red2)}
+.mode-row{display:flex;gap:8px}
+.mode-btn{flex:1;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:var(--r2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;transition:.2s;text-align:center}
+.mode-btn.selected{background:rgba(192,57,43,.15);border-color:var(--red2);color:var(--text)}
 
-/* ════════════════════ SCREENS ════════════════════ */
-.screen { display:none; position:relative; z-index:1; min-height:100vh; padding:20px 16px 50px; }
-.screen.active { display:flex; flex-direction:column; align-items:center; }
-#screen-game { padding:0; }
+/* ═══ BUTTONS ═════════════════════════════════════════════════════════ */
+.btn{padding:14px;border:none;border-radius:var(--r);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;width:100%;transition:.2s}
+.btn-blood{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;box-shadow:0 4px 20px rgba(192,57,43,.4)}
+.btn-blood:hover{box-shadow:0 6px 28px rgba(192,57,43,.6);transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;box-shadow:0 4px 20px rgba(240,176,64,.3)}
+.btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text)}
+.btn-sm{padding:10px 14px;font-size:13px}
+.btn-add{background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.12);color:var(--muted);border-radius:var(--r2);padding:10px;width:100%;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;transition:.2s}
+.btn-add:hover{border-color:var(--gold);color:var(--gold)}
 
-/* ════════════════════ LOGO ════════════════════ */
-.logo-block { position:relative; text-align:center; margin:30px 0 4px; }
-.logo-fatal {
-  display:block; font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(52px,15vw,96px); letter-spacing:6px; line-height:.9;
-  color:var(--text);
-  text-shadow: 0 0 40px rgba(139,26,26,.8), 2px 2px 0 rgba(0,0,0,.8);
-  animation:logoBreath 4s ease-in-out infinite alternate;
-}
-.logo-beast {
-  display:block; font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(52px,15vw,96px); letter-spacing:6px; line-height:.9;
-  color:var(--red2);
-  text-shadow: 0 0 60px rgba(192,57,43,.9), 0 0 100px rgba(192,57,43,.4), 2px 2px 0 rgba(0,0,0,.8);
-  animation:logoBreath 4s ease-in-out infinite alternate-reverse;
-}
-@keyframes logoBreath {
-  from { filter:brightness(1); }
-  to   { filter:brightness(1.3) drop-shadow(0 0 20px rgba(192,57,43,.6)); }
-}
-.logo-paw {
-  position:absolute; font-size:44px; opacity:.15; pointer-events:none;
-  animation:pawFloat 6s ease-in-out infinite alternate;
-}
-.logo-paw:nth-child(1) { top:-10px; left:10px; transform:rotate(-20deg); }
-.logo-paw:nth-child(2) { top:-10px; right:10px; transform:rotate(20deg); animation-delay:2s; }
-@keyframes pawFloat { to { transform:rotate(-20deg) translateY(-8px); } }
-.logo-tagline {
-  font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:4px;
-  color:var(--gold); text-transform:uppercase; margin-top:8px; opacity:.8;
-}
+/* ═══ JOIN SCREEN ═════════════════════════════════════════════════════ */
+.join-wrap{width:100%;max-width:380px;padding:40px 16px}
+.pin-big{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:8px;text-align:center;width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:16px;color:var(--gold2);outline:none;transition:.2s;text-transform:uppercase}
+.pin-big:focus{border-color:var(--red2)}
 
-/* ════════════════════ BUTTONS ════════════════════ */
-.btn {
-  width:100%; max-width:380px; padding:16px 24px; border:none; border-radius:var(--r);
-  font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px;
-  cursor:pointer; transition:all .2s; position:relative; overflow:hidden;
-  display:flex; align-items:center; justify-content:center; gap:10px;
-}
-.btn::before {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 60%);
-  opacity:0; transition:opacity .2s;
-}
-.btn:hover::before { opacity:1; }
-.btn:active { transform:scale(.97); }
-.btn-blood {
-  background:linear-gradient(135deg, #5a0a0a, var(--red2));
-  color:#fff;
-  box-shadow:0 4px 24px rgba(192,57,43,.4), inset 0 1px 0 rgba(255,255,255,.1);
-}
-.btn-blood:hover { box-shadow:0 6px 32px rgba(192,57,43,.7); transform:translateY(-2px); }
-.btn-gold {
-  background:linear-gradient(135deg, #7a5010, var(--gold2));
-  color:#1a0800; font-weight:700;
-  box-shadow:0 4px 24px rgba(200,146,42,.4), inset 0 1px 0 rgba(255,255,255,.15);
-}
-.btn-gold:hover { box-shadow:0 6px 32px rgba(240,176,64,.7); transform:translateY(-2px); }
-.btn-ghost {
-  background:transparent; border:1px solid rgba(106,112,144,.4); color:var(--muted);
-  margin-top:10px; font-size:14px; letter-spacing:2px;
-}
-.btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
-.btn-sm { padding:10px 18px; font-size:14px; max-width:none; width:auto; letter-spacing:2px; }
-.btn-icon {
-  width:38px; height:38px; background:var(--bg3); border:1px solid rgba(255,255,255,.08);
-  border-radius:10px; color:var(--muted); font-size:16px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; transition:all .15s;
-}
-.btn-icon:hover { border-color:var(--red2); color:var(--red2); }
+/* ═══ LOBBY ═══════════════════════════════════════════════════════════ */
+.lobby-wrap{width:100%;max-width:380px;padding:20px 16px 40px;display:flex;flex-direction:column;gap:14px}
+.lobby-code{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:10px;text-align:center;color:var(--gold2);text-shadow:0 0 30px rgba(240,176,64,.5)}
+#qr-container{display:flex;justify-content:center;padding:12px;background:#fff;border-radius:10px;width:fit-content;margin:0 auto}
+.lobby-player{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2)}
+.lobby-player.master{border-color:rgba(200,146,42,.3)}
+.lobby-dot{width:8px;height:8px;border-radius:50%;background:var(--heal2);box-shadow:0 0 8px var(--heal2)}
+.lobby-player.master .lobby-dot{background:var(--gold2);box-shadow:0 0 8px var(--gold2)}
 
-/* ════════════════════ INPUTS ════════════════════ */
-.field { width:100%; max-width:380px; margin-bottom:14px; }
-.field label {
-  display:block; font-family:'Barlow Condensed',sans-serif; font-size:11px;
-  letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px;
-}
-.field input, .field select {
-  width:100%; background:var(--bg3); border:1px solid rgba(255,255,255,.07);
-  border-radius:var(--r); padding:13px 16px; color:var(--text);
-  font-family:'Barlow',sans-serif; font-size:15px; outline:none;
-  transition:border-color .2s, box-shadow .2s;
-}
-.field input:focus, .field select:focus {
-  border-color:var(--red2); box-shadow:0 0 0 3px rgba(192,57,43,.15);
-}
-.field select option { background:var(--bg2); }
+/* ═══ GAME SCREEN TOP BAR ════════════════════════════════════════════ */
+#screen-game{padding-bottom:20px}
+.game-top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(3,4,10,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:50;width:100%}
+.game-logo-sm{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--red2);text-shadow:0 0 15px rgba(192,57,43,.5);flex-shrink:0}
+.game-logo-sm span{color:var(--gold2)}
+.turn-info{flex:1;text-align:center}
+.turn-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.turn-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--text);line-height:1}
+.timer-wrap{position:relative;width:46px;height:46px;flex-shrink:0;cursor:default}
+.timer-wrap svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.timer-ring{stroke:var(--red2);stroke-linecap:round;transition:stroke-dashoffset .9s linear}
+.timer-bg{stroke:rgba(255,255,255,.08)}
+#timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text)}
+.timer-wrap.urgent #timer-num{color:var(--red3);animation:timerPulse .4s ease infinite alternate}
+.timer-wrap.urgent .timer-ring{stroke:var(--red3)}
+@keyframes timerPulse{to{transform:scale(1.2)}}
+.settings-btn{width:36px;height:36px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:.2s}
+.settings-btn:hover{background:rgba(255,255,255,.12)}
+.dir-bar{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);text-align:center;padding:4px 14px;border-bottom:1px solid rgba(255,255,255,.04);background:rgba(0,0,0,.2)}
 
-/* ════════════════════ PLAYER ROWS ════════════════════ */
-.players-list { width:100%; max-width:380px; display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
-.player-row { display:flex; gap:8px; }
-.player-row input {
-  flex:1; background:var(--bg3); border:1px solid rgba(255,255,255,.07);
-  border-radius:var(--r); padding:11px 14px; color:var(--text); font-size:14px; outline:none;
-  transition:border-color .2s;
-}
-.player-row input:focus { border-color:var(--red2); }
-.btn-remove {
-  width:36px; height:36px; background:transparent; border:1px solid rgba(255,255,255,.07);
-  border-radius:9px; color:var(--muted); font-size:16px; cursor:pointer; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; transition:all .15s; align-self:center;
-}
-.btn-remove:hover { border-color:var(--red2); color:var(--red2); background:rgba(192,57,43,.1); }
-.btn-add-player {
-  width:100%; background:transparent; border:1px dashed rgba(255,255,255,.1);
-  border-radius:var(--r); padding:11px; color:var(--muted); font-size:13px; cursor:pointer;
-  transition:all .2s; letter-spacing:1px; font-family:'Barlow Condensed',sans-serif;
-}
-.btn-add-player:hover { border-color:var(--gold); color:var(--gold); }
-
-/* ════════════════════ MODE SELECT ════════════════════ */
-.mode-wrap { display:flex; gap:12px; width:100%; max-width:380px; margin-bottom:20px; }
-.mode-card {
-  flex:1; padding:18px 12px; border:2px solid rgba(255,255,255,.07);
-  border-radius:var(--r); text-align:center; cursor:pointer; transition:all .25s;
-  background:var(--bg3);
-}
-.mode-card.selected { border-color:var(--red2); background:rgba(139,26,26,.15); }
-.mode-card .mode-icon { font-size:32px; margin-bottom:6px; }
-.mode-card .mode-name { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; color:var(--gold); }
-.mode-card .mode-desc { font-size:11px; color:var(--muted); margin-top:3px; }
-
-/* ════════════════════ SECTION TITLE ════════════════════ */
-.section-title {
-  font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:3px;
-  text-transform:uppercase; color:var(--muted); width:100%; max-width:380px;
-  margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,.05);
-}
-
-/* ════════════════════ QR / LOBBY ════════════════════ */
-.qr-wrap {
-  background:#fff; padding:14px; border-radius:var(--r); margin:16px 0;
-  box-shadow:0 0 50px rgba(192,57,43,.3), 0 0 100px rgba(192,57,43,.1);
-}
-.room-code-box {
-  text-align:center; padding:14px 20px; background:var(--bg3);
-  border:1px solid rgba(255,255,255,.07); border-radius:var(--r); margin-bottom:16px; width:100%; max-width:380px;
-}
-.room-code-label { font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; }
-.room-code-val {
-  font-family:'Bebas Neue',sans-serif; font-size:48px; letter-spacing:12px;
-  color:var(--gold2); text-shadow:0 0 20px rgba(240,176,64,.5);
-}
-.lobby-player {
-  display:flex; align-items:center; gap:10px; padding:11px 14px;
-  background:var(--bg3); border-radius:10px; margin-bottom:6px;
-  border-left:3px solid var(--heal); width:100%; max-width:380px;
-  animation:slideIn .3s ease;
-}
-.lobby-player.master { border-left-color:var(--gold); }
-@keyframes slideIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
-.lobby-dot { width:8px; height:8px; border-radius:50%; background:var(--heal); animation:dotPulse 1.5s infinite; flex-shrink:0; }
-.lobby-player.master .lobby-dot { background:var(--gold); }
-@keyframes dotPulse { 0%,100%{opacity:1}50%{opacity:.3} }
-
-/* ════════════════════ GAME LAYOUT ════════════════════ */
-.game-wrap { width:100%; min-height:100vh; display:flex; flex-direction:column; }
-
-/* Top bar */
-.topbar {
-  display:flex; align-items:center; gap:10px; padding:10px 14px;
-  background:rgba(4,5,10,.95); border-bottom:1px solid rgba(139,26,26,.3);
-  backdrop-filter:blur(10px); position:sticky; top:0; z-index:50;
-}
-.topbar-logo {
-  font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px;
-  color:var(--red2); text-shadow:0 0 12px rgba(192,57,43,.6); flex-shrink:0;
-}
-.topbar-turn { flex:1; min-width:0; }
-.topbar-turn-label { font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
-.topbar-turn-name {
-  font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px;
-  color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.topbar-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
-.timer-wrap { position:relative; width:46px; height:46px; flex-shrink:0; }
-.timer-svg { position:absolute; inset:0; transform:rotate(-90deg); }
-.timer-bg   { fill:none; stroke:rgba(255,255,255,.08); stroke-width:3; }
-.timer-fill { fill:none; stroke:var(--gold); stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset .9s linear, stroke .3s; }
-.timer-num {
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; font-size:19px; color:var(--gold);
-  transition:color .3s;
-}
-.timer-wrap.urgent .timer-fill { stroke:var(--red3); }
-.timer-wrap.urgent .timer-num  { color:var(--red3); animation:timerShake .3s infinite; }
-@keyframes timerShake { 0%,100%{transform:none} 50%{transform:scale(1.1)} }
-.topbar-settings-btn {
-  background:transparent; border:1px solid rgba(255,255,255,.08);
-  border-radius:9px; color:var(--muted); font-size:18px; cursor:pointer;
-  width:38px; height:38px; display:flex; align-items:center; justify-content:center;
-  transition:all .15s;
-}
-.topbar-settings-btn:hover { border-color:var(--red2); color:var(--red2); }
-
-/* Direction bar */
-.dir-bar {
-  text-align:center; padding:5px; font-family:'Barlow Condensed',sans-serif;
-  font-size:12px; letter-spacing:2px; color:var(--muted);
-  background:rgba(8,12,20,.8); border-bottom:1px solid rgba(255,255,255,.04);
-  text-transform:uppercase; transition:all .3s;
-}
-
-/* ════════════════════ HP STRIP ════════════════════ */
-.hp-strip {
-  display:flex; gap:6px; padding:8px 10px; overflow-x:auto;
-  background:rgba(8,12,20,.9); border-bottom:1px solid rgba(139,26,26,.2);
-  scrollbar-width:none; flex-shrink:0;
-}
-.hp-strip::-webkit-scrollbar { display:none; }
-.hp-card {
-  min-width:68px; background:var(--bg3); border:1px solid rgba(255,255,255,.07);
-  border-radius:10px; padding:7px 8px; flex-shrink:0; transition:all .3s; position:relative;
-}
-.hp-card.active { border-color:var(--gold); box-shadow:0 0 14px rgba(200,146,42,.3); }
-.hp-card.danger { border-color:var(--danger); animation:dangerPulse 1s infinite; }
-@keyframes dangerPulse {
-  0%,100%{ box-shadow:0 0 8px rgba(204,17,17,.3); }
-  50%    { box-shadow:0 0 22px rgba(204,17,17,.8); }
-}
-.hp-card.dead { opacity:.35; filter:grayscale(1); }
-.hp-card.hit  { animation:hitFlash .5s; }
-@keyframes hitFlash {
-  0%,100%{ background:var(--bg3); }
-  30%    { background:rgba(192,57,43,.35); box-shadow:0 0 20px rgba(192,57,43,.6); }
-}
-.hp-card.healed { animation:healFlash .5s; }
-@keyframes healFlash {
-  0%,100%{ background:var(--bg3); }
-  30%    { background:rgba(39,214,118,.2); box-shadow:0 0 20px rgba(39,214,118,.5); }
-}
-.hpc-name { font-size:9px; color:var(--muted); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:64px; letter-spacing:.5px; }
-.hpc-val  { font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:1; }
-.hpc-bar  { height:2px; background:rgba(255,255,255,.06); border-radius:1px; margin-top:4px; overflow:hidden; }
-.hpc-fill { height:100%; border-radius:1px; transition:width .5s ease; }
-.danger-skull {
-  position:absolute; top:3px; right:4px; font-size:9px;
-  animation:skullBlink .8s infinite; pointer-events:none;
-}
-@keyframes skullBlink { 0%,100%{opacity:1}50%{opacity:0} }
-
-/* ════════════════════ PU BANNER ════════════════════ */
-.pu-banner {
-  margin:0; padding:0; max-height:0; overflow:hidden; transition:max-height .3s, padding .3s;
-  background:linear-gradient(135deg, rgba(45,8,8,.9), rgba(29,18,6,.9));
-  border-bottom:1px solid rgba(200,146,42,.25);
-}
-.pu-banner.show { max-height:80px; padding:10px 14px; }
-.pu-banner-inner { display:flex; align-items:center; gap:12px; }
-.pu-banner-icon { font-size:34px; flex-shrink:0; filter:drop-shadow(0 0 6px rgba(200,146,42,.5)); }
-.pu-banner-info {}
-.pu-banner-title { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--gold2); letter-spacing:1px; text-transform:uppercase; }
-.pu-banner-desc  { font-size:11px; color:var(--muted); margin-top:2px; line-height:1.4; }
-
-/* ════════════════════ CARDS ════════════════════ */
-.cards-section { padding:10px 12px 6px; flex:1; }
-.cards-label {
-  font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:3px;
-  text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:10px;
-}
-.cards-grid {
-  display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;
-}
-/* When 3+ cards, may need different layout */
-.cards-grid.many { grid-template-columns:repeat(2, 1fr); }
-
-/* THE CARD */
-.game-card {
-  height:var(--card-h); border-radius:16px; position:relative; overflow:hidden;
-  cursor:pointer; user-select:none; transition:transform .2s, box-shadow .2s;
-  background:linear-gradient(145deg, #111827, #0d1422);
-  border:1.5px solid rgba(255,255,255,.06);
-}
-.game-card::before {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(135deg, rgba(255,255,255,.05) 0%, transparent 50%);
-  pointer-events:none;
-}
-/* Card inner glow lines */
-.game-card::after {
-  content:''; position:absolute; inset:0;
-  border-radius:16px;
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,.03) 0%, transparent 30%),
-    repeating-linear-gradient(-45deg, transparent 0px, transparent 14px, rgba(255,255,255,.01) 14px, rgba(255,255,255,.01) 15px);
-  pointer-events:none;
-}
-.game-card:not(.disabled):hover {
-  transform:translateY(-4px) scale(1.02);
-  box-shadow:0 12px 30px rgba(0,0,0,.6), 0 0 0 2px rgba(200,146,42,.4);
-  border-color:rgba(200,146,42,.5);
-}
-.game-card:not(.disabled):active {
-  transform:translateY(-2px) scale(1.01);
-}
-.game-card.disabled { cursor:default; }
-.game-card.selected-card {
-  pointer-events:none;
-  animation:cardChoose .7s ease forwards;
-}
-@keyframes cardChoose {
-  0%  { transform:scale(1); box-shadow:none; }
-  40% { transform:scale(1.08) translateY(-6px); box-shadow:0 0 40px rgba(192,57,43,.7), 0 0 80px rgba(192,57,43,.3); border-color:var(--red2); }
-  100%{ transform:scale(.95); opacity:.5; }
-}
-.game-card.critical-card {
-  border-color:rgba(255,65,54,.4) !important;
-}
-.game-card.critical-card .card-value { color:var(--red3) !important; }
-
-/* Card content */
-.card-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; z-index:1; }
-.card-value {
-  font-family:'Bebas Neue',sans-serif; font-size:clamp(42px,10vw,60px);
-  color:var(--gold2); line-height:1;
-  text-shadow:0 0 20px rgba(240,176,64,.4);
-  transition:all .3s;
-}
-.card-value.covered { color:rgba(255,255,255,.1); font-size:40px; }
-.card-value.distorted { filter:blur(4px); color:var(--muted); animation:distort 2s infinite; }
-@keyframes distort {
-  0%,100%{ transform:skewX(0deg); }
-  25%    { transform:skewX(6deg) scaleX(1.05); }
-  75%    { transform:skewX(-4deg) scaleX(.97); }
-}
-.card-name {
-  font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600;
-  color:var(--text); letter-spacing:.5px; opacity:.85; text-align:center; padding:0 8px;
-}
-.card-name.hidden { opacity:0; }
-.card-name.revealed { color:var(--gold2); }
-
-/* Card badges */
-.card-badge {
-  position:absolute; top:8px; left:8px; font-size:10px; padding:2px 7px;
-  border-radius:20px; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px;
-  font-weight:700; text-transform:uppercase;
-}
-.badge-tick       { background:rgba(125,60,152,.5); color:#d7bde2; border:1px solid rgba(125,60,152,.8); }
-.badge-viper      { background:rgba(192,57,43,.5);  color:#f1948a; border:1px solid rgba(192,57,43,.8); }
-.badge-butterfly  { background:rgba(39,174,96,.3);  color:#82e0aa; border:1px solid rgba(39,174,96,.7); }
-.badge-lizard     { background:rgba(52,152,219,.3); color:#85c1e9; border:1px solid rgba(52,152,219,.7); }
-
-/* Covered shimmer */
-.card-covered-shimmer {
-  position:absolute; inset:0; border-radius:16px;
-  background:linear-gradient(90deg, transparent 0%, rgba(200,146,42,.05) 50%, transparent 100%);
-  background-size:200% 100%;
-  animation:shimmerSlide 2.5s ease infinite;
-}
-@keyframes shimmerSlide { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-/* Beast symbol on covered card */
-.card-beast-symbol {
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:48px; opacity:.06; pointer-events:none; user-select:none;
-}
-
-/* Critical badge */
-.critical-flash {
-  position:absolute; top:8px; right:8px; font-size:10px; padding:2px 7px;
-  border-radius:20px; background:rgba(255,65,54,.4); color:var(--red3);
-  border:1px solid rgba(255,65,54,.7); font-family:'Barlow Condensed',sans-serif;
-  font-weight:700; letter-spacing:1px; text-transform:uppercase;
-  animation:critBlink .5s infinite alternate;
-}
-@keyframes critBlink { to { background:rgba(255,65,54,.7); } }
-
-/* ════════════════════ POWERUP SECTION ════════════════════ */
-.pu-section {
-  padding:12px 12px; border-top:1px solid rgba(255,255,255,.05);
-  background:rgba(8,12,20,.95);
-}
-.pu-section-title {
-  font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:3px;
-  color:var(--muted); text-transform:uppercase; margin-bottom:10px; text-align:center;
-}
-.pu-grid { display:flex; gap:8px; }
-.pu-choice {
-  flex:1; background:var(--bg3); border:1.5px solid rgba(255,255,255,.07);
-  border-radius:14px; padding:12px 8px; cursor:pointer; transition:all .25s;
-  display:flex; flex-direction:column; align-items:center; gap:6px; position:relative;
+/* ═══ HP STRIP (BIG REDESIGN) ════════════════════════════════════════ */
+.hp-strip-wrap{padding:10px 14px 6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hp-strip-wrap::-webkit-scrollbar{height:3px}
+.hp-strip-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.hp-strip{display:flex;gap:8px;padding-bottom:4px;min-width:fit-content}
+.hp-card{
+  min-width:130px;height:112px;border-radius:12px;
+  background:var(--bg3);border:1px solid rgba(255,255,255,.07);
+  padding:10px 12px 8px;position:relative;flex-shrink:0;
+  transition:border-color .3s,box-shadow .3s,transform .2s;
   overflow:hidden;
 }
-.pu-choice::before {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 60%);
-}
-.pu-choice:hover { border-color:var(--gold); background:rgba(200,146,42,.06); transform:translateY(-2px); }
-.pu-choice.chosen { border-color:var(--gold2); background:rgba(200,146,42,.1); box-shadow:0 0 20px rgba(200,146,42,.25); }
-.pu-choice.disabled-pu { opacity:.35; pointer-events:none; }
-.pu-icon-big { font-size:36px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
-.pu-choice-name { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; color:var(--gold2); letter-spacing:1px; text-align:center; text-transform:uppercase; }
-.pu-choice-desc { font-size:10px; color:var(--muted); text-align:center; line-height:1.4; }
-.pu-choice.chosen .pu-choice-desc { color:var(--text); }
+.hp-card.active{border-color:rgba(240,176,64,.5);box-shadow:0 0 20px rgba(240,176,64,.15),inset 0 0 20px rgba(240,176,64,.04)}
+.hp-card.dead{opacity:.45;filter:grayscale(.8)}
+.hp-card.danger{border-color:rgba(204,17,17,.5);animation:dangerPulse 1.2s ease infinite}
+@keyframes dangerPulse{0%,100%{box-shadow:0 0 10px rgba(204,17,17,.3)}50%{box-shadow:0 0 24px rgba(204,17,17,.6)}}
+.hp-card.hit{animation:hpHit .5s ease}
+.hp-card.healed{animation:hpHeal .5s ease}
+@keyframes hpHit{0%,100%{background:var(--bg3)}40%{background:rgba(192,57,43,.35)}}
+@keyframes hpHeal{0%,100%{background:var(--bg3)}40%{background:rgba(26,158,88,.3)}}
+.hpc-name{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px;line-height:1.1}
+.hpc-val{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;letter-spacing:1px;margin-top:1px}
+.hpc-bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:4px;overflow:hidden}
+.hpc-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.danger-skull{position:absolute;top:6px;right:8px;font-size:16px;animation:skullBob .8s ease infinite alternate}
+@keyframes skullBob{to{transform:translateY(-3px)}}
+.bug-shield{position:absolute;top:6px;right:8px;font-size:14px;animation:shieldPulse 1s ease infinite}
+@keyframes shieldPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.dolphin-shield{position:absolute;top:5px;left:8px;font-size:13px;opacity:.7}
 
-/* Confirm row */
-.confirm-row { display:flex; gap:8px; padding:10px 12px 16px; background:rgba(4,5,10,.95); }
+/* ═══ PU BANNER ══════════════════════════════════════════════════════ */
+.pu-banner{display:none;align-items:center;gap:10px;margin:6px 14px;padding:10px 14px;background:linear-gradient(135deg,rgba(200,146,42,.1),rgba(200,146,42,.04));border:1px solid rgba(200,146,42,.25);border-radius:var(--r2)}
+.pu-banner.show{display:flex}
+.pu-banner-icon{font-size:26px;flex-shrink:0}
+.pu-banner-text{flex:1;min-width:0}
+.pu-banner-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold2);text-transform:uppercase}
+.pu-banner-desc{font-family:'Barlow',sans-serif;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
 
-/* ════════════════════ LOG ════════════════════ */
-.log-wrap { padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); }
-.log-title { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:6px; }
-.log-list { max-height:110px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; scrollbar-width:none; }
-.log-list::-webkit-scrollbar { display:none; }
-.log-entry {
-  font-size:11px; color:var(--muted); padding:5px 10px;
-  background:rgba(255,255,255,.025); border-radius:6px;
-  border-left:2px solid rgba(255,255,255,.06); line-height:1.4;
-}
-.log-entry:first-child { opacity:1; }
-.log-entry .lp { color:var(--text); font-weight:600; }
-.log-entry .ld { color:var(--red3); font-weight:700; }
-.log-entry .lh { color:var(--heal2); font-weight:700; }
-.log-entry .lpu { color:var(--gold2); }
-
-/* ════════════════════ OVERLAYS / MODALS ════════════════════ */
-.overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:200;
-  display:none; align-items:center; justify-content:center; padding:20px;
-  backdrop-filter:blur(4px);
-}
-.overlay.show { display:flex; animation:fadeOverlay .2s; }
-@keyframes fadeOverlay { from{opacity:0} to{opacity:1} }
-.modal {
-  width:100%; max-width:420px; background:var(--bg2); border:1px solid rgba(255,255,255,.08);
-  border-radius:20px; padding:24px 20px; animation:modalUp .25s ease;
-  box-shadow:0 24px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(192,57,43,.1);
-  max-height:90vh; overflow-y:auto;
-}
-@keyframes modalUp { from{transform:translateY(24px);opacity:0} to{transform:none;opacity:1} }
-.modal-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:2px; color:var(--red2); margin-bottom:16px; }
-.modal-btn {
-  width:100%; padding:14px 16px; background:var(--bg3); border:1px solid rgba(255,255,255,.07);
-  border-radius:var(--r); color:var(--text); font-family:'Barlow Condensed',sans-serif;
-  font-size:14px; font-weight:600; cursor:pointer; transition:all .2s;
-  letter-spacing:1px; text-align:left; display:flex; align-items:center; gap:10px;
-  margin-bottom:6px;
-}
-.modal-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(200,146,42,.06); }
-.modal-btn.danger:hover { border-color:var(--red2); color:var(--red2); background:rgba(192,57,43,.06); }
-.modal-close { margin-top:8px; width:100%; padding:12px; background:transparent; border:1px solid rgba(255,255,255,.07); border-radius:var(--r); color:var(--muted); cursor:pointer; font-size:13px; letter-spacing:1px; transition:all .2s; }
-.modal-close:hover { border-color:var(--muted); color:var(--text); }
-
-/* ════════════════════ REVEAL MODAL ════════════════════ */
-#overlay-reveal .modal { text-align:center; }
-.reveal-icon-wrap { position:relative; display:inline-block; margin-bottom:10px; }
-.reveal-icon { font-size:72px; filter:drop-shadow(0 0 20px rgba(192,57,43,.7)); animation:revealPop .4s cubic-bezier(.34,1.56,.64,1); }
-@keyframes revealPop { from{transform:scale(0) rotate(-20deg)} to{transform:scale(1) rotate(0)} }
-.reveal-title { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; color:var(--text); margin-bottom:6px; }
-.reveal-desc  { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
-.reveal-dmg   { font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:3px; line-height:1; margin:8px 0; }
-.reveal-dmg.red { color:var(--red3); text-shadow:0 0 30px rgba(255,65,54,.6); }
-.reveal-dmg.green { color:var(--heal2); text-shadow:0 0 30px rgba(39,214,118,.5); }
-
-/* ════════════════════ POWERUP MANAGER ════════════════════ */
-.pu-manager-row {
-  display:flex; align-items:center; gap:10px; padding:10px 0;
-  border-bottom:1px solid rgba(255,255,255,.04);
-}
-.pu-mgr-icon { font-size:24px; width:32px; text-align:center; flex-shrink:0; }
-.pu-mgr-info { flex:1; }
-.pu-mgr-name { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600; color:var(--text); }
-.pu-mgr-desc { font-size:10px; color:var(--muted); line-height:1.3; margin-top:1px; }
-.toggle { position:relative; width:42px; height:24px; flex-shrink:0; }
-.toggle input { opacity:0; width:0; height:0; }
-.toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,.07); border-radius:24px; cursor:pointer; border:1px solid rgba(255,255,255,.1); transition:.3s; }
-.toggle-slider::before { content:''; position:absolute; width:18px; height:18px; left:2px; top:2px; background:var(--muted); border-radius:50%; transition:.3s; }
-.toggle input:checked + .toggle-slider { background:rgba(39,174,96,.25); border-color:var(--heal); }
-.toggle input:checked + .toggle-slider::before { transform:translateX(18px); background:var(--heal2); }
-
-/* ════════════════════ GAME OVER ════════════════════ */
-.gameover-hero { position:relative; text-align:center; padding:40px 20px 20px; }
-.gameover-fire { font-size:80px; animation:fireFloat 1.5s ease-in-out infinite alternate; filter:drop-shadow(0 0 20px rgba(255,100,0,.6)); }
-@keyframes fireFloat { to{ transform:translateY(-12px) scale(1.05); } }
-.gameover-winner-name { font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,10vw,56px); letter-spacing:3px; color:var(--gold2); margin:12px 0 4px; text-shadow:0 0 30px rgba(240,176,64,.5); }
-.gameover-sub { font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
-.final-list { width:100%; max-width:380px; display:flex; flex-direction:column; gap:7px; margin:20px auto; }
-.final-row {
-  display:flex; align-items:center; gap:12px; padding:12px 16px;
-  background:var(--bg3); border:1px solid rgba(255,255,255,.06); border-radius:var(--r);
-  animation:rowIn .4s ease both;
-}
-.final-row:nth-child(1) { border-color:rgba(200,146,42,.4); background:rgba(200,146,42,.05); animation-delay:.1s; }
-.final-row:nth-child(2) { animation-delay:.2s; }
-.final-row:nth-child(3) { animation-delay:.3s; }
-@keyframes rowIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:none} }
-.final-rank { font-size:22px; width:28px; text-align:center; flex-shrink:0; }
-.final-name { flex:1; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:600; }
-.final-hp   { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--gold); }
-
-/* Stats block */
-.stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; width:100%; max-width:380px; margin:16px auto; }
-.stat-box { background:var(--bg3); border:1px solid rgba(255,255,255,.06); border-radius:var(--r); padding:12px; text-align:center; }
-.stat-val  { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--red2); }
-.stat-label{ font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
-
-/* Match history */
-.history-item { background:var(--bg3); border:1px solid rgba(255,255,255,.06); border-radius:var(--r); padding:12px 14px; margin-bottom:8px; width:100%; max-width:380px; }
-.history-winner { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--gold2); letter-spacing:1px; }
-.history-meta   { font-size:11px; color:var(--muted); margin-top:2px; }
-
-/* ════════════════════ SPECTATOR ════════════════════ */
-.spectator-pill {
-  position:fixed; top:58px; left:50%; transform:translateX(-50%);
-  background:rgba(125,60,152,.85); color:#d7bde2; font-size:10px; padding:4px 12px;
-  border-radius:20px; letter-spacing:2px; font-family:'Barlow Condensed',sans-serif;
-  font-weight:700; text-transform:uppercase; z-index:100; pointer-events:none;
-  border:1px solid rgba(125,60,152,.9);
+/* ═══ RAT — persistent topo running across cards ════════════════════ */
+.cards-section{position:relative;overflow:hidden}
+@keyframes ratOverCards{0%{left:-70px;opacity:0}3%{opacity:1}97%{opacity:1}100%{left:calc(100% + 70px);opacity:0}}
+.cards-section.rat-active::after{
+  content:'🐭';position:absolute;top:calc(50% - 20px);left:-70px;
+  font-size:46px;pointer-events:none;z-index:20;
+  animation:ratOverCards 2.8s linear infinite;
+  filter:drop-shadow(0 0 8px rgba(200,146,42,.6));
 }
 
-/* Master override button */
-.master-override {
-  display:flex; align-items:center; gap:8px; padding:9px 14px;
-  background:rgba(200,146,42,.08); border:1px solid rgba(200,146,42,.2);
-  border-radius:var(--r); cursor:pointer; transition:all .2s;
-  font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:600;
-  color:var(--gold); letter-spacing:1px; text-transform:uppercase;
-  margin:0 12px 8px;
-}
-.master-override:hover { background:rgba(200,146,42,.15); border-color:var(--gold); }
+/* ═══ SPECIAL TURN PILL ══════════════════════════════════════════════ */
+.special-turn-pill{margin:0 14px 6px;padding:8px 14px;background:linear-gradient(135deg,rgba(240,176,64,.12),rgba(240,176,64,.04));border:1px solid rgba(240,176,64,.3);border-radius:var(--r2);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--gold2);letter-spacing:1px;text-align:center;text-transform:uppercase}
+.bear-cards-left{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold2);margin-left:8px;vertical-align:middle}
 
-/* ════════════════════ DAMAGE FLOAT ════════════════════ */
-.dmg-float {
-  position:fixed; pointer-events:none; z-index:999;
-  font-family:'Bebas Neue',sans-serif; font-size:44px; letter-spacing:2px;
-  text-shadow:0 3px 10px rgba(0,0,0,.9); animation:floatUp 1.5s ease forwards;
-}
-@keyframes floatUp {
-  0%  { opacity:1; transform:translateY(0) scale(1); }
-  20% { transform:translateY(-14px) scale(1.25); }
-  100%{ opacity:0; transform:translateY(-90px) scale(.7); }
-}
-.dmg-float.red   { color:var(--red3); }
-.dmg-float.green { color:var(--heal2); }
-.dmg-float.gold  { color:var(--gold3); }
+/* ═══ MASTER OVERRIDE ════════════════════════════════════════════════ */
+.master-override{display:flex;align-items:center;gap:8px;padding:9px 14px;margin:0 14px 6px;background:rgba(200,146,42,.07);border:1px solid rgba(200,146,42,.2);border-radius:var(--r2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;transition:.2s}
+.master-override:hover{background:rgba(200,146,42,.14)}
 
-/* Critical hit explosion */
-.crit-explode {
-  position:fixed; inset:0; pointer-events:none; z-index:998;
-  animation:critExplode .6s ease forwards;
-  background:radial-gradient(ellipse 60% 40% at 50% 50%, rgba(255,65,54,.15) 0%, transparent 70%);
-}
-@keyframes critExplode { 0%{opacity:0}20%{opacity:1}100%{opacity:0;transform:scale(1.5)} }
+/* ═══ CARDS SECTION — REAL PLAYING CARDS ════════════════════════════ */
+.cards-section{padding:0 14px 8px}
+.cards-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding:0 2px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;justify-items:center}
+.cards-grid.compact{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
 
-/* Screen shake */
-@keyframes screenShake {
-  0%,100%{ transform:translate(0,0) rotate(0); }
-  15%{ transform:translate(-5px,3px) rotate(-.3deg); }
-  30%{ transform:translate(5px,-3px) rotate(.3deg); }
-  45%{ transform:translate(-3px,5px) rotate(-.2deg); }
-  60%{ transform:translate(3px,-3px) rotate(.2deg); }
-  75%{ transform:translate(-3px,2px) rotate(-.1deg); }
+/* The real card */
+.game-card{
+  width:148px;height:215px;border-radius:14px;position:relative;
+  background:linear-gradient(160deg,#1c2540,#0e1525);
+  border:2px solid rgba(200,146,42,.2);
+  box-shadow:0 8px 32px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
+  cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.3,1),box-shadow .25s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;transform-style:preserve-3d;
+  flex-shrink:0;user-select:none;
 }
-.screen-shake { animation:screenShake .45s ease; }
+.game-card:hover:not(.disabled){transform:translateY(-10px) scale(1.04);box-shadow:0 24px 56px rgba(0,0,0,.85),0 0 0 2px var(--gold)}
+.game-card.disabled{cursor:default;opacity:.75}
+.game-card.critical-card{border-color:rgba(255,65,54,.6);animation:critGlow 1.5s ease infinite alternate}
+@keyframes critGlow{from{box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 15px rgba(255,65,54,.3)}to{box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 35px rgba(255,65,54,.6)}}
+.game-card.flip-anim{animation:cardFlip3d .5s ease forwards}
+@keyframes cardFlip3d{0%{transform:rotateY(0) scale(1)}40%{transform:rotateY(90deg) scale(1.08)}65%{transform:rotateY(-15deg) scale(1.04)}100%{transform:rotateY(0) scale(.93);opacity:.4}}
+/* Card inner parts */
+.card-corner{position:absolute;font-size:14px;color:rgba(200,146,42,.35);line-height:1}
+.card-corner.tl{top:8px;left:10px}
+.card-corner.br{bottom:8px;right:10px;transform:rotate(180deg)}
+.card-val-main{font-family:'Bebas Neue',sans-serif;font-size:82px;line-height:1;color:var(--gold2);text-shadow:0 0 40px rgba(240,176,64,.5),0 2px 10px rgba(0,0,0,.9);z-index:2;position:relative}
+.card-name-reveal{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);text-align:center;padding:0 10px;margin-top:8px;line-height:1.2;min-height:22px;z-index:2;position:relative}
+.card-name-reveal.hidden{opacity:0}
+.card-name-reveal.revealed{animation:nameReveal .4s ease}
+@keyframes nameReveal{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card-name-reveal.eagle-glow{color:var(--gold2);text-shadow:0 0 20px rgba(240,176,64,.8)}
+/* Covered card */
+.card-covered{background:linear-gradient(160deg,#0a0f1a,#060910);border-color:rgba(255,255,255,.06)}
+.card-covered-pattern{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 1px,transparent 10px);border-radius:12px}
+.card-covered-symbol{font-size:52px;opacity:.12;user-select:none}
+.card-covered-shimmer{position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);animation:cardShimmer 2.5s ease infinite;border-radius:12px}
+@keyframes cardShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+/* Critical flash */
+.critical-flash{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;letter-spacing:2px;color:var(--red3);background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:4px;padding:2px 8px;text-transform:uppercase;animation:critFlash .6s ease infinite alternate;white-space:nowrap}
+@keyframes critFlash{to{background:rgba(192,57,43,.4);box-shadow:0 0 12px rgba(255,65,54,.4)}}
+/* Badge */
+.card-badge{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;letter-spacing:1.5px;padding:3px 9px;border-radius:4px;text-transform:uppercase;white-space:nowrap;z-index:3}
+.badge-tick{background:rgba(180,80,20,.3);border:1px solid rgba(180,80,20,.6);color:#e87000}
+.badge-viper{background:rgba(20,120,20,.25);border:1px solid rgba(20,180,20,.4);color:#3be03b}
+.badge-butterfly{background:rgba(130,60,200,.25);border:1px solid rgba(180,80,255,.4);color:#d080ff}
+.badge-revival{background:rgba(20,160,100,.25);border:1px solid rgba(30,210,130,.4);color:#30e490}
 
-/* Confetti */
-.confetti-bit {
-  position:fixed; width:7px; height:12px; pointer-events:none; z-index:998;
-  border-radius:1px; animation:confettiFall linear forwards;
+/* ═══ PU CHOICE — Marvel Snap Card Style ════════════════════════════ */
+.pu-section{padding:8px 14px 0;animation:slideUp .35s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.pu-section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+.pu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pu-choice{
+  border-radius:16px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s,border-color .2s;
+  transform-style:preserve-3d;height:190px;display:flex;flex-direction:column;
 }
-@keyframes confettiFall {
-  0%  { transform:translateY(-20px) rotateZ(0); opacity:1; }
-  100%{ transform:translateY(100vh) rotateZ(720deg); opacity:0; }
+.pu-choice.chosen .puc-shine{opacity:1}
+.puc-art-zone{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0}
+.puc-icon{font-size:52px;display:block;position:relative;z-index:2;transition:transform .2s}
+.pu-choice:hover .puc-icon,.pu-choice.chosen .puc-icon{transform:scale(1.12)}
+.puc-band{padding:8px 6px 10px;flex-shrink:0;position:relative;z-index:2}
+.puc-name{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;text-align:center;margin-bottom:3px;line-height:1}
+.puc-desc{font-size:9px;color:rgba(255,255,255,.5);line-height:1.3;text-align:center;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.puc-corner{position:absolute;top:7px;left:9px;font-size:14px;opacity:.4;z-index:3;line-height:1}
+.puc-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,transparent 45%,rgba(255,255,255,.04) 100%);border-radius:14px;pointer-events:none;z-index:4;opacity:0;transition:opacity .2s}
+.pu-choice:hover .puc-shine{opacity:.6}
+.confirm-row{display:none;gap:8px;padding:10px 14px 6px}
+
+/* ═══ LOG — BIGGER, CLEARER ══════════════════════════════════════════ */
+.log-section{padding:0 14px 8px}
+.log-header{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;cursor:pointer}
+.log-header-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase}
+.log-header-arrow{font-size:12px;color:var(--muted);transition:.2s}
+.log-header.open .log-header-arrow{transform:rotate(180deg)}
+#log-list{height:340px;overflow-y:auto;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.35)}
+#log-list::-webkit-scrollbar{width:3px}
+#log-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
+.log-entry{font-family:'Barlow Condensed',sans-serif;font-size:16px;line-height:1.55;padding:9px 14px 9px 16px;border-bottom:1px solid rgba(255,255,255,.04);border-left:3px solid transparent;transition:background .15s;letter-spacing:.2px}
+.log-entry:hover{background:rgba(255,255,255,.025)}
+.log-entry.damage{border-left-color:var(--red2)}
+.log-entry.heal{border-left-color:var(--heal2)}
+.log-entry.powerup{border-left-color:var(--gold)}
+.log-entry.elim{border-left-color:#555;background:rgba(80,0,0,.15)}
+.log-entry.system{border-left-color:#333}
+/* Log text helpers */
+.lp{color:var(--gold2);font-weight:700;font-size:17px}
+.ld{color:var(--red3);font-weight:700;font-size:17px}
+.lh{color:var(--heal2);font-weight:700;font-size:17px}
+.lpu{color:var(--gold);font-weight:700}
+
+/* ═══ MODALS / OVERLAYS ══════════════════════════════════════════════ */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;animation:fadeOverlay .2s ease}
+.overlay.show{display:flex}
+@keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+.modal{background:linear-gradient(160deg,var(--bg3),var(--bg2));border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:24px 20px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto;animation:modalIn .25s cubic-bezier(.2,.8,.3,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--gold2);text-align:center;margin-bottom:18px}
+.modal-close{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);border-radius:var(--r2);padding:10px;width:100%;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;margin-top:8px;transition:.2s}
+.modal-close:hover{color:var(--text)}
+.modal-btn{display:block;width:100%;padding:13px;margin-bottom:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:var(--r2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;color:var(--text);text-align:left;transition:.2s}
+.modal-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18)}
+.modal-btn.danger{color:var(--red3);border-color:rgba(192,57,43,.2)}
+.modal-btn.danger:hover{background:rgba(192,57,43,.15)}
+
+/* Reveal overlay */
+.reveal-card{width:100%;max-width:320px;padding:30px 24px;text-align:center}
+.reveal-animal{font-size:72px;margin-bottom:8px;animation:revealPop .4s cubic-bezier(.2,.8,.3,1)}
+@keyframes revealPop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+.reveal-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--text);margin-bottom:8px}
+.reveal-desc{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+.reveal-dmg{font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:2px;margin:8px 0}
+.reveal-dmg.red{color:var(--red3);text-shadow:0 0 30px rgba(255,65,54,.6)}
+.reveal-dmg.green{color:var(--heal2);text-shadow:0 0 30px rgba(34,199,106,.6)}
+.reveal-dmg.gold{color:var(--gold2);text-shadow:0 0 30px rgba(240,176,64,.6)}
+
+/* PU manager */
+.pu-manager-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.pu-manager-row:last-child{border-bottom:none}
+.pu-mgr-icon{font-size:22px;width:30px;text-align:center;flex-shrink:0}
+.pu-mgr-info{flex:1;min-width:0}
+.pu-mgr-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+.pu-mgr-desc{font-size:10px;color:var(--muted);line-height:1.3;margin-top:1px}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.07);border-radius:24px;cursor:pointer;border:1px solid rgba(255,255,255,.1);transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:rgba(39,174,96,.25);border-color:var(--heal)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);background:var(--heal2)}
+
+/* ═══ SPECTATOR PILL ═════════════════════════════════════════════════ */
+.spectator-pill{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(100,50,130,.85);color:#d7bde2;font-size:10px;padding:4px 14px;border-radius:20px;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;z-index:100;pointer-events:none;border:1px solid rgba(140,70,180,.8)}
+
+/* ═══ GAME OVER ══════════════════════════════════════════════════════ */
+.gameover-wrap{width:100%;max-width:420px;padding:30px 16px 50px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.go-fire{font-size:80px;animation:fireFloat 1.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 24px rgba(255,120,0,.7))}
+@keyframes fireFloat{to{transform:translateY(-12px) scale(1.07)}}
+.go-winner-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,12vw,60px);letter-spacing:3px;color:var(--gold2);text-align:center;text-shadow:0 0 40px rgba(240,176,64,.6)}
+.go-sub{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+.final-list{width:100%;display:flex;flex-direction:column;gap:8px}
+.final-row{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);animation:rowIn .4s ease both}
+.final-row:nth-child(1){border-color:rgba(200,146,42,.4);background:rgba(200,146,42,.06);animation-delay:.1s}
+.final-row:nth-child(2){animation-delay:.2s}
+.final-row:nth-child(3){animation-delay:.3s}
+@keyframes rowIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.final-rank{font-size:24px;width:32px;flex-shrink:0}
+.final-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700}
+.final-hp{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%}
+.stat-box{background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;text-align:center}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--red2)}
+.stat-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.history-item{background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:13px 16px;margin-bottom:8px}
+.history-winner{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--gold2);letter-spacing:1px}
+.history-meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ═══ DAMAGE FLOAT ═══════════════════════════════════════════════════ */
+.dmg-float{position:fixed;pointer-events:none;z-index:900;font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;text-shadow:0 3px 12px rgba(0,0,0,.95);animation:floatUp 1.5s ease forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}20%{transform:translateY(-16px) scale(1.3)}100%{opacity:0;transform:translateY(-100px) scale(.7)}}
+.dmg-float.red{color:var(--red3)}
+.dmg-float.green{color:var(--heal2)}
+.dmg-float.gold{color:var(--gold3)}
+
+/* ═══ SCREEN FX ══════════════════════════════════════════════════════ */
+.crit-explode{position:fixed;inset:0;pointer-events:none;z-index:890;animation:critExAnim .65s ease forwards;background:radial-gradient(ellipse 65% 45% at 50% 50%,rgba(255,65,54,.18) 0%,transparent 70%)}
+@keyframes critExAnim{0%{opacity:0}25%{opacity:1}100%{opacity:0;transform:scale(1.6)}}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-5px,3px)}30%{transform:translate(5px,-3px)}45%{transform:translate(-3px,5px)}60%{transform:translate(3px,-3px)}75%{transform:translate(-3px,2px)}}
+.screen-shake{animation:screenShake .45s ease}
+.confetti-bit{position:fixed;border-radius:1px;pointer-events:none;z-index:890;animation:confettiFall linear forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotateZ(0);opacity:1}100%{transform:translateY(100vh) rotateZ(720deg);opacity:0}}
+
+/* ═══ ELIMINATION ANIMATION ══════════════════════════════════════════ */
+.elim-anim-wrap{position:fixed;inset:0;z-index:950;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:elimFade 2.5s ease forwards}
+@keyframes elimFade{0%{background:rgba(0,0,0,0)}15%{background:rgba(90,0,0,.8)}70%{background:rgba(25,0,0,.65)}100%{background:rgba(0,0,0,0);opacity:0}}
+.elim-skull{font-size:110px;animation:elimSkull 2.5s ease forwards;filter:drop-shadow(0 0 40px rgba(255,65,54,.9))}
+@keyframes elimSkull{0%{transform:scale(0) rotate(-40deg);opacity:0}20%{transform:scale(1.5) rotate(10deg);opacity:1}40%{transform:scale(1) rotate(0);opacity:1}80%{opacity:1}100%{transform:scale(1.3) translateY(-30px);opacity:0}}
+.elim-name{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;color:var(--red3);margin-top:12px;text-shadow:0 0 40px rgba(255,65,54,.9);animation:elimName 2.5s ease forwards}
+@keyframes elimName{0%,15%{opacity:0;transform:translateY(18px)}30%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
+.elim-sub{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;animation:elimName 2.5s .1s ease forwards;opacity:0}
+.blood-drop{position:fixed;border-radius:50% 50% 50% 0;background:radial-gradient(circle,#8b0000,#3a0000);pointer-events:none;z-index:949;animation:bloodDrop ease forwards}
+@keyframes bloodDrop{0%{transform:scale(0) rotate(var(--rot));opacity:1}40%{transform:scale(1) rotate(var(--rot));opacity:1}100%{transform:scale(.8) rotate(var(--rot)) translateY(25px);opacity:0}}
+
+/* ═══ SCROLLBAR ══════════════════════════════════════════════════════ */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* ═══════════════════════════════════════════════════════════════════
+   POWER-UP ANIMATIONS — Marvel Snap Style 3D Card System
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Backdrop ──────────────────────────────────────────────────── */
+.pua-backdrop{position:fixed;inset:0;z-index:790;background:rgba(0,0,0,.55);
+  pointer-events:none;animation:puaBkIn .18s ease both}
+@keyframes puaBkIn{from{opacity:0}to{opacity:1}}
+
+/* ── Card container ─────────────────────────────────────────────── */
+.pua-card{
+  position:fixed;width:228px;height:318px;
+  left:50%;top:50%;border-radius:22px;
+  z-index:800;overflow:hidden;pointer-events:none;
+  animation:cardSlam3d 2.4s cubic-bezier(.22,1,.36,1) forwards;
+  transform-style:preserve-3d;
+}
+@keyframes cardSlam3d{
+  0%  {transform:translate(-50%,-50%) perspective(900px) rotateY(-90deg) scale(.4) translateZ(-200px);opacity:0}
+  28% {transform:translate(-50%,-50%) perspective(900px) rotateY(14deg)  scale(1.1) translateZ(40px);opacity:1}
+  45% {transform:translate(-50%,-50%) perspective(900px) rotateY(-7deg)  scale(1.04) translateZ(15px)}
+  58% {transform:translate(-50%,-50%) perspective(900px) rotateY(3deg)   scale(1.02) translateZ(5px)}
+  68% {transform:translate(-50%,-50%) perspective(900px) rotateY(0deg)   scale(1)    translateZ(0)}
+  80% {transform:translate(-50%,-50%) perspective(900px) rotateY(0deg)   scale(1)    translateZ(0);opacity:1}
+  100%{transform:translate(-50%,-50%) perspective(900px) rotateY(90deg)  scale(.5)   translateZ(-150px);opacity:0}
 }
 
-/* ════════════════════ JOIN SCREEN ════════════════════ */
-.pin-big {
-  font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:8px;
-  text-align:center; width:100%; background:var(--bg3);
-  border:1px solid rgba(255,255,255,.07); border-radius:var(--r);
-  padding:16px; color:var(--gold2); outline:none;
-  transition:border-color .2s, box-shadow .2s; text-transform:uppercase;
-}
-.pin-big:focus { border-color:var(--red2); box-shadow:0 0 0 3px rgba(192,57,43,.15); }
+/* ── Card inner layers ──────────────────────────────────────────── */
+.pua-card-glow{position:absolute;inset:-30px;border-radius:50px;pointer-events:none;
+  animation:glowIn 2.4s ease forwards}
+@keyframes glowIn{0%,22%{opacity:0}38%{opacity:1}78%{opacity:1}100%{opacity:0}}
 
-/* Scrollbar */
-::-webkit-scrollbar { width:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1); border-radius:2px; }
+.pua-card-shine{position:absolute;inset:0;border-radius:22px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 40%,rgba(255,255,255,.04) 100%);
+  animation:shineIn 2.4s ease forwards}
+@keyframes shineIn{0%,25%{opacity:0}35%{opacity:1}82%,100%{opacity:0}}
 
-/* ════════════════════ ELIMINATION ANIMATION ════════════════════ */
-.elim-anim-wrap {
-  position:fixed; inset:0; z-index:950; pointer-events:none;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  animation:elimFade 2.2s ease forwards;
+.pua-card-border{position:absolute;inset:3px;border-radius:18px;
+  border:1.5px solid rgba(255,255,255,.25);pointer-events:none;z-index:10}
+
+.pua-card-grid{position:absolute;inset:0;background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 32px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0,rgba(255,255,255,.02) 1px,transparent 1px,transparent 32px);
+  border-radius:22px;pointer-events:none}
+
+/* ── Art zone ──────────────────────────────────────────────────── */
+.pua-card-art{
+  position:absolute;top:18%;left:50%;transform:translateX(-50%);
+  font-size:100px;z-index:3;pointer-events:none;
+  animation:artSlam 2.4s cubic-bezier(.22,1,.36,1) forwards;
 }
-@keyframes elimFade {
-  0%  { background:rgba(0,0,0,0); }
-  15% { background:rgba(100,0,0,.75); }
-  70% { background:rgba(30,0,0,.6); }
-  100%{ background:rgba(0,0,0,0); opacity:0; }
-}
-.elim-skull-big {
-  font-size:100px; line-height:1;
-  animation:elimSkullPop 2.2s ease forwards;
-  filter:drop-shadow(0 0 30px rgba(255,65,54,.8));
-}
-@keyframes elimSkullPop {
-  0%  { transform:scale(0) rotate(-40deg); opacity:0; }
-  20% { transform:scale(1.4) rotate(8deg);  opacity:1; }
-  40% { transform:scale(1) rotate(0);       opacity:1; }
-  80% { transform:scale(1) rotate(0);       opacity:1; }
-  100%{ transform:scale(1.2) translateY(-20px); opacity:0; }
-}
-.elim-player-name {
-  font-family:'Bebas Neue',sans-serif; font-size:38px; letter-spacing:4px;
-  color:var(--red3); margin-top:10px;
-  text-shadow:0 0 30px rgba(255,65,54,.9), 0 0 60px rgba(255,65,54,.4);
-  animation:elimNameAnim 2.2s ease forwards;
-}
-@keyframes elimNameAnim {
-  0%,15%{ opacity:0; transform:translateY(16px); }
-  30%   { opacity:1; transform:none; }
-  75%   { opacity:1; }
-  100%  { opacity:0; }
-}
-.elim-sub-text {
-  font-family:'Barlow Condensed',sans-serif; font-size:14px; letter-spacing:3px;
-  color:var(--muted); text-transform:uppercase; margin-top:6px;
-  animation:elimNameAnim 2.2s .1s ease forwards; opacity:0;
-}
-/* Blood splatter effect */
-.blood-drop {
-  position:fixed; pointer-events:none; z-index:949; border-radius:50% 50% 50% 0;
-  background:radial-gradient(circle, #8b0000, #3a0000);
-  animation:bloodDrop ease forwards;
-}
-@keyframes bloodDrop {
-  0%  { transform:scale(0) rotate(var(--rot)); opacity:1; }
-  40% { transform:scale(1) rotate(var(--rot));  opacity:1; }
-  100%{ transform:scale(.8) rotate(var(--rot)) translateY(20px); opacity:0; }
+@keyframes artSlam{
+  0%,22%{opacity:0;transform:translateX(-50%) scale(.2) translateY(30px)}
+  38%   {opacity:1;transform:translateX(-50%) scale(1.25) translateY(-8px)}
+  52%   {transform:translateX(-50%) scale(.95) translateY(2px)}
+  65%   {transform:translateX(-50%) scale(1.02) translateY(0)}
+  78%   {transform:translateX(-50%) scale(1) translateY(0);opacity:1}
+  100%  {opacity:0;transform:translateX(-50%) scale(1) translateY(0)}
 }
 
-/* ════════════════════ CARD FLIP ════════════════════ */
-.game-card { transform-style:preserve-3d; perspective:600px; }
-@keyframes cardFlip {
-  0%  { transform:rotateY(0) scale(1); }
-  35% { transform:rotateY(90deg) scale(1.06); box-shadow:0 0 50px rgba(192,57,43,.5); }
-  65% { transform:rotateY(-20deg) scale(1.04); }
-  100%{ transform:rotateY(0) scale(.94); opacity:.45; }
+/* ── Energy ring ────────────────────────────────────────────────── */
+.pua-card-ring{
+  position:absolute;top:28%;left:50%;transform:translateX(-50%);
+  width:160px;height:160px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.15);
+  pointer-events:none;z-index:2;
+  animation:ringPulse 2.4s ease forwards;
 }
-.game-card.flip-anim { animation:cardFlip .55s ease forwards; }
+@keyframes ringPulse{
+  0%,25%{transform:translateX(-50%) scale(0);opacity:0}
+  40%   {transform:translateX(-50%) scale(1.2);opacity:.8}
+  60%   {transform:translateX(-50%) scale(1);opacity:.4}
+  82%,100%{opacity:0}
+}
 
-/* ════════════════════ BEAR / FOX TURN INDICATORS ════════════════════ */
-.special-turn-pill {
-  text-align:center; padding:6px 14px; margin:0 12px 6px;
-  background:linear-gradient(135deg, rgba(200,146,42,.15), rgba(200,146,42,.05));
-  border:1px solid rgba(200,146,42,.35); border-radius:var(--r);
-  font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
-  color:var(--gold2); letter-spacing:1.5px; text-transform:uppercase;
+/* ── Name band (bottom) ─────────────────────────────────────────── */
+.pua-card-band{
+  position:absolute;bottom:0;left:0;right:0;height:82px;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.85) 35%,rgba(0,0,0,.95) 100%);
+  border-radius:0 0 22px 22px;z-index:4;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
 }
-.bear-cards-left {
-  font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold2); margin-left:8px;
+.pua-card-name{
+  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:5px;
+  color:#fff;text-align:center;line-height:1;
+  animation:nameSlam 2.4s ease forwards;
 }
+@keyframes nameSlam{
+  0%,35%{opacity:0;transform:translateY(10px)}
+  50%   {opacity:1;transform:none}
+  80%   {opacity:1}100%{opacity:0}
+}
+.pua-card-subtitle{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;
+  color:rgba(255,255,255,.6);text-transform:uppercase;text-align:center;
+  animation:nameSlam 2.4s .04s ease forwards;opacity:0;padding:0 12px;line-height:1.3
+}
+
+/* ── Corner icons ───────────────────────────────────────────────── */
+.pua-card-corner{position:absolute;font-size:18px;opacity:.35;line-height:1;z-index:5}
+.pua-card-corner.tl{top:10px;left:12px}
+.pua-card-corner.br{bottom:88px;right:12px;transform:rotate(180deg)}
+
+/* ── Extra: hedgehog spines ─────────────────────────────────────── */
+@keyframes spineShoot3d{
+  0%  {transform:translate(-50%,-50%) translate(0,0) scale(0);opacity:1}
+  60% {opacity:1}
+  100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.4);opacity:0}
+}
+.spine3d{position:fixed;left:50%;top:50%;font-size:24px;pointer-events:none;z-index:810;
+  animation:spineShoot3d .9s .35s ease forwards;opacity:0}
+
+/* ── Extra: rat persistent running ─────────────────────────────── */
+@keyframes ratOverCards{0%{left:-70px;opacity:0}3%{opacity:1}97%{opacity:1}100%{left:calc(100% + 70px);opacity:0}}
+.cards-section{position:relative;overflow:hidden}
+.cards-section.rat-active::after{
+  content:'🐭';position:absolute;top:calc(50% - 22px);left:-70px;
+  font-size:50px;pointer-events:none;z-index:20;
+  animation:ratOverCards 2.6s linear infinite;
+  filter:drop-shadow(0 0 10px rgba(155,89,182,.9));
+}
+
+/* ── Extra: spider web canvas ───────────────────────────────────── */
+.spider-web-canvas{position:fixed;inset:0;pointer-events:none;z-index:802;opacity:.7;transition:opacity 1.5s}
+
+/* ── ZECCA auto-damage flash ────────────────────────────────────── */
+@keyframes zeckaDmg{0%{background:rgba(180,80,0,0)}30%{background:rgba(180,80,0,.4)}100%{background:rgba(180,80,0,0)}}
+.zecca-flash{position:fixed;inset:0;pointer-events:none;z-index:799;animation:zeckaDmg .8s ease forwards}
+
+/* ── ANIMAL ALERT (canguro/volpe/orso/gufo) ─────────────────────── */
+.animal-alert{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:850;pointer-events:none;
+  background:linear-gradient(160deg,#0a0a14,#18182a);
+  border-radius:20px;padding:28px 36px;text-align:center;
+  min-width:260px;max-width:320px;
+  animation:alertPop 2.2s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes alertPop{
+  0%  {opacity:0;transform:translate(-50%,-50%) scale(.5)}
+  22% {opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+  32% {transform:translate(-50%,-50%) scale(.97)}
+  40% {transform:translate(-50%,-50%) scale(1)}
+  80% {opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}
+}
+.animal-alert-icon{font-size:80px;display:block;margin-bottom:12px;
+  animation:alertIcon 2.2s ease forwards;filter:drop-shadow(0 0 20px currentColor)}
+@keyframes alertIcon{0%,18%{transform:scale(0)}28%{transform:scale(1.3)}38%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+.animal-alert-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;
+  margin-bottom:8px;animation:nameSlam 2.2s ease forwards}
+.animal-alert-desc{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;
+  color:rgba(255,255,255,.6);line-height:1.4;animation:nameSlam 2.2s .05s ease forwards;opacity:0}
 </style>
 </head>
 <body>
-
-<!-- ANIMATED BACKGROUND -->
 <div class="scene-bg"></div>
-<div class="claws"></div>
-<canvas id="particle-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.6"></canvas>
+<canvas id="particle-canvas"></canvas>
 
-<!-- ═══════════════════ HOME ═══════════════════ -->
-<div id="screen-home" class="screen active">
-  <div class="logo-block" style="margin-top:50px">
-    <span class="logo-paw" style="top:-10px;left:5px">🐾</span>
-    <span class="logo-paw" style="top:-10px;right:5px">🐾</span>
-    <span class="logo-fatal">FATAL</span>
-    <span class="logo-beast">BEAST</span>
-  </div>
-  <div class="logo-tagline">⚔️ Il gioco della sopravvivenza ⚔️</div>
-  <div style="height:32px"></div>
-  <button class="btn btn-blood" onclick="showScreen('screen-setup')">🐾 Crea Partita</button>
-  <button class="btn btn-ghost" onclick="showScreen('screen-join')">🔗 Unisciti a una Partita</button>
-  <button class="btn btn-ghost" onclick="showHistory()">📊 Storico Partite</button>
-  <div style="margin-top:28px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;line-height:2">
-    <div>🎲 2-18 GIOCATORI &nbsp;·&nbsp; ⏱ 25-30 MIN</div>
-    <div>28 POTERI BESTIALI &nbsp;·&nbsp; REAL-TIME MULTIPLAYER</div>
-  </div>
-</div>
-
-<!-- ═══════════════════ SETUP ═══════════════════ -->
-<div id="screen-setup" class="screen">
-  <div style="align-self:flex-start;margin-bottom:14px">
-    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
-  </div>
-  <div style="text-align:center;margin-bottom:20px">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--red2)">NUOVA PARTITA</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px">Configurazione Master</div>
-  </div>
-  <div class="field"><label>Il tuo nome (Master)</label><input id="master-name" type="text" placeholder="Es. Marco" maxlength="16"></div>
-  <div class="field"><label>Punti Vita iniziali</label><input id="setup-hp" type="number" value="1000" min="10" max="99999"></div>
-  <div class="section-title" style="margin-top:4px">Giocatori aggiuntivi (min 1)</div>
-  <div class="players-list" id="players-list"></div>
-  <button class="btn-add-player" onclick="addPlayerField()">+ Aggiungi giocatore</button>
-  <div style="height:14px"></div>
-  <div class="section-title">Modalità di gioco</div>
-  <div class="mode-wrap">
-    <div class="mode-card selected" id="mode-classic" onclick="selectMode('classic')">
-      <div class="mode-icon">🃏</div>
-      <div class="mode-name">Classica</div>
-      <div class="mode-desc">Carte scoperte</div>
+<!-- ══════════════ HOME / SETUP ══════════════════════════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="home-wrap">
+    <div class="logo-hero">
+      <span class="logo-fatal">FATAL</span>
+      <span class="logo-beast">BEAST</span>
+      <div class="logo-tagline">⚔ Il gioco della sopravvivenza ⚔</div>
     </div>
-    <div class="mode-card" id="mode-hardcore" onclick="selectMode('hardcore')">
-      <div class="mode-icon">💀</div>
-      <div class="mode-name">Hardcore</div>
-      <div class="mode-desc">Carte coperte</div>
-    </div>
-  </div>
-  <button class="btn btn-blood" onclick="createGame()">⚔️ Crea Partita</button>
-</div>
 
-<!-- ═══════════════════ LOBBY ═══════════════════ -->
-<div id="screen-lobby" class="screen">
-  <div style="text-align:center;margin-bottom:6px;margin-top:20px">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:var(--red2)">SALA D'ATTESA</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px">Fai inquadrare il QR agli amici</div>
-  </div>
-  <div class="qr-wrap" id="qr-container"></div>
-  <div class="room-code-box">
-    <div class="room-code-label">Codice Stanza</div>
-    <div class="room-code-val" id="room-code-display">----</div>
-  </div>
-  <div id="waiting-players" style="width:100%;max-width:380px"></div>
-  <div style="height:16px"></div>
-  <button class="btn btn-blood" id="btn-start-game" onclick="startGame()">🐾 Inizia la Caccia!</button>
-  <button class="btn btn-ghost" onclick="copyRoomLink()">📋 Copia Link Partita</button>
-</div>
-
-<!-- ═══════════════════ JOIN ═══════════════════ -->
-<div id="screen-join" class="screen">
-  <div style="align-self:flex-start;margin-bottom:14px">
-    <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
-  </div>
-  <div style="text-align:center;margin-bottom:24px">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--red2)">UNISCITI</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px">Entra nella partita</div>
-  </div>
-  <div class="field"><label>Il tuo nome</label><input id="join-name" type="text" placeholder="Es. Giulia" maxlength="16"></div>
-  <div class="field">
-    <label>Codice partita (4 caratteri)</label>
-    <input class="pin-big" id="join-code" maxlength="4" placeholder="XXXX" style="width:100%">
-  </div>
-  <button class="btn btn-blood" onclick="joinGame()">Entra in Battaglia →</button>
-  <button class="btn btn-ghost" onclick="joinAsSpectator()">👁 Entra come Spettatore</button>
-</div>
-
-<!-- ═══════════════════ GAME ═══════════════════ -->
-<div id="screen-game" class="screen" style="padding:0;align-items:stretch">
-  <div id="spectator-pill" class="spectator-pill" style="display:none">👁 SPETTATORE</div>
-  <div class="game-wrap" id="game-wrap">
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <div class="topbar-logo">FB</div>
-      <div class="topbar-turn">
-        <div class="topbar-turn-label">Turno di</div>
-        <div class="topbar-turn-name" id="turn-name">—</div>
-      </div>
-      <div class="topbar-right">
-        <div class="timer-wrap" id="timer-wrap">
-          <svg class="timer-svg" viewBox="0 0 46 46">
-            <circle class="timer-bg" cx="23" cy="23" r="19"/>
-            <circle class="timer-fill" id="timer-ring" cx="23" cy="23" r="19" stroke-dasharray="119.4" stroke-dashoffset="0"/>
-          </svg>
-          <div class="timer-num" id="timer-num">—</div>
-        </div>
-        <button class="topbar-settings-btn" onclick="showSettingsModal()">⚙️</button>
+    <div class="section-card">
+      <div class="section-title">Maestro di gioco</div>
+      <div class="field">
+        <label>Il tuo nome</label>
+        <input type="text" id="master-name" placeholder="Nome del Master" maxlength="16">
       </div>
     </div>
-    <!-- DIRECTION -->
+
+    <div class="section-card">
+      <div class="section-title">Giocatori</div>
+      <div id="players-list"></div>
+      <button class="btn-add" onclick="addPlayerField()">＋ Aggiungi giocatore</button>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">Punti vita iniziali</div>
+      <input type="number" id="setup-hp" value="1000" min="10" max="99999">
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">Modalità di gioco</div>
+      <div class="mode-row">
+        <div class="mode-btn selected" id="mode-classic" onclick="selectMode('classic')">🎴 Classica</div>
+        <div class="mode-btn" id="mode-hardcore" onclick="selectMode('hardcore')">💀 Hardcore</div>
+      </div>
+    </div>
+
+    <button class="btn btn-blood" onclick="createGame()">⚔️ CREA PARTITA</button>
+    <button class="btn btn-ghost" onclick="showScreen('screen-join')" style="margin-top:4px">Entra in una stanza</button>
+    <button class="btn btn-ghost btn-sm" onclick="showHistory()" style="margin-top:4px">📊 Storico partite</button>
+  </div>
+</div>
+
+<!-- ══════════════ JOIN ══════════════════════════════════════════ -->
+<div class="screen" id="screen-join">
+  <div class="join-wrap" style="display:flex;flex-direction:column;gap:14px">
+    <div class="logo-hero" style="padding:20px 0 6px">
+      <span class="logo-fatal" style="font-size:clamp(38px,10vw,60px)">FATAL</span>
+      <span class="logo-beast" style="font-size:clamp(38px,10vw,60px)">BEAST</span>
+    </div>
+    <div class="section-card">
+      <div class="field">
+        <label>Il tuo nome</label>
+        <input type="text" id="join-name" placeholder="Nome giocatore" maxlength="16">
+      </div>
+      <div class="field">
+        <label>Codice stanza</label>
+        <input class="pin-big" type="text" id="join-code" placeholder="XXXX" maxlength="4">
+      </div>
+    </div>
+    <button class="btn btn-blood" onclick="joinGame()">🎮 ENTRA NELLA STANZA</button>
+    <button class="btn btn-ghost btn-sm" onclick="joinAsSpectator()">👁 Entra come spettatore</button>
+    <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-home')">← Indietro</button>
+  </div>
+</div>
+
+<!-- ══════════════ LOBBY ═════════════════════════════════════════ -->
+<div class="screen" id="screen-lobby">
+  <div class="lobby-wrap">
+    <div style="text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Codice stanza</div>
+      <div class="lobby-code" id="room-code-display">----</div>
+    </div>
+    <div id="qr-container"></div>
+    <div class="section-card">
+      <div class="section-title">Giocatori connessi</div>
+      <div id="waiting-players" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="copyRoomLink()">🔗 Copia link stanza</button>
+    <button class="btn btn-blood" id="start-btn" onclick="startGame()">⚔️ AVVIA PARTITA</button>
+  </div>
+</div>
+
+<!-- ══════════════ GAME ══════════════════════════════════════════ -->
+<div class="screen" id="screen-game">
+  <div id="game-wrap" style="width:100%;max-width:520px">
+
+    <!-- Top bar -->
+    <div class="game-top">
+      <div class="game-logo-sm">F<span>B</span></div>
+      <div class="turn-info">
+        <div class="turn-label">Turno di</div>
+        <div class="turn-name" id="turn-name">—</div>
+      </div>
+      <div class="timer-wrap" id="timer-wrap">
+        <svg viewBox="0 0 46 46">
+          <circle class="timer-bg" cx="23" cy="23" r="19" fill="none" stroke-width="3"/>
+          <circle class="timer-ring" id="timer-ring" cx="23" cy="23" r="19" fill="none" stroke-width="3"
+            stroke-dasharray="119.4" stroke-dashoffset="0"/>
+        </svg>
+        <div id="timer-num">—</div>
+      </div>
+      <div class="settings-btn" onclick="showSettingsModal()">⚙</div>
+    </div>
     <div class="dir-bar" id="dir-bar">→ SENSO ORARIO</div>
-    <!-- HP STRIP -->
-    <div class="hp-strip" id="hp-strip"></div>
-    <!-- ACTIVE PU BANNER -->
+
+    <!-- HP Strip -->
+    <div class="hp-strip-wrap">
+      <div class="hp-strip" id="hp-strip"></div>
+    </div>
+
+    <!-- Spectator pill -->
+    <div class="spectator-pill" id="spectator-pill" style="display:none">👁 SPETTATORE</div>
+
+    <!-- Active PU banner -->
     <div class="pu-banner" id="pu-banner">
-      <div class="pu-banner-inner">
-        <div class="pu-banner-icon" id="pu-banner-icon">🐾</div>
-        <div class="pu-banner-info">
-          <div class="pu-banner-title" id="pu-banner-title"></div>
-          <div class="pu-banner-desc" id="pu-banner-desc"></div>
-        </div>
+      <div class="pu-banner-icon" id="pu-banner-icon">🔥</div>
+      <div class="pu-banner-text">
+        <div class="pu-banner-title" id="pu-banner-title"></div>
+        <div class="pu-banner-desc" id="pu-banner-desc"></div>
       </div>
     </div>
-    <!-- MASTER OVERRIDE -->
+
+    <!-- Special turn pill (bear/fox/etc) -->
+    <div class="special-turn-pill" id="special-turn-pill" style="display:none"></div>
+
+    <!-- Master override -->
     <div class="master-override" id="master-override" style="display:none" onclick="masterPlayForCurrent()">
-      ⚡ <span id="master-override-text">Gioca per il giocatore attivo</span>
+      <span>⚡</span><span id="master-override-text">Gioca per...</span>
     </div>
-    <!-- CARDS -->
+
+    <!-- Cards section -->
     <div class="cards-section">
-      <div class="cards-label" id="cards-label">Scegli una carta</div>
+      <div class="cards-label" id="cards-label">⏳ Attendi il tuo turno</div>
       <div class="cards-grid" id="cards-grid"></div>
     </div>
-    <!-- POWERUP CHOICE -->
+
+    <!-- PU choice (slides up after turn) -->
     <div class="pu-section" id="pu-section" style="display:none">
-      <div class="pu-section-title">⚡ Scegli il tuo potere</div>
+      <div class="pu-section-title">✨ Scegli un potere</div>
       <div class="pu-grid" id="pu-grid"></div>
     </div>
-    <!-- CONFIRM ROW -->
     <div class="confirm-row" id="confirm-row" style="display:none">
-      <button class="btn btn-gold btn-sm" onclick="confirmPowerup()" style="flex:1">✓ Attiva Potere</button>
-      <button class="btn btn-ghost btn-sm" onclick="skipPowerup()">Salta</button>
+      <button class="btn btn-gold" style="flex:1" onclick="confirmPowerup()">✓ Conferma</button>
+      <button class="btn btn-ghost" style="flex:0;padding:14px 20px" onclick="skipPowerup()">Salta</button>
     </div>
-    <!-- LOG -->
-    <div class="log-wrap">
-      <div class="log-title">⚔️ Storico Partita</div>
-      <div class="log-list" id="log-list"></div>
+
+    <!-- Log -->
+    <div class="log-section" style="margin-top:10px">
+      <div class="log-header open" id="log-header" onclick="toggleLog()">
+        <div class="log-header-title">📜 Storico eventi</div>
+        <div class="log-header-arrow">▲</div>
+      </div>
+      <div id="log-list"></div>
     </div>
+
+  </div><!-- /game-wrap -->
+</div>
+
+<!-- ══════════════ GAME OVER ═════════════════════════════════════ -->
+<div class="screen" id="screen-gameover">
+  <div class="gameover-wrap">
+    <div class="go-fire">🔥</div>
+    <div class="go-sub">Vincitore</div>
+    <div class="go-winner-name" id="winner-name">—</div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="final-list" id="final-list"></div>
+    <button class="btn btn-blood" onclick="restartGame()" style="margin-top:8px">🔄 Rivincita</button>
+    <button class="btn btn-ghost btn-sm" onclick="goHome()">← Home</button>
   </div>
 </div>
 
-<!-- ═══════════════════ GAME OVER ═══════════════════ -->
-<div id="screen-gameover" class="screen">
-  <div class="gameover-hero">
-    <div class="gameover-fire">🏆</div>
-    <div class="gameover-winner-name" id="winner-name">—</div>
-    <div class="gameover-sub">Ha vinto la partita!</div>
+<!-- ══════════════ OVERLAYS ══════════════════════════════════════ -->
+
+<!-- Reveal -->
+<div class="overlay" id="overlay-reveal">
+  <div class="modal reveal-card">
+    <div class="reveal-animal" id="reveal-icon">⚔️</div>
+    <div class="reveal-title" id="reveal-title"></div>
+    <div class="reveal-desc" id="reveal-desc"></div>
+    <div class="reveal-dmg" id="reveal-dmg"></div>
+    <button class="btn btn-blood" style="margin-top:16px" onclick="closeReveal()">OK !</button>
   </div>
-  <div class="stats-grid" id="stats-grid"></div>
-  <div class="final-list" id="final-list"></div>
-  <button class="btn btn-blood" onclick="restartGame()" style="max-width:380px;margin-top:8px">🔄 Rivincita</button>
-  <button class="btn btn-ghost" onclick="goHome()" style="max-width:380px">🏠 Menu</button>
 </div>
 
-<!-- ═══════════════════ OVERLAYS ═══════════════════ -->
 <!-- Settings -->
 <div class="overlay" id="overlay-settings">
   <div class="modal">
-    <div class="modal-title">⚙️ IMPOSTAZIONI</div>
+    <div class="modal-title">⚙ IMPOSTAZIONI</div>
     <div id="settings-content"></div>
     <button class="modal-close" onclick="closeOverlay('overlay-settings')">Chiudi</button>
   </div>
 </div>
 
-<!-- PU Manager -->
+<!-- PU manager -->
 <div class="overlay" id="overlay-pu-manager">
   <div class="modal">
     <div class="modal-title">🐾 GESTIONE POTERI</div>
     <div id="pu-manager-list"></div>
-    <div style="height:10px"></div>
-    <button class="modal-close" onclick="closeOverlay('overlay-pu-manager')">Salva & Chiudi</button>
+    <button class="modal-close" onclick="closeOverlay('overlay-pu-manager')">Chiudi</button>
   </div>
 </div>
 
-<!-- Reveal -->
-<div class="overlay" id="overlay-reveal">
-  <div class="modal" style="text-align:center">
-    <div class="reveal-icon-wrap"><div id="reveal-icon" class="reveal-icon">⚔️</div></div>
-    <div id="reveal-dmg" class="reveal-dmg red" style="display:none">-0</div>
-    <div id="reveal-title" class="reveal-title"></div>
-    <div id="reveal-desc" class="reveal-desc"></div>
-    <button class="btn btn-blood btn-sm" onclick="closeReveal()" style="width:100%">Continua ▶</button>
-  </div>
-</div>
-
-<!-- Restart HP -->
+<!-- Restart -->
 <div class="overlay" id="overlay-restart">
   <div class="modal">
     <div class="modal-title">🔄 NUOVA PARTITA</div>
-    <div class="field"><label>Nuovi Punti Vita iniziali</label><input id="restart-hp" type="number" value="1000" min="10" max="99999"></div>
+    <div class="field"><label>HP iniziali</label><input id="restart-hp" type="number" value="1000" min="10" max="99999"></div>
     <button class="btn btn-blood btn-sm" onclick="doRestart()" style="width:100%;margin-bottom:8px">Riavvia</button>
     <button class="modal-close" onclick="closeOverlay('overlay-restart')">Annulla</button>
   </div>
@@ -990,74 +743,92 @@ html,body { width:100%; min-height:100%; background:var(--bg0); color:var(--text
   </div>
 </div>
 
-<!-- Master play for player -->
-<div class="overlay" id="overlay-master-play">
-  <div class="modal">
-    <div class="modal-title">⚡ GIOCA PER</div>
-    <div id="master-play-content"></div>
-    <button class="modal-close" onclick="closeOverlay('overlay-master-play')">Annulla</button>
-  </div>
-</div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-//  FATALBEAST — Core Engine v2 (all bugs fixed)
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+//  FATALBEAST v3 — Engine + Animations
+// ══════════════════════════════════════════════════════════════════
 
-// ── State ──────────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────
 const G = {
-  roomId:null, playerId:null, playerName:null,
-  isMaster:false, isSpectator:false, gameMode:'classic',
-  pendingConfirm:false, puEnabled:{},
+  roomId:null,playerId:null,playerName:null,
+  isMaster:false,isSpectator:false,gameMode:'classic',
+  pendingConfirm:false,puEnabled:{},
   unsubscribes:[],
-  sessionStats:{ dmgDealt:0, dmgReceived:0, highCard:0, turnsPlayed:0, puUsed:0 },
-  masterOverrideActive:false, masterOverridePid:null,
-  bearMode:false, bearCardsChosen:0,
-  foxMode:false, foxTargetPid:null,
-  timerTO:null, timerActive:false, timerSec:0,
+  sessionStats:{dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0},
+  masterOverrideActive:false,masterOverridePid:null,
+  bearMode:false,bearCardsChosen:0,bearFirstTarget:null,
+  foxMode:false,foxTargetPid:null,
+  timerTO:null,timerActive:false,timerSec:0,
   selectedPU:null,
+  _shownAnims:{},  // prevent animation replay per turn
+  _gameoverShown:false,
+  _logOpen:true,
 };
 
-// ── Powerup Definitions (Seppia REMOVED) ──────────────────────
+// ── Power-up definitions (Seppia removed, Lucertola → Camaleonte) ─
 const POWERUPS = [
-  {id:'eagle',     icon:'🦅',name:'Aquila',     timing:'before',desc:'Al tuo prossimo turno vedrai il nome di 1 giocatore assegnato a una carta.'},
-  {id:'bull',      icon:'🐂',name:'Toro',       timing:'after', desc:'La carta del prossimo giocatore vale il doppio dei danni.'},
-  {id:'hedgehog',  icon:'🦔',name:'Riccio',     timing:'after', desc:'La carta del prossimo giocatore infligge danni a TUTTI i giocatori in vita.'},
-  {id:'rat',       icon:'🐭',name:'Topo',       timing:'before',desc:'Tutti (tranne spettatori) giocano a carte coperte fino al tuo prossimo turno.'},
-  {id:'kangaroo',  icon:'🦘',name:'Canguro',    timing:'before',desc:'Il giocatore successivo salta il proprio turno.'},
-  {id:'turtle',    icon:'🐢',name:'Tartaruga',  timing:'after', desc:'La carta del prossimo giocatore viene dimezzata (arrotondamento per eccesso).'},
-  {id:'koala',     icon:'🐨',name:'Koala',      timing:'after', desc:'La carta del prossimo giocatore farà guadagnare HP invece di perderli.'},
-  {id:'cheetah',   icon:'🐆',name:'Ghepardo',   timing:'before',desc:'Il prossimo giocatore ha 7 secondi per scegliere. Se non sceglie salta il turno.'},
-  {id:'bear',      icon:'🐻',name:'Orso',       timing:'before',desc:'Al tuo prossimo turno potrai scegliere 2 carte (entrambi i danni si applicano).'},
-  {id:'owl',       icon:'🦉',name:'Gufo',       timing:'before',desc:'Il prossimo giocatore non può attivare nessun potere dopo la sua scelta.'},
-  {id:'lizard',    icon:'🦎',name:'Lucertola',  timing:'after', desc:'Aggiunge carta extra: se scelta, riporta un eliminato in vita (HP = valore, usabile una volta).'},
-  {id:'armadillo', icon:'🛡️',name:'Armadillo',  timing:'after', desc:'Il prossimo giocatore infligge il danno anche a se stesso oltre che al bersaglio.'},
-  {id:'crocodile', icon:'🐊',name:'Coccodrillo',timing:'before',desc:'Il prossimo giocatore non può colpirti. Se sceglie la tua carta la scelta viene annullata.'},
-  {id:'bug',       icon:'🐛',name:'Cimice',     timing:'before',desc:'Annulla il prossimo colpo che ricevi e rimanda esattamente quel danno al mittente.'},
-  {id:'fox',       icon:'🦊',name:'Volpe',      timing:'before',desc:'Giochi tu al posto del giocatore successivo. Lui salta il turno.'},
-  {id:'dolphin',   icon:'🐬',name:'Delfino',    timing:'before',desc:'Inverti senso di gioco. Blocca il prossimo danno che dovresti ricevere.'},
-  {id:'shark',     icon:'🦈',name:'Squalo',     timing:'before',desc:'Elimina immediatamente tutti i giocatori con HP < 15% degli HP iniziali.'},
-  {id:'deer',      icon:'🦌',name:'Cervo',      timing:'after', desc:'Una carta casuale del prossimo giocatore viene giocata infliggendo danno a tutti.'},
-  {id:'tick',      icon:'🐜',name:'Zecca',      timing:'before',desc:'Aggiunge una carta che cambia valore ogni turno. Chi la sceglie subisce quel danno.'},
-  {id:'rhino',     icon:'🦏',name:'Rinoceronte',timing:'before',desc:'Il prossimo giocatore attiva tutte le carte contemporaneamente (subisce la somma).'},
-  {id:'butterfly', icon:'🦋',name:'Farfalla',   timing:'after', desc:'Ogni giocatore riceve una carta bonus: se scelta, guadagni HP. Scade al tuo prossimo turno.'},
-  {id:'viper',     icon:'🐍',name:'Vipera',     timing:'after', desc:'Aggiunge una carta trappola: chi la sceglie viene eliminato istantaneamente.'},
-  {id:'spider',    icon:'🕷️',name:'Ragno',      timing:'after', desc:'Il prossimo giocatore colpito salterà la sua prossima giocata.'},
-  {id:'ram',       icon:'🐏',name:'Ariete',     timing:'after', desc:'Il prossimo danno si propaga per metà anche ai giocatori adiacenti al bersaglio.'},
-  {id:'chameleon', icon:'🦎',name:'Camaleonte', timing:'after', desc:'La carta non fa danni ma imposta la vita del bersaglio al valore (0 = eliminato).'},
-  {id:'walrus',    icon:'🦭',name:'Tricheco',   timing:'before',desc:'Attiva 2 poteri casuali: uno al giocatore precedente, uno al successivo.'},
-  {id:'donkey',    icon:'🫏',name:'Asino',      timing:'after', desc:'Inverte i valori: la carta più bassa prende il valore della più alta e viceversa.'},
+  {id:'eagle',    icon:'🦅',name:'Aquila',    timing:'before',
+   desc:'Al tuo prossimo turno puoi vedere il nome di 1 carta prima di scegliere.'},
+  {id:'bull',     icon:'🐂',name:'Toro',      timing:'after',
+   desc:'Trigger: dopo la scelta. Il danno viene raddoppiato.'},
+  {id:'hedgehog', icon:'🦔',name:'Riccio',    timing:'after',
+   desc:'Trigger: dopo la scelta. Il danno viene applicato a TUTTI i giocatori vivi.'},
+  {id:'rat',      icon:'🐭',name:'Topo',      timing:'before',
+   desc:'Tutti gli altri giocatori vedono carte coperte fino al tuo prossimo turno.'},
+  {id:'kangaroo', icon:'🦘',name:'Canguro',   timing:'before',
+   desc:'Il giocatore successivo salta il turno.'},
+  {id:'turtle',   icon:'🐢',name:'Tartaruga', timing:'after',
+   desc:'Trigger: dopo la scelta. Il danno viene dimezzato (arrotondamento per eccesso).'},
+  {id:'koala',    icon:'🐨',name:'Koala',     timing:'after',
+   desc:'Trigger: dopo la scelta. Il valore diventa guarigione invece di danno.'},
+  {id:'cheetah',  icon:'🐆',name:'Ghepardo',  timing:'before',
+   desc:'Il prossimo giocatore ha 7 secondi per scegliere. Timeout → turno saltato.'},
+  {id:'bear',     icon:'🐻',name:'Orso',      timing:'before',
+   desc:'Al tuo prossimo turno DEVI scegliere 2 carte (2 bersagli diversi, entrambi i danni applicati).'},
+  {id:'owl',      icon:'🦉',name:'Gufo',      timing:'before',
+   desc:'Il prossimo giocatore non può attivare nessun power-up.'},
+  {id:'chameleon',icon:'🦎',name:'Camaleonte',timing:'after',
+   desc:'Aggiunge una carta revival. Se scelta: rianima un eliminato con HP = valore carta. Usabile 1 volta.'},
+  {id:'armadillo',icon:'🛡️',name:'Armadillo', timing:'after',
+   desc:'Trigger: dopo la scelta. Il prossimo giocatore subisce anche lui lo stesso danno. Se sceglie se stesso: danno ×2.'},
+  {id:'crocodile',icon:'🐊',name:'Coccodrillo',timing:'before',
+   desc:'Il prossimo giocatore non può colpirti. Se sceglie la tua carta, la scelta viene annullata.'},
+  {id:'bug',      icon:'🐛',name:'Cimice',    timing:'before',
+   desc:'Annulla il prossimo danno ricevuto e lo riflette al mittente.'},
+  {id:'fox',      icon:'🦊',name:'Volpe',     timing:'before',
+   desc:'Giochi tu al posto del giocatore successivo. Lui salta il turno.'},
+  {id:'shark',    icon:'🦈',name:'Squalo',    timing:'before',
+   desc:'Elimina immediatamente tutti i giocatori con HP < 15% degli HP iniziali.'},
+  {id:'deer',     icon:'🦌',name:'Cervo',     timing:'after',
+   desc:'Trigger: dopo la scelta. Una carta casuale tra le rimanenti → danno a tutti.'},
+  {id:'tick',     icon:'🐜',name:'Zecca',     timing:'before',
+   desc:'Carta extra che cambia valore ogni turno. Infligge danno automatico all\'attivo a inizio turno finché non viene scelta.'},
+  {id:'rhino',    icon:'🦏',name:'Rinoceronte',timing:'before',
+   desc:'Il prossimo giocatore subisce automaticamente la somma di tutte le carte.'},
+  {id:'butterfly',icon:'🦋',name:'Farfalla',  timing:'after',
+   desc:'Trigger: dopo la scelta. Aggiunge 1 carta a tutti. Se scelta → il tuo HP aumenta.'},
+  {id:'viper',    icon:'🐍',name:'Vipera',    timing:'after',
+   desc:'Trigger: dopo la scelta. Carta trappola extra. Se scelta → eliminazione immediata.'},
+  {id:'spider',   icon:'🕷️',name:'Ragno',     timing:'after',
+   desc:'Trigger: dopo la scelta. Il prossimo giocatore colpito salta il turno successivo.'},
+  {id:'ram',      icon:'🐏',name:'Ariete',    timing:'after',
+   desc:'Trigger: dopo la scelta. Il danno si propaga per metà anche ai giocatori adiacenti.'},
+  {id:'walrus',   icon:'🦭',name:'Tricheco',  timing:'before',
+   desc:'Attiva 2 power-up casuali: uno contro il giocatore precedente, uno contro il successivo.'},
+  {id:'donkey',   icon:'🫏',name:'Asino',     timing:'after',
+   desc:'Trigger: dopo la scelta. Scambia il valore della carta più alta con quello della più bassa.'},
 ];
 POWERUPS.forEach(p => G.puEnabled[p.id] = true);
 
-// ── Web Audio ──────────────────────────────────────────────────
-let _ac = null;
-function getAC(){ if(!_ac) _ac = new (window.AudioContext||window.webkitAudioContext)(); return _ac; }
-function resumeAC(){ try{const a=getAC(); if(a.state==='suspended') a.resume();}catch(e){} }
+// ── Audio ─────────────────────────────────────────────────────────
+let _ac=null;
+function getAC(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+function resumeAC(){try{const a=getAC();if(a.state==='suspended')a.resume();}catch(e){}}
 function playSound(type){
   try{
-    resumeAC(); const ac=getAC(), t=ac.currentTime;
-    const map={
+    resumeAC();const ac=getAC(),t=ac.currentTime;
+    const M={
       hit:  [[200,.3,.22,'sawtooth'],[100,.2,.17,'sawtooth']],
       crit: [[440,.5,.3,'sawtooth'],[220,.35,.5,'square'],[55,.2,.6,'sawtooth']],
       heal: [[523,.2,.3,'sine'],[659,.15,.35,'sine'],[784,.1,.4,'sine']],
@@ -1066,101 +837,256 @@ function playSound(type){
       pu:   [[523,.18,.2,'triangle'],[659,.14,.26,'triangle'],[784,.1,.32,'triangle'],[1047,.07,.38,'triangle']],
       win:  [[523,.3,.5,'sine'],[659,.25,.6,'sine'],[784,.2,.7,'sine'],[880,.15,.85,'sine'],[1047,.1,1.1,'sine']],
       tick: [[880,.15,.12,'square'],[440,.1,.18,'square']],
+      zecca:[[180,.3,.4,'sawtooth'],[90,.2,.6,'sawtooth']],
     };
-    (map[type]||map.flip).forEach(([f,g,d,tp],i)=>{
+    (M[type]||M.flip).forEach(([f,g,d,tp],i)=>{
       const o=ac.createOscillator(),gn=ac.createGain();
-      o.type=tp; o.frequency.setValueAtTime(f,t+i*.04);
-      gn.gain.setValueAtTime(g,t+i*.04);
-      gn.gain.exponentialRampToValueAtTime(.001,t+i*.04+d);
-      o.connect(gn);gn.connect(ac.destination);
-      o.start(t+i*.04);o.stop(t+i*.04+d+.01);
+      o.type=tp;o.frequency.setValueAtTime(f,t+i*.04);
+      gn.gain.setValueAtTime(g,t+i*.04);gn.gain.exponentialRampToValueAtTime(.001,t+i*.04+d);
+      o.connect(gn);gn.connect(ac.destination);o.start(t+i*.04);o.stop(t+i*.04+d+.01);
     });
   }catch(e){}
 }
-function vibrate(p){ try{navigator.vibrate(p)}catch(e){} }
+function vibrate(p){try{navigator.vibrate(p)}catch(e){}}
 
-// ── Particle Canvas ────────────────────────────────────────────
+// ── Particles ─────────────────────────────────────────────────────
 (function(){
-  const cv=document.getElementById('particle-canvas'); if(!cv)return;
-  const ctx=cv.getContext('2d'); let W,H,pts=[];
+  const cv=document.getElementById('particle-canvas');if(!cv)return;
+  const ctx=cv.getContext('2d');let W,H,pts=[];
   function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
-  resize(); window.addEventListener('resize',resize);
+  resize();window.addEventListener('resize',resize);
   function mk(){return{x:Math.random()*W,y:H+10,r:Math.random()*2+.5,vx:(Math.random()-.5)*.3,vy:-(Math.random()*.7+.2),life:1,decay:Math.random()*.003+.001,col:`hsl(${Math.random()<.5?'5,75%':'38,80%'},${25+Math.random()*25}%)`};}
   for(let i=0;i<18;i++)pts.push({...mk(),y:Math.random()*H});
   (function draw(){
-    ctx.clearRect(0,0,W,H); if(pts.length<22)pts.push(mk());
-    pts=pts.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=p.decay; if(p.life<=0)return false;
+    ctx.clearRect(0,0,W,H);if(pts.length<22)pts.push(mk());
+    pts=pts.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;if(p.life<=0)return false;
       ctx.save();ctx.globalAlpha=p.life*.35;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();return true;});
     requestAnimationFrame(draw);
   })();
 })();
 
-// ── Utilities ──────────────────────────────────────────────────
-function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function genRoomId(){return Math.random().toString(36).substr(2,4).toUpperCase();}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function showOverlay(id){document.getElementById(id).classList.add('show');}
-function closeOverlay(id){document.getElementById(id).classList.remove('show');}
-function toast(msg,dur=2500){
-  const el=document.createElement('div');
-  el.style.cssText=`position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5a0a0a,#c0392b);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:1px;z-index:1000;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(192,57,43,.5)`;
-  el.textContent=msg;document.body.appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';},dur-300);
-  setTimeout(()=>el.remove(),dur);
+// ══ ANIMATION SYSTEM v2 — Marvel Snap Style ══════════════════════
+const PU_THEMES = {
+  eagle:    {bg:'linear-gradient(160deg,#060e22,#0e2a5a,#1a4a9e)',glow:'#4fa3f7',accent:'#a8d4ff'},
+  bull:     {bg:'linear-gradient(160deg,#1a0505,#600e0e,#b02020)',glow:'#ff4444',accent:'#ff9999'},
+  hedgehog: {bg:'linear-gradient(160deg,#2d1200,#7a3300,#c05800)',glow:'#ff8c00',accent:'#ffb347'},
+  rat:      {bg:'linear-gradient(160deg,#16122a,#2a2050,#4a3890)',glow:'#9b59b6',accent:'#c39bd3'},
+  kangaroo: {bg:'linear-gradient(160deg,#261500,#5a3500,#9a6000)',glow:'#f0b040',accent:'#ffd580'},
+  turtle:   {bg:'linear-gradient(160deg,#08200f,#155a2a,#1e8449)',glow:'#27ae60',accent:'#82e0aa'},
+  koala:    {bg:'linear-gradient(160deg,#101a10,#224422,#2d6b2d)',glow:'#58d68d',accent:'#d5f5d5'},
+  cheetah:  {bg:'linear-gradient(160deg,#221100,#5a3000,#c47000)',glow:'#f4d03f',accent:'#ffe082'},
+  bear:     {bg:'linear-gradient(160deg,#1a0500,#4a1200,#8a2a00)',glow:'#e05020',accent:'#f0a080'},
+  owl:      {bg:'linear-gradient(160deg,#08080f,#14143a,#201860)',glow:'#7c3aed',accent:'#c4b5fd'},
+  chameleon:{bg:'linear-gradient(160deg,#00200e,#005a28,#009940)',glow:'#00e676',accent:'#69f0ae'},
+  armadillo:{bg:'linear-gradient(160deg,#181000,#403000,#806000)',glow:'#d4af37',accent:'#fce38a'},
+  crocodile:{bg:'linear-gradient(160deg,#041200,#0e3a00,#1a6600)',glow:'#4caf50',accent:'#a5d6a7'},
+  bug:      {bg:'linear-gradient(160deg,#1e1400,#4a3200,#806000)',glow:'#cda800',accent:'#f5e642'},
+  fox:      {bg:'linear-gradient(160deg,#200800,#5a1e00,#b04000)',glow:'#ff6b35',accent:'#ffa07a'},
+  shark:    {bg:'linear-gradient(160deg,#001426,#002a52,#004080)',glow:'#0984e3',accent:'#74b9ff'},
+  deer:     {bg:'linear-gradient(160deg,#180a00,#3e2000,#7a4400)',glow:'#c89030',accent:'#f0c060'},
+  tick:     {bg:'linear-gradient(160deg,#0a1200,#203000,#3a5800)',glow:'#8bc34a',accent:'#c5e1a5'},
+  rhino:    {bg:'linear-gradient(160deg,#0c0c0c,#1e1e1e,#2e2e2e)',glow:'#9e9e9e',accent:'#e0e0e0'},
+  butterfly:{bg:'linear-gradient(160deg,#1a0028,#3d0068,#7800c0)',glow:'#d500f9',accent:'#ea80fc'},
+  viper:    {bg:'linear-gradient(160deg,#001800,#003800,#007200)',glow:'#00e000',accent:'#a0ff80'},
+  spider:   {bg:'linear-gradient(160deg,#080808,#100018,#1e0030)',glow:'#9c27b0',accent:'#e040fb'},
+  ram:      {bg:'linear-gradient(160deg,#1e0000,#500000,#960000)',glow:'#f44336',accent:'#ef9a9a'},
+  walrus:   {bg:'linear-gradient(160deg,#001828,#003a5e,#005e96)',glow:'#29b6f6',accent:'#b3e5fc'},
+  donkey:   {bg:'linear-gradient(160deg,#1a1200,#3e2c00,#706000)',glow:'#c8a000',accent:'#f5d500'},
+};
+
+function triggerAnim(id, opts={}) {
+  const theme = PU_THEMES[id];
+  const def = POWERUPS.find(p=>p.id===id);
+  if(!theme || !def) return;
+
+  // Backdrop
+  const bd = document.createElement('div');
+  bd.className = 'pua-backdrop';
+  document.body.appendChild(bd);
+
+  // Card
+  const card = document.createElement('div');
+  card.className = 'pua-card';
+  card.style.cssText = `
+    background:${theme.bg};
+    box-shadow:0 0 100px ${theme.glow}80,0 30px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.18);
+    border:2px solid ${theme.glow}70;
+  `;
+  const subtitle = opts.subtitle || '';
+  card.innerHTML = `
+    <div class="pua-card-glow" style="background:radial-gradient(ellipse 140% 120% at 50% 35%,${theme.glow}55 0%,transparent 65%)"></div>
+    <div class="pua-card-grid"></div>
+    <div class="pua-card-ring" style="border-color:${theme.glow}50;box-shadow:0 0 20px ${theme.glow}40"></div>
+    <div class="pua-card-art" style="filter:drop-shadow(0 0 28px ${theme.glow}) drop-shadow(0 0 60px ${theme.glow}60)">${def.icon}</div>
+    <div class="pua-card-band">
+      <div class="pua-card-name" style="color:${theme.accent};text-shadow:0 0 24px ${theme.glow},0 0 48px ${theme.glow}80">${def.name.toUpperCase()}</div>
+      ${subtitle?`<div class="pua-card-subtitle">${subtitle}</div>`:''}
+    </div>
+    <div class="pua-card-corner tl" style="color:${theme.accent}">${def.icon}</div>
+    <div class="pua-card-corner br" style="color:${theme.accent}">${def.icon}</div>
+    <div class="pua-card-border" style="border-color:${theme.glow}40"></div>
+    <div class="pua-card-shine"></div>
+  `;
+  document.body.appendChild(card);
+
+  // Canvas particle burst
+  spawnPuBurst(theme.glow, theme.accent, id);
+
+  // Special secondary effects
+  if(id==='hedgehog') spawnHedgehogSpines();
+  if(id==='spider') setTimeout(()=>drawSpiderWebCanvas(), 350);
+  if(id==='rat') {} // handled by css rat-active class
+
+  setTimeout(()=>{
+    bd.style.transition='opacity .5s';bd.style.opacity='0';
+    setTimeout(()=>{try{bd.remove();card.remove();}catch(e){}},550);
+  },1900);
 }
+
+function spawnPuBurst(color1, color2, id) {
+  const cv = document.createElement('canvas');
+  cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:801';
+  cv.width = innerWidth; cv.height = innerHeight;
+  document.body.appendChild(cv);
+  const ctx = cv.getContext('2d');
+  const cx = innerWidth/2, cy = innerHeight/2;
+  const pts = [];
+  const count = 55;
+  for(let i=0;i<count;i++){
+    const a = (Math.PI*2*i/count)+Math.random()*.5;
+    const spd = 2.5+Math.random()*7;
+    pts.push({x:cx,y:cy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-2,r:2.5+Math.random()*4,
+      life:1,decay:.018+Math.random()*.025,col:Math.random()<.55?color1:color2,trail:[]});
+  }
+  // Also add some "sparks" that go up
+  for(let i=0;i<20;i++){
+    pts.push({x:cx+rnd(-20,20),y:cy,vx:(Math.random()-.5)*4,vy:-(3+Math.random()*8),r:1.5+Math.random()*2,
+      life:1,decay:.025+Math.random()*.03,col:'#ffffff',trail:[]});
+  }
+  let frame=0;
+  (function draw(){
+    if(frame>90){cv.remove();return;}frame++;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // Shockwave
+    if(frame<18){
+      const pct=frame/18;
+      ctx.save();ctx.globalAlpha=(1-pct)*.6;
+      ctx.strokeStyle=color1;ctx.lineWidth=3;
+      ctx.shadowBlur=20;ctx.shadowColor=color1;
+      ctx.beginPath();ctx.arc(cx,cy,pct*140,0,Math.PI*2);ctx.stroke();
+      ctx.restore();
+    }
+    pts.forEach(p=>{
+      if(p.life<=0)return;
+      p.trail.push({x:p.x,y:p.y,life:p.life});
+      if(p.trail.length>6)p.trail.shift();
+      p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.vx*=.97;p.life-=p.decay;
+      // Trail
+      p.trail.forEach((t,ti)=>{
+        ctx.save();ctx.globalAlpha=t.life*.3*(ti/p.trail.length);
+        ctx.fillStyle=p.col;ctx.beginPath();
+        ctx.arc(t.x,t.y,p.r*(ti/p.trail.length),0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+      ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.col;
+      ctx.shadowBlur=12;ctx.shadowColor=p.col;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  })();
+}
+
+function spawnHedgehogSpines() {
+  for(let i=0;i<12;i++){
+    const el=document.createElement('div');el.className='spine3d';
+    const a=(Math.PI*2*i/12);
+    const d=170+Math.random()*60;
+    el.style.setProperty('--dx',`${Math.cos(a)*d}px`);
+    el.style.setProperty('--dy',`${Math.sin(a)*d}px`);
+    el.textContent=['💥','⚡','🔥','✨'][i%4];
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1400);
+  }
+}
+
+function drawSpiderWebCanvas() {
+  const cv=document.createElement('canvas');
+  cv.className='spider-web-canvas';cv.width=innerWidth;cv.height=innerHeight;
+  document.body.appendChild(cv);
+  const ctx=cv.getContext('2d');
+  const drawWeb=(cx,cy,spk,rings,sz)=>{
+    ctx.strokeStyle='rgba(180,100,220,.55)';ctx.lineWidth=1;ctx.shadowBlur=6;ctx.shadowColor='#9c27b0';
+    for(let s=0;s<spk;s++){const a=s*(Math.PI*2/spk);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*sz,cy+Math.sin(a)*sz);ctx.stroke();}
+    for(let r=1;r<=rings;r++){ctx.beginPath();for(let s=0;s<=spk;s++){const a=s*(Math.PI*2/spk);const d=r*sz/rings;if(s===0)ctx.moveTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);else ctx.lineTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);}ctx.closePath();ctx.stroke();}
+  };
+  drawWeb(0,0,8,5,220);drawWeb(innerWidth,0,8,5,220);
+  drawWeb(0,innerHeight,8,5,220);drawWeb(innerWidth,innerHeight,8,5,220);
+  drawWeb(innerWidth/2,innerHeight/2,14,7,280);
+  setTimeout(()=>{cv.style.opacity='0';setTimeout(()=>cv.remove(),1600);},3000);
+}
+
+function showAnimalAlert(icon,title,desc,color) {
+  const bd=document.createElement('div');bd.className='pua-backdrop';document.body.appendChild(bd);
+  const al=document.createElement('div');al.className='animal-alert';
+  al.style.cssText=`border:2px solid ${color}60;box-shadow:0 0 60px ${color}40,0 20px 50px rgba(0,0,0,.8)`;
+  al.innerHTML=`<span class="animal-alert-icon" style="filter:drop-shadow(0 0 20px ${color})">${icon}</span>
+    <div class="animal-alert-title" style="color:${color};text-shadow:0 0 20px ${color}80">${title}</div>
+    <div class="animal-alert-desc">${desc}</div>`;
+  document.body.appendChild(al);
+  playSound('pu');vibrate([80,40,120]);
+  setTimeout(()=>{bd.style.transition='opacity .4s';bd.style.opacity='0';al.style.transition='opacity .4s';al.style.opacity='0';setTimeout(()=>{try{bd.remove();al.remove();}catch(e){}},450);},2100);
+}
+
+
+
+// ══ Visual effects ════════════════════════════════════════════════
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function spawnFloat(text,type='red',x,y){
   const el=document.createElement('div');el.className=`dmg-float ${type}`;el.textContent=text;
-  el.style.left=(x||innerWidth/2-24)+'px';el.style.top=(y||innerHeight*.38)+'px';
+  el.style.left=(x||innerWidth/2-28)+'px';el.style.top=(y||innerHeight*.38)+'px';
   document.body.appendChild(el);setTimeout(()=>el.remove(),1600);
 }
 function shakeScreen(){const w=document.getElementById('game-wrap');if(!w)return;w.classList.remove('screen-shake');void w.offsetWidth;w.classList.add('screen-shake');setTimeout(()=>w.classList.remove('screen-shake'),500);}
 function critExplode(){const el=document.createElement('div');el.className='crit-explode';document.body.appendChild(el);setTimeout(()=>el.remove(),700);}
 function confetti(){
   const cols=['#c0392b','#f0b040','#27d676','#3498db','#9b59b6','#e74c3c','#fff'];
-  for(let i=0;i<70;i++){
-    const el=document.createElement('div');el.className='confetti-bit';
-    el.style.cssText=`left:${rnd(5,95)}vw;top:-20px;background:${cols[rnd(0,cols.length-1)]};animation-duration:${rnd(12,22)/10}s;animation-delay:${rnd(0,12)/10}s;transform:rotateZ(${rnd(0,360)}deg);width:${rnd(6,12)}px;height:${rnd(10,18)}px;`;
-    document.body.appendChild(el);setTimeout(()=>el.remove(),2800);
-  }
+  for(let i=0;i<80;i++){const el=document.createElement('div');el.className='confetti-bit';el.style.cssText=`left:${rnd(5,95)}vw;top:-20px;background:${cols[rnd(0,cols.length-1)]};animation-duration:${rnd(12,22)/10}s;animation-delay:${rnd(0,14)/10}s;transform:rotateZ(${rnd(0,360)}deg);width:${rnd(6,12)}px;height:${rnd(10,18)}px;`;document.body.appendChild(el);setTimeout(()=>el.remove(),3000);}
 }
-
-// ── Elimination animation (NUOVO) ─────────────────────────────
 function triggerEliminationAnim(name){
   playSound('elim');vibrate([120,60,120,60,250]);
-  for(let i=0;i<12;i++){
-    const b=document.createElement('div');b.className='blood-drop';
-    const sz=rnd(16,40);
-    b.style.cssText=`width:${sz}px;height:${sz*1.4}px;left:${rnd(15,85)}vw;top:${rnd(20,70)}vh;--rot:${rnd(-60,60)}deg;animation-duration:${rnd(8,14)/10}s;animation-delay:${rnd(0,4)/10}s;z-index:948`;
-    document.body.appendChild(b);setTimeout(()=>b.remove(),1600);
-  }
+  for(let i=0;i<14;i++){const b=document.createElement('div');b.className='blood-drop';const sz=rnd(14,36);b.style.cssText=`width:${sz}px;height:${sz*1.4}px;left:${rnd(15,85)}vw;top:${rnd(20,70)}vh;--rot:${rnd(-60,60)}deg;animation-duration:${rnd(8,14)/10}s;animation-delay:${rnd(0,4)/10}s;`;document.body.appendChild(b);setTimeout(()=>b.remove(),1700);}
   const w=document.createElement('div');w.className='elim-anim-wrap';
-  w.innerHTML=`<div class="elim-skull-big">💀</div><div class="elim-player-name">${name}</div><div class="elim-sub-text">è stato eliminato!</div>`;
-  document.body.appendChild(w);setTimeout(()=>w.remove(),2400);
+  w.innerHTML=`<div class="elim-skull">💀</div><div class="elim-name">${name}</div><div class="elim-sub">è stato eliminato!</div>`;
+  document.body.appendChild(w);setTimeout(()=>w.remove(),2600);
+}
+function toast(msg,dur=2500){
+  const el=document.createElement('div');el.style.cssText=`position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5a0a0a,#c0392b);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;z-index:1000;white-space:nowrap;max-width:92vw;text-align:center;box-shadow:0 4px 20px rgba(192,57,43,.5)`;
+  el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';},dur-300);setTimeout(()=>el.remove(),dur);
 }
 
-// ── Firebase helpers — FIX: use onValue return value for unsub ──
+// ══ Firebase helpers ══════════════════════════════════════════════
+function genRoomId(){return Math.random().toString(36).substr(2,4).toUpperCase();}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showOverlay(id){document.getElementById(id).classList.add('show');}
+function closeOverlay(id){document.getElementById(id).classList.remove('show');}
 async function dbSet(p,d){const{db,ref,set}=window._fb;await set(ref(db,p),d);}
 async function dbUpdate(p,d){const{db,ref,update}=window._fb;await update(ref(db,p),d);}
 async function dbGet(p){const{db,ref,get}=window._fb;const s=await get(ref(db,p));return s.exists()?s.val():null;}
 function dbListen(p,cb){
   const{db,ref,onValue}=window._fb;
   const unsub=onValue(ref(db,p),s=>cb(s.exists()?s.val():null));
-  G.unsubscribes.push(unsub); // store the unsubscribe fn, NOT the ref
+  G.unsubscribes.push(unsub);
 }
 function dbUnsubAll(){G.unsubscribes.forEach(fn=>{try{fn();}catch(e){}});G.unsubscribes=[];}
-
-// ── Log — FIX: any player can log (not just master) ───────────
-function addLog(html){
+function addLog(html,type='system'){
   if(!window._fb||!G.roomId)return;
-  const{db,ref,push}=window._fb;
-  push(ref(db,`rooms/${G.roomId}/log`),{html,ts:Date.now()});
+  const{db,ref,push}=window._fb;push(ref(db,`rooms/${G.roomId}/log`),{html,ts:Date.now(),type});
 }
 
-// ── Setup ──────────────────────────────────────────────────────
+// ══ Setup ══════════════════════════════════════════════════════════
 (function(){addPlayerField();addPlayerField();})();
 function addPlayerField(){
   const list=document.getElementById('players-list');
-  if(list.children.length>=17){toast('Massimo 17 giocatori aggiuntivi');return;}
+  if(list.children.length>=17){toast('Max 17 giocatori');return;}
   const n=list.children.length+1;
   const row=document.createElement('div');row.className='player-row';
   row.innerHTML=`<input type="text" placeholder="Giocatore ${n}" maxlength="16"><button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
@@ -1171,21 +1097,28 @@ function selectMode(m){
   document.getElementById('mode-classic').classList.toggle('selected',m==='classic');
   document.getElementById('mode-hardcore').classList.toggle('selected',m==='hardcore');
 }
+function toggleLog(){
+  const h=document.getElementById('log-header');
+  const l=document.getElementById('log-list');
+  G._logOpen=!G._logOpen;
+  h.classList.toggle('open',G._logOpen);
+  l.style.display=G._logOpen?'block':'none';
+}
 
-// ── Create game ────────────────────────────────────────────────
+// ══ Create game ═══════════════════════════════════════════════════
 async function createGame(){
   if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
   const masterName=document.getElementById('master-name').value.trim()||'Master';
   const hp=parseInt(document.getElementById('setup-hp').value)||1000;
   const inputs=document.querySelectorAll('#players-list .player-row input');
   const extras=Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
-  if(extras.length<1){toast('Aggiungi almeno 1 altro giocatore');return;}
+  if(extras.length<1){toast('Aggiungi almeno 1 giocatore');return;}
   const roomId=genRoomId();
   G.roomId=roomId;G.playerName=masterName;G.isMaster=true;G.isSpectator=false;
   const allNames=[masterName,...extras];
   const players={};
   allNames.forEach((name,i)=>{
-    players['p'+i]={id:'p'+i,name,hp,maxHp:hp,alive:true,ismaster:i===0,joined:true,skipNext:false,activeBug:false,dolphinShield:false};
+    players['p'+i]={id:'p'+i,name,hp,maxHp:hp,alive:true,ismaster:i===0,joined:true,skipNext:false,activeBug:false};
   });
   const puEnabled={};POWERUPS.forEach(p=>puEnabled[p.id]=true);
   const state={
@@ -1193,14 +1126,15 @@ async function createGame(){
     currentTurnIndex:0,turnCount:0,
     players,playerOrder:allNames.map((_,i)=>'p'+i),
     cards:[],activePowerups:{},puEnabled,log:[],
-    tickCard:null,butterflyActive:false,butterflyOwner:null,butterflyCards:{},lizardUsed:false,
+    tickCard:null,butterflyActive:false,butterflyOwner:null,butterflyCards:{},
+    chameleonUsed:false,
   };
   await dbSet(`rooms/${roomId}`,state);
   G.playerId='p0';
   showLobby(roomId,players);
 }
 
-// ── Lobby ──────────────────────────────────────────────────────
+// ══ Lobby ══════════════════════════════════════════════════════════
 function showLobby(roomId,players){
   showScreen('screen-lobby');
   document.getElementById('room-code-display').textContent=roomId;
@@ -1212,24 +1146,17 @@ function showLobby(roomId,players){
     const wrap=document.getElementById('waiting-players');wrap.innerHTML='';
     Object.values(data).forEach(p=>{
       const d=document.createElement('div');d.className=`lobby-player${p.ismaster?' master':''}`;
-      d.innerHTML=`<div class="lobby-dot"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600">${p.name}</span>${p.ismaster?'<span style="margin-left:auto;font-size:11px;color:var(--gold);letter-spacing:1px">MASTER</span>':''}`;
+      d.innerHTML=`<div class="lobby-dot"></div><span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700">${p.name}</span>${p.ismaster?'<span style="margin-left:auto;font-size:11px;color:var(--gold);letter-spacing:1px">MASTER</span>':''}`;
       wrap.appendChild(d);
     });
   });
-  dbListen(`rooms/${roomId}/status`,status=>{
-    if(status==='playing')startPlayingScreen();
-  });
+  dbListen(`rooms/${roomId}/status`,status=>{if(status==='playing')startPlayingScreen();});
 }
-function copyRoomLink(){
-  const url=`${location.origin}${location.pathname}?room=${G.roomId}`;
-  navigator.clipboard.writeText(url).then(()=>toast('🔗 Link copiato!'));
-}
+function copyRoomLink(){navigator.clipboard.writeText(`${location.origin}${location.pathname}?room=${G.roomId}`).then(()=>toast('🔗 Link copiato!'));}
 
-// ── Start game ─────────────────────────────────────────────────
 async function startGame(){
   const room=await dbGet(`rooms/${G.roomId}`);if(!room)return;
-  const alive=Object.values(room.players).filter(p=>p.alive);
-  if(alive.length<2){toast('Servono almeno 2 giocatori');return;}
+  if(Object.values(room.players).filter(p=>p.alive).length<2){toast('Servono almeno 2 giocatori');return;}
   const cards=generateCards(room.players,room.mode);
   await dbUpdate(`rooms/${G.roomId}`,{status:'playing',cards,currentTurnIndex:0,turnCount:1});
 }
@@ -1238,12 +1165,11 @@ function generateCards(players,mode){
   return [...alive].sort(()=>Math.random()-.5).map(([pid,p],i)=>({id:'c'+i,value:rnd(0,100),assignedTo:pid,assignedName:p.name}));
 }
 
-// ── Join ───────────────────────────────────────────────────────
 async function joinGame(){
   if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
   const name=document.getElementById('join-name').value.trim();
   const code=document.getElementById('join-code').value.trim().toUpperCase();
-  if(!name){toast('Inserisci il tuo nome');return;}
+  if(!name){toast('Inserisci nome');return;}
   if(code.length!==4){toast('Codice non valido');return;}
   const room=await dbGet(`rooms/${code}`);
   if(!room){toast('Stanza non trovata');return;}
@@ -1255,30 +1181,30 @@ async function joinGame(){
     await dbUpdate(`rooms/${code}/players/${G.playerId}`,{joined:true});
     if(room.status==='playing'){startPlayingScreen();return;}
     showLobby(code,room.players);
-  }else{toast('Nome non trovato. Verifica con il Master.');}
+  }else{toast('Nome non trovato. Contatta il Master.');}
 }
 async function joinAsSpectator(){
   if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
   const code=document.getElementById('join-code').value.trim().toUpperCase();
-  if(code.length!==4){toast('Inserisci il codice stanza');return;}
-  const room=await dbGet(`rooms/${code}`);
-  if(!room){toast('Stanza non trovata');return;}
+  if(code.length!==4){toast('Inserisci codice');return;}
+  const room=await dbGet(`rooms/${code}`);if(!room){toast('Stanza non trovata');return;}
   G.roomId=code;G.isSpectator=true;G.isMaster=false;G.playerId=null;
   startPlayingScreen();
 }
 
-// ── Playing screen — FIX: dbUnsubAll before re-listening ───────
+// ══ Playing screen ════════════════════════════════════════════════
 let _lastTurnPid=null;
 function startPlayingScreen(){
-  dbUnsubAll(); // FIX: clear lobby listeners before adding game listener
+  dbUnsubAll();
   showScreen('screen-game');
   document.getElementById('spectator-pill').style.display=G.isSpectator?'block':'none';
   clearTimer();
   G.sessionStats={dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0};
-  G.bearMode=false;G.foxMode=false;G.masterOverrideActive=false;
+  G.bearMode=false;G.foxMode=false;G.masterOverrideActive=false;G._shownAnims={};
   dbListen(`rooms/${G.roomId}`,state=>{
     if(!state)return;
     if(state.status==='gameover'){showGameOver(state);return;}
+    checkZeckaDmg(state);
     if(!G.pendingConfirm)renderState(state);
   });
 }
@@ -1292,56 +1218,92 @@ function renderState(state){
   const pu=state.activePowerups||{};
   const isMyTurn=!G.isSpectator&&currentPid===G.playerId;
 
-  // FIX: Fox — fox owner gets to play on the fox target's turn
+  // Fox: owner plays for fox target
   const foxActive=pu.fox;
   if(foxActive&&foxActive.target===currentPid&&foxActive.owner===G.playerId&&!G.foxMode){
     G.foxMode=true;G.foxTargetPid=currentPid;
   }
+  // Bear: owner gets 2 picks next turn
+  if(pu.bear&&pu.bear.target===G.playerId&&isMyTurn&&!G.bearMode&&G.bearCardsChosen===0){
+    G.bearMode=true;G.bearCardsChosen=0;G.bearFirstTarget=null;
+  }
   const canPlay=isMyTurn||G.foxMode||G.masterOverrideActive;
 
-  // FIX: Bear — detect bear owner's turn and enable bear mode
-  if(pu.bear&&pu.bear.owner===G.playerId&&isMyTurn&&!G.bearMode&&G.bearCardsChosen===0){
-    G.bearMode=true;G.bearCardsChosen=0;
-  }
-
-  // New turn sound
+  // New turn announcement
   if(_lastTurnPid!==currentPid){
     _lastTurnPid=currentPid;
+    G._shownAnims={};
     if(isMyTurn||G.foxMode){playSound('flip');vibrate([40,30,80]);}
   }
 
-  // Update UI
+  // Per-turn alerts to affected players
+  if(!G._shownAnims.kang_alert&&pu.kangaroo?.target===G.playerId){
+    G._shownAnims.kang_alert=true;
+    showAnimalAlert('🦘','TURNO SALTATO!','Il Canguro ti ha scavalcato — il tuo turno è saltato!','#f0b040');
+  }
+  if(!G._shownAnims.fox_alert&&foxActive?.target===G.playerId&&foxActive?.owner!==G.playerId){
+    G._shownAnims.fox_alert=true;
+    showAnimalAlert('🦊','VOLPE!','La Volpe gioca al posto tuo — il tuo turno è saltato!','#e67e22');
+  }
+  if(!G._shownAnims.bear_alert&&pu.bear?.target===G.playerId&&isMyTurn){
+    G._shownAnims.bear_alert=true;
+    showAnimalAlert('🐻','ORSO!','Devi scegliere 2 carte obbligatoriamente!','#c0392b');
+  }
+  if(!G._shownAnims.owl_alert&&pu.owl?.target===G.playerId&&isMyTurn){
+    G._shownAnims.owl_alert=true;
+    showAnimalAlert('🦉','GUFO!','Non puoi attivare nessun power-up questo turno!','#6c5ce7');
+  }
+
+  // Per-turn anim triggers
+  if(canPlay&&!G._shownAnims.rat&&pu.rat&&pu.rat.owner!==G.playerId&&!G.foxMode){
+    G._shownAnims.rat=true;triggerAnim('rat');
+  }
+  if(canPlay&&!G._shownAnims.kangaroo&&pu.kangaroo?.target===currentPid){
+    G._shownAnims.kangaroo=true;
+    // kangaroo effect handled in nextTurn; just show anim here
+    triggerAnim('kangaroo');
+  }
+  if(canPlay&&!G._shownAnims.cheetah&&pu.cheetah&&!G.timerActive){
+    G._shownAnims.cheetah=true;triggerAnim('cheetah');
+  }
+  if(canPlay&&!G._shownAnims.owl&&pu.owl){
+    G._shownAnims.owl=true;triggerAnim('owl');
+  }
+  if(canPlay&&!G._shownAnims.crocodile&&pu.crocodile){
+    G._shownAnims.crocodile=true;triggerAnim('crocodile');
+  }
+
+  // UI updates
   document.getElementById('turn-name').textContent=
-    G.foxMode?`${players[foxActive?.owner]?.name} → ${players[currentPid]?.name}`:(players[currentPid]?.name||'—');
+    G.foxMode?`${players[foxActive?.owner]?.name}→${players[currentPid]?.name}`:(players[currentPid]?.name||'—');
   document.getElementById('dir-bar').textContent=state.direction===1?'→ SENSO ORARIO':'← SENSO ANTIORARIO';
   renderHpStrip(players,order,currentPid,state.initialHp||1000);
   renderPuBanner(pu);
 
-  // Special turn pill
   const pill=document.getElementById('special-turn-pill');
   if(pill){
-    if(G.bearMode&&canPlay){pill.style.display='block';pill.innerHTML=`🐻 ORSO — Scegli carta <span class="bear-cards-left">${G.bearCardsChosen+1}/2</span>`;}
-    else if(G.foxMode){pill.style.display='block';pill.innerHTML=`🦊 VOLPE — Stai giocando per <b>${players[currentPid]?.name}</b>`;}
+    if(G.bearMode&&canPlay){pill.style.display='block';pill.innerHTML=`🐻 ORSO — Scegli carta<span class="bear-cards-left">${G.bearCardsChosen+1}/2</span>`;}
+    else if(G.foxMode){pill.style.display='block';pill.innerHTML=`🦊 VOLPE — Giochi per <b>${players[currentPid]?.name}</b>`;}
     else{pill.style.display='none';}
   }
 
   renderCards(state,canPlay,currentPid);
   renderLog(state.log);
 
-  // Master override button
   const mo=document.getElementById('master-override');
   if(mo){
     if(G.isMaster&&!isMyTurn&&!G.foxMode&&!G.masterOverrideActive){
       mo.style.display='flex';
-      document.getElementById('master-override-text').textContent=`Gioca tu per ${players[currentPid]?.name}`;
+      document.getElementById('master-override-text').textContent=`Gioca per ${players[currentPid]?.name}`;
     }else{mo.style.display='none';}
   }
 
   // Cheetah timer
-  if(canPlay&&pu.cheetah&&!G.timerActive){
+  const cheetahOwner=pu.cheetah?.owner;
+  if(canPlay&&pu.cheetah&&!G.timerActive&&cheetahOwner!==G.playerId&&!G.isSpectator){
     startTimer(7,async()=>{
       const fresh=await dbGet(`rooms/${G.roomId}`);if(!fresh)return;
-      addLog(`<span class='lpu'>⏱ Tempo scaduto!</span> <span class='lp'>${players[currentPid]?.name}</span> salta il turno.`);
+      addLog(`<span class='lpu'>⏱ Tempo scaduto!</span> <span class='lp'>${players[currentPid]?.name}</span> salta il turno.`,'system');
       await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/cheetah':null});
       await nextTurn(fresh);
     });
@@ -1353,7 +1315,7 @@ function renderState(state){
   }
 }
 
-// ── HP Strip ───────────────────────────────────────────────────
+// ══ HP Strip ══════════════════════════════════════════════════════
 function renderHpStrip(players,order,currentPid,initialHp){
   const strip=document.getElementById('hp-strip');strip.innerHTML='';
   order.forEach(pid=>{
@@ -1365,6 +1327,8 @@ function renderHpStrip(players,order,currentPid,initialHp){
     card.id=`hp-${pid}`;
     card.className=`hp-card${!p.alive?' dead':''}${pid===currentPid?' active':''}${isDanger&&p.alive?' danger':''}`;
     card.innerHTML=`${isDanger&&p.alive?'<div class="danger-skull">💀</div>':''}
+
+      ${p.activeBug?'<div class="bug-shield">🐛</div>':''}
       <div class="hpc-name">${p.name}</div>
       <div class="hpc-val" style="color:${!p.alive?'var(--muted)':pct>50?'var(--text)':pct>25?'var(--gold)':'var(--red3)'}">${p.alive?p.hp:'☠'}</div>
       <div class="hpc-bar"><div class="hpc-fill" style="width:${pct}%;background:${barColor}"></div></div>`;
@@ -1372,7 +1336,7 @@ function renderHpStrip(players,order,currentPid,initialHp){
   });
 }
 
-// ── PU Banner ─────────────────────────────────────────────────
+// ══ PU Banner ═════════════════════════════════════════════════════
 function renderPuBanner(pu){
   const banner=document.getElementById('pu-banner');
   const entries=pu?Object.entries(pu):[];
@@ -1381,12 +1345,14 @@ function renderPuBanner(pu){
   const def=POWERUPS.find(p=>p.id===id);
   if(!def){banner.classList.remove('show');return;}
   document.getElementById('pu-banner-icon').textContent=def.icon;
-  document.getElementById('pu-banner-title').textContent=`POTERE DEL ${def.name.toUpperCase()} ATTIVO`;
+  document.getElementById('pu-banner-title').textContent=`${def.name.toUpperCase()} ATTIVO`;
   document.getElementById('pu-banner-desc').textContent=def.desc;
   banner.classList.add('show');
 }
 
-// ── Render Cards — FIX: rat covers all non-spectators, eagle shows 1 name ──
+// ══ Render Cards ══════════════════════════════════════════════════
+// RULE FIX: Classica = active sees values only (no names); others see values+names
+// RULE FIX: Hardcore = active sees nothing (covered); others see everything
 let _cardLocked=false;
 function renderCards(state,canPlay,currentPid){
   if(G.pendingConfirm)return;
@@ -1395,141 +1361,176 @@ function renderCards(state,canPlay,currentPid){
   const pu=state.activePowerups||{};
 
   document.getElementById('cards-label').textContent=
-    canPlay?(G.bearMode?`🐻 Scegli carta ${G.bearCardsChosen+1} di 2`:'⚔️ Scegli la tua carta'):
+    canPlay?(G.bearMode?`🐻 Orso: scegli carta ${G.bearCardsChosen+1} di 2`:'⚔️ Scegli la tua carta'):
     G.isSpectator?'👁 Vista spettatore':'⏳ Attendi il tuo turno';
 
   let cards=[...(state.cards||[])];
-
-  // Add special cards
-  if(state.tickCard) cards.push({...state.tickCard,id:'tick-special',badge:'tick'});
-  if(pu.viper) cards.push({id:'viper-special',value:pu.viper.value||42,assignedTo:'viper',assignedName:'???',badge:'viper'});
-  if(state.butterflyActive&&state.butterflyCards) Object.values(state.butterflyCards).forEach(bc=>cards.push({...bc,badge:'butterfly'}));
-  if(pu.lizard&&!state.lizardUsed){
+  if(state.tickCard)cards.push({...state.tickCard});
+  if(pu.viper)cards.push({id:'viper-special',value:pu.viper.value||42,assignedTo:'viper',assignedName:'???',badge:'viper'});
+  if(state.butterflyActive&&state.butterflyCards)Object.values(state.butterflyCards).forEach(bc=>cards.push({...bc,badge:'butterfly'}));
+  if(pu.chameleon&&!state.chameleonUsed){
     const elim=Object.values(state.players||{}).filter(p=>!p.alive);
-    if(elim.length>0) cards.push({id:'lizard-special',value:pu.lizard.value||50,assignedTo:'lizard',assignedName:'Rivivi',badge:'lizard'});
+    if(elim.length>0)cards.push({id:'revival-special',value:pu.chameleon.value||rnd(30,80),assignedTo:'revival',assignedName:'Rivivi',badge:'revival'});
   }
 
-  // FIX: Donkey — swap min/max values for DISPLAY (actual swap happens in nextTurn)
+  // Donkey swap display
   if(pu.donkey){
     const normal=cards.filter(c=>!c.badge);
     if(normal.length>=2){
-      const vals=normal.map(c=>c.value).sort((a,b)=>a-b);
+      const vals=[...normal].map(c=>c.value).sort((a,b)=>a-b);
       const minV=vals[0],maxV=vals[vals.length-1];
       if(minV!==maxV){
         cards=cards.map(c=>{
-          if(!c.badge){
-            if(c.value===minV)return{...c,value:maxV};
-            if(c.value===maxV)return{...c,value:minV};
-          }
+          if(!c.badge){if(c.value===minV)return{...c,value:maxV};if(c.value===maxV)return{...c,value:minV};}
           return c;
         });
       }
     }
   }
 
-  // FIX: Rat covers ALL non-spectators (including active player)
-  const forceCovered=state.mode==='hardcore'||(pu.rat&&!G.isSpectator);
-  // FIX: Eagle — show 1 name only to eagle owner on their turn
-  const eagleRevealPid=(pu.eagle&&pu.eagle.owner===G.playerId)?pu.eagle.reveal:null;
-  // canSeeNames: spectators always see names; others see names only when NOT active player (classic mode, no rat)
-  const canSeeNames=G.isSpectator||(state.mode!=='hardcore'&&!canPlay&&!pu.rat);
+  // RULE FIX: visibility logic
+  // Classica: active player sees values ONLY (no names); other players see values + names
+  // Hardcore: active player sees NOTHING (covered); others see everything
+  // Topo: other players (non-activator) see covered; activator sees normally
+  // Spectator: always sees everything
+  const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  const iAmActive=canPlay;
 
-  grid.className='cards-grid'+(cards.length>4?' many':'');
+  let forceCovered=false;
+  let showNames=true;
+
+  if(G.isSpectator){
+    forceCovered=false;showNames=true;
+  }else if(state.mode==='hardcore'){
+    if(iAmActive){forceCovered=true;showNames=false;}
+    else{forceCovered=false;showNames=true;}
+  }else{
+    // Classica
+    if(iAmActive){
+      forceCovered=false;
+      // Active player in Classica: sees values but NOT names
+      showNames=false;
+      // Unless eagle reveals a specific card
+    }else{
+      // Topo: non-activators see covered
+      if(pu.rat&&pu.rat.owner!==G.playerId){
+        forceCovered=true;showNames=false;
+      }else{
+        forceCovered=false;showNames=true;
+      }
+    }
+  }
+
+  // Eagle: active player sees 1 specific name
+  const eagleRevealPid=(pu.eagle&&pu.eagle.owner===G.playerId&&iAmActive)?pu.eagle.reveal:null;
+
+  // Rat active class on the cards section container
+  const sec=document.querySelector('.cards-section');
+  if(sec) sec.classList.toggle('rat-active', !!(pu.rat&&!G.isSpectator&&pu.rat.owner!==G.playerId));
+  grid.className='cards-grid'+(cards.length>6?' compact':'');
+
+  // Bear mode: disable cards targeting already-chosen target
+  const bearUsedTargets=G.bearFirstTarget?[G.bearFirstTarget]:[];
 
   cards.forEach(card=>{
     const div=document.createElement('div');
     const isCrit=card.value>=80&&!forceCovered;
+    const isBearDisabled=G.bearMode&&G.bearCardsChosen===1&&card.assignedTo===G.bearFirstTarget;
     const cls=['game-card'];
-    if(!canPlay)cls.push('disabled');
-    if(isCrit&&(canSeeNames||canPlay))cls.push('critical-card');
+    if(!canPlay||isBearDisabled)cls.push('disabled');
+    if(isCrit&&!forceCovered)cls.push('critical-card');
+    if(forceCovered)cls.push('card-covered');
     div.className=cls.join(' ');
 
     if(forceCovered){
-      div.innerHTML=`<div class="card-beast-symbol">🐾</div><div class="card-covered-shimmer"></div><div class="card-inner"><div class="card-value covered">?</div></div>`;
+      div.innerHTML=`<div class="card-covered-pattern"></div><div class="card-covered-shimmer"></div><div class="card-covered-symbol">🐾</div>`;
     }else{
-      const isEagleCard=eagleRevealPid&&eagleRevealPid===card.assignedTo;
-      const showName=canSeeNames||isEagleCard;
-      const nameHtml=showName&&card.assignedName
-        ?`<div class="card-name revealed">${isEagleCard?'🦅 ':''} ${card.assignedName}</div>`
-        :`<div class="card-name hidden"></div>`;
+      const isEagle=eagleRevealPid&&eagleRevealPid===card.assignedTo;
+      const showThisName=showNames||isEagle;
+      const nameClass=showThisName?`revealed${isEagle?' eagle-glow':''}`:' hidden';
+      const badgeHtml=card.badge?`<div class="card-badge badge-${card.badge}">${{tick:'🐜 ZECCA',viper:'🐍 VIPERA',butterfly:'🦋 BONUS',revival:'💚 VITA'}[card.badge]||''}</div>`:'';
       div.innerHTML=`
-        ${isCrit&&(canSeeNames||canPlay)?'<div class="critical-flash">CRITICO</div>':''}
-        ${card.badge?`<div class="card-badge badge-${card.badge}">${{tick:'ZECCA',viper:'VIPERA',butterfly:'🦋',lizard:'VITA'}[card.badge]||''}</div>`:''}
-        <div class="card-inner"><div class="card-value">${card.value}</div>${nameHtml}</div>`;
+        <div class="card-corner tl">${card.value>=50?'♦':'♣'}</div>
+        <div class="card-corner br">${card.value>=50?'♦':'♣'}</div>
+        ${isCrit?'<div class="critical-flash">CRITICO</div>':''}
+        ${badgeHtml}
+        <div class="card-val-main">${card.value}</div>
+        <div class="card-name-reveal ${nameClass}">${showThisName&&card.assignedName?card.assignedName:''}</div>`;
     }
 
-    if(canPlay){
+    if(canPlay&&!isBearDisabled){
       div.addEventListener('click',()=>{
-        if(_cardLocked||G.pendingConfirm)return; // FIX: double lock
+        if(_cardLocked||G.pendingConfirm)return;
         _cardLocked=true;
         div.classList.add('flip-anim');
         playSound(card.value>=80?'crit':'flip');vibrate([60]);
-        // Disable all cards immediately
         document.querySelectorAll('.game-card').forEach(c=>c.classList.add('disabled'));
         setTimeout(async()=>{
           const fresh=await dbGet(`rooms/${G.roomId}`);
-          if(fresh&&fresh.status==='playing') await resolveCard(card,fresh);
-        },360);
+          if(fresh&&fresh.status==='playing')await resolveCard(card,fresh);
+        },380);
       });
     }
     grid.appendChild(div);
   });
 }
 
-// ── Resolve card choice ────────────────────────────────────────
+// ══ Resolve card ══════════════════════════════════════════════════
 async function resolveCard(card,state){
   G.pendingConfirm=true;
   const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
   const pu=state.activePowerups||{};
   const players=state.players||{};
-  const postUpdates={};
+  const postUpd={};
+  if(pu.eagle&&pu.eagle.owner===activePid)postUpd['activePowerups/eagle']=null;
 
-  // FIX: Eagle clears itself after eagle owner plays their card
-  if(pu.eagle&&pu.eagle.owner===activePid) postUpdates['activePowerups/eagle']=null;
-
-  // ── Special badge cards ──────────────────────────────────────
+  // ── Badge cards ──────────────────────────────────────────────────
   if(card.badge==='tick'){
     await applyHpFresh(activePid,-card.value);
-    addLog(`<span class='lp'>${players[activePid]?.name}</span> prende la <span class='lpu'>🐜 Zecca</span>: <span class='ld'>-${card.value}</span>`);
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la <span class='lpu'>🐜 Zecca</span>: <span class='ld'>-${card.value}</span> — zecca rimossa`,'damage');
     spawnFloat(`-${card.value}`,'red');shakeScreen();playSound('hit');vibrate([80]);
-    await dbUpdate(`rooms/${G.roomId}`,{tickCard:null,...postUpdates});
+    await dbUpdate(`rooms/${G.roomId}`,{tickCard:null,...postUpd});
     await checkWin(await dbGet(`rooms/${G.roomId}`));
     await proceedAfterCard(state,activePid);return;
   }
   if(card.badge==='viper'){
-    await dbUpdate(`rooms/${G.roomId}`,{[`players/${activePid}/hp`]:0,[`players/${activePid}/alive`]:false,'activePowerups/viper':null,...postUpdates});
-    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la <span class='lpu'>🐍 Vipera</span>: <span class='ld'>ELIMINATO!</span>`);
+    triggerAnim('viper');
+    await dbUpdate(`rooms/${G.roomId}`,{[`players/${activePid}/hp`]:0,[`players/${activePid}/alive`]:false,'activePowerups/viper':null,...postUpd});
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> cade nella <span class='lpu'>🐍 Vipera</span>: <span class='ld'>ELIMINATO!</span>`,'elim');
     triggerEliminationAnim(players[activePid]?.name||'?');
     await checkWin(await dbGet(`rooms/${G.roomId}`));
     await proceedAfterCard(state,activePid);return;
   }
-  if(card.badge==='lizard'){
+  if(card.badge==='revival'){
+    // Camaleonte revival
     const elim=Object.entries(players).filter(([_,p])=>!p.alive);
     if(elim.length>0){
       const [rpid,rp]=elim[rnd(0,elim.length-1)];
-      await dbUpdate(`rooms/${G.roomId}`,{[`players/${rpid}/hp`]:card.value,[`players/${rpid}/alive`]:true,lizardUsed:true,'activePowerups/lizard':null,...postUpdates});
-      addLog(`<span class='lpu'>🦎 Lucertola</span>: <span class='lp'>${rp.name}</span> risorge con <span class='lh'>+${card.value}</span> HP!`);
+      triggerAnim('chameleon',{revivedName:rp.name});
+      await dbUpdate(`rooms/${G.roomId}`,{[`players/${rpid}/hp`]:card.value,[`players/${rpid}/alive`]:true,chameleonUsed:true,'activePowerups/chameleon':null,...postUpd});
+      addLog(`<span class='lpu'>🦎 Camaleonte</span>: <span class='lp'>${rp.name}</span> risorge con <span class='lh'>+${card.value}</span> HP!`,'heal');
       spawnFloat(`+${card.value}`,'green');playSound('heal');
-    }else{if(Object.keys(postUpdates).length)await dbUpdate(`rooms/${G.roomId}`,postUpdates);}
+    }else{if(Object.keys(postUpd).length)await dbUpdate(`rooms/${G.roomId}`,postUpd);}
     await proceedAfterCard(state,activePid);return;
   }
   if(card.badge==='butterfly'){
     const owner=state.butterflyOwner;
     if(owner&&players[owner]?.alive){
+      triggerAnim('butterfly');
       await applyHpFresh(owner,card.value);
-      addLog(`<span class='lpu'>🦋 Farfalla</span>: <span class='lp'>${players[owner]?.name}</span> guadagna <span class='lh'>+${card.value}</span> HP`);
+      addLog(`<span class='lpu'>🦋 Farfalla</span>: <span class='lp'>${players[owner]?.name}</span> guadagna <span class='lh'>+${card.value}</span> HP`,'heal');
       spawnFloat(`+${card.value}`,'green');playSound('heal');
     }
-    if(Object.keys(postUpdates).length)await dbUpdate(`rooms/${G.roomId}`,postUpdates);
+    if(Object.keys(postUpd).length)await dbUpdate(`rooms/${G.roomId}`,postUpd);
     await proceedAfterCard(state,activePid);return;
   }
 
-  // ── Normal card ──────────────────────────────────────────────
+  // ── Normal card ──────────────────────────────────────────────────
   let target=card.assignedTo;
   let dmg=card.value;
   let dmgType='damage';
 
-  // Crocodile: attacker cannot hit crocodile owner
+  // Crocodile block
   if(pu.crocodile?.owner&&target===pu.crocodile.owner&&activePid!==pu.crocodile.owner){
     toast(`🐊 Coccodrillo! Non puoi colpire ${players[pu.crocodile.owner]?.name}! Scelta annullata.`);
     _cardLocked=false;G.pendingConfirm=false;
@@ -1537,64 +1538,64 @@ async function resolveCard(card,state){
     return;
   }
 
-  // FIX: Bug shield — reflect damage back to attacker
+  // Bug reflect
   let bugReflect=false;
   if(players[target]?.activeBug&&target!==activePid){
     bugReflect=true;target=activePid;
     await dbUpdate(`rooms/${G.roomId}`,{[`players/${card.assignedTo}/activeBug`]:false});
+    triggerAnim('bug');
   }
 
-  // FIX: Dolphin shield — block incoming damage for dolphin owner
+  // Dolphin shield
   const realTarget=bugReflect?activePid:card.assignedTo;
   if(players[realTarget]?.dolphinShield&&dmgType==='damage'&&!bugReflect){
     const sName=players[realTarget]?.name||'?';
-    addLog(`<span class='lpu'>🐬 Delfino</span>: il danno a <span class='lp'>${sName}</span> è bloccato!`);
+    addLog(`<span class='lpu'>🐬 Delfino</span>: danno su <span class='lp'>${sName}</span> bloccato!`,'system');
     toast(`🐬 Delfino! ${sName} ha bloccato il danno!`);
-    await dbUpdate(`rooms/${G.roomId}`,{[`players/${realTarget}/dolphinShield`]:false,...postUpdates});
+    await dbUpdate(`rooms/${G.roomId}`,{[`players/${realTarget}/dolphinShield`]:false,...postUpd});
     await clearAfterPU(pu);
     G.sessionStats.turnsPlayed++;
     await proceedAfterCard(state,activePid);return;
   }
 
-  // Apply modifiers
-  if(pu.bull)      dmg=Math.min(99999,dmg*2);
-  if(pu.turtle)    dmg=Math.ceil(dmg/2);
-  if(pu.koala)     dmgType='heal';
-  if(pu.chameleon) dmgType='set';
-  if(pu.hedgehog)  dmgType='all';
+  // Modifiers
+  if(pu.bull){dmg=Math.min(99999,dmg*2);triggerAnim('bull');}
+  if(pu.turtle)dmg=Math.ceil(dmg/2);
+  if(pu.koala){dmgType='heal';triggerAnim('koala');}
+  if(pu.hedgehog){dmgType='all';triggerAnim('hedgehog');}
   if(pu.deer){
-    dmgType='all';
+    dmgType='all';triggerAnim('deer');
     const normal=(state.cards||[]).filter(c=>!c.badge);
-    if(normal.length>0) dmg=normal[rnd(0,normal.length-1)].value;
+    if(normal.length>0)dmg=normal[rnd(0,normal.length-1)].value;
   }
 
-  // Build reveal texts
   const tName=players[target]?.name||'???';
   const aName=players[activePid]?.name||'???';
   let icon,title,desc,dmgClass='red';
 
-  if(bugReflect){icon='🐛';title='CIMICE! RIFLESSO';desc=`${aName} ha tentato di colpire ${players[card.assignedTo]?.name}, ma la Cimice ha riflesso il danno!`;}
-  else if(dmgType==='all'){icon=pu.deer?'🦌':'🦔';title=pu.deer?'CERVO!':'RICCIO!';desc=`${aName} infligge ${dmg} a TUTTI!`;}
-  else if(dmgType==='heal'){icon='💚';title='KOALA!';desc=`${aName} cura ${tName} di ${dmg} HP`;dmgClass='green';}
-  else if(dmgType==='set'){icon='🦎';title='CAMALEONTE!';desc=`Vita di ${tName} impostata a ${dmg}${dmg===0?' — ELIMINATO!':''}`;dmgClass='gold';}
-  else{icon=dmg>=80?'💥':'⚔️';title=dmg>=80?'COLPO CRITICO!':`HAI COLPITO ${tName.toUpperCase()}!`;
-    desc=`${aName} infligge ${dmg} danni a ${tName}${pu.bull?' (×2 Toro!)':pu.turtle?' (÷2 Tartaruga!)':''}${bugReflect?' 🐛 riflesso!':''}`;}
+  if(bugReflect){icon='🐛';title='CIMICE! DANNO RIFLESSO';desc=`${aName} voleva colpire ${players[card.assignedTo]?.name} ma il danno è stato riflesso!`;dmgClass='red';}
+  else if(dmgType==='all'){icon=pu.deer?'🦌':'🦔';title=pu.deer?'CERVO! DANNI A TUTTI!':'RICCIO! DANNI A TUTTI!';desc=`${aName} infligge ${dmg} a TUTTI i giocatori vivi!`;}
+  else if(dmgType==='heal'){icon='💚';title='KOALA! CURA!';desc=`${aName} cura ${tName} di ${dmg} HP`;dmgClass='green';}
+  else{
+    icon=dmg>=80?'💥':'⚔️';title=dmg>=80?'COLPO CRITICO!':`COLPITO: ${tName.toUpperCase()}!`;
+    desc=`${aName} infligge ${dmg} danni a ${tName}${pu.bull?' (Toro ×2!)':pu.turtle?' (Tartaruga ÷2!)':''}${bugReflect?' [🐛 riflesso]':''}`;
+  }
 
   showReveal(icon,title,desc,dmg,dmgClass,async()=>{
     if(dmgType==='all'){
-      const alive=Object.entries(players).filter(([_,p])=>p.alive).map(([id])=>id);
-      for(const apid of alive) await applyHpFresh(apid,-dmg);
+      const alivePs=Object.entries(players).filter(([_,p])=>p.alive).map(([id])=>id);
+      for(const apid of alivePs)await applyHpFresh(apid,-dmg);
       spawnFloat(`-${dmg} TUTTI`,'red');shakeScreen();playSound(dmg>=80?'crit':'hit');vibrate([100,40,100]);
-    }else if(dmgType==='set'){
-      const newHp=Math.max(0,dmg);
-      await dbUpdate(`rooms/${G.roomId}`,{[`players/${target}/hp`]:newHp,[`players/${target}/alive`]:newHp>0});
-      if(newHp===0)triggerEliminationAnim(players[target]?.name||'?');
-      spawnFloat(`=${dmg}`,'gold');
     }else{
       await applyHpFresh(target,dmgType==='heal'?dmg:-dmg);
-      // FIX: Armadillo — fetch fresh HP before self-damage to avoid stale state bug
       if(pu.armadillo&&dmgType!=='heal'){
-        await applyHpFresh(activePid,-dmg);
+        // RULE FIX: if self-target, double damage
+        if(target===activePid){
+          await applyHpFresh(activePid,-dmg); // extra hit for self-target
+        }else{
+          await applyHpFresh(activePid,-dmg);
+        }
+        triggerAnim('armadillo');
       }
       if(pu.ram&&dmgType==='damage'){
         const ord=state.playerOrder||[];
@@ -1605,10 +1606,12 @@ async function resolveCard(card,state){
         if(half>0){
           if(players[prev]?.alive&&prev!==target)await applyHpFresh(prev,-half);
           if(players[next]?.alive&&next!==target)await applyHpFresh(next,-half);
+          triggerAnim('ram');
         }
       }
       if(pu.spider&&target!==activePid&&dmgType==='damage'){
         await dbUpdate(`rooms/${G.roomId}`,{[`players/${target}/skipNext`]:true});
+        triggerAnim('spider');
       }
       const isHeal=dmgType==='heal';
       spawnFloat(`${isHeal?'+':'-'}${dmg}`,isHeal?'green':'red');
@@ -1617,14 +1620,17 @@ async function resolveCard(card,state){
       G.sessionStats.dmgDealt+=dmg;
       if(dmg>G.sessionStats.highCard)G.sessionStats.highCard=dmg;
     }
-    const logCls=dmgType==='heal'?'lh':'ld';
-    const sym=dmgType==='heal'?'+':dmgType==='set'?'=':'-';
-    addLog(`<span class='lp'>${players[activePid]?.name}</span> → ${dmgType==='all'?'tutti':players[target]?.name}: <span class='${logCls}'>${sym}${dmg}</span>`);
+    const lc=dmgType==='heal'?'lh':'ld';
+    const sym=dmgType==='heal'?'+':'-';
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> → ${dmgType==='all'?'TUTTI':players[target]?.name}: <span class='${lc}'>${sym}${dmg}</span>${bugReflect?' 🐛':''}`,dmgType==='heal'?'heal':'damage');
 
     await clearAfterPU(pu);
-    if(Object.keys(postUpdates).length)await dbUpdate(`rooms/${G.roomId}`,postUpdates);
-
+    if(Object.keys(postUpd).length)await dbUpdate(`rooms/${G.roomId}`,postUpd);
     G.sessionStats.turnsPlayed++;
+
+    // Bear: track first target
+    if(G.bearMode&&G.bearCardsChosen===0)G.bearFirstTarget=card.assignedTo;
+
     const fresh=await dbGet(`rooms/${G.roomId}`);
     await checkWin(fresh);
     await proceedAfterCard(fresh,activePid);
@@ -1632,11 +1638,10 @@ async function resolveCard(card,state){
   });
 }
 
-// FIX: applyHpFresh — always fetches current HP from DB (no stale state bug)
 async function applyHpFresh(pid,delta){
   const p=await dbGet(`rooms/${G.roomId}/players/${pid}`);
   if(!p||!p.alive)return;
-  const newHp=Math.max(0,Math.min(p.maxHp||9999,p.hp+delta));
+  const newHp=Math.max(0,Math.min(p.maxHp||99999,p.hp+delta));
   const alive=newHp>0;
   await dbUpdate(`rooms/${G.roomId}`,{[`players/${pid}/hp`]:newHp,[`players/${pid}/alive`]:alive});
   if(!alive)triggerEliminationAnim(p.name||'?');
@@ -1644,23 +1649,20 @@ async function applyHpFresh(pid,delta){
   if(el){el.classList.add(delta>0?'healed':'hit');setTimeout(()=>el.classList.remove('healed','hit'),600);}
 }
 
-// Clear "after" powerup effects
 async function clearAfterPU(pu){
-  const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','chameleon','spider','viper','donkey','crocodile'];
+  const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','viper','donkey','crocodile'];
   const upd={};afters.forEach(id=>{if(pu[id])upd[`activePowerups/${id}`]=null;});
   if(Object.keys(upd).length)await dbUpdate(`rooms/${G.roomId}`,upd);
 }
 
-// ── Reveal modal ───────────────────────────────────────────────
+// ══ Reveal modal ══════════════════════════════════════════════════
 function showReveal(icon,title,desc,dmg,dmgClass,onClose){
   document.getElementById('reveal-icon').textContent=icon;
   document.getElementById('reveal-title').textContent=title;
   document.getElementById('reveal-desc').textContent=desc;
   const dmgEl=document.getElementById('reveal-dmg');
-  if(dmg!==undefined){
-    dmgEl.style.display='block';dmgEl.className=`reveal-dmg ${dmgClass}`;
-    dmgEl.textContent=`${dmgClass==='red'?'-':dmgClass==='green'?'+':'='}${dmg}`;
-  }else{dmgEl.style.display='none';}
+  if(dmg!==undefined){dmgEl.style.display='block';dmgEl.className=`reveal-dmg ${dmgClass}`;dmgEl.textContent=`${dmgClass==='red'?'-':dmgClass==='green'?'+':'='}${dmg}`;}
+  else{dmgEl.style.display='none';}
   document.getElementById('overlay-reveal')._cb=onClose;
   showOverlay('overlay-reveal');
 }
@@ -1670,35 +1672,40 @@ function closeReveal(){
   if(cb)cb();
 }
 
-// ── Proceed after card (handles Bear 2nd pick) ─────────────────
+// ══ Bear: proceed with 2 picks ════════════════════════════════════
 async function proceedAfterCard(state,activePid){
   G.pendingConfirm=false;_cardLocked=false;
 
-  // FIX: Bear mode — allow second card pick
+  // Bear mode: allow 2nd pick if first done
   if(G.bearMode&&G.bearCardsChosen===0){
     G.bearCardsChosen=1;
-    // Clear bear power from DB so it doesn't re-trigger
+    triggerAnim('bear');
     await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/bear':null});
     const fresh=await dbGet(`rooms/${G.roomId}`);
-    if(fresh&&fresh.status==='playing'){renderCards(fresh,true,null);}
+    if(fresh&&fresh.status==='playing')renderCards(fresh,true,null);
     return;
   }
 
-  // Reset all turn-specific flags
-  G.bearMode=false;G.bearCardsChosen=0;
+  const wasFoxPlay=G.foxMode;
+  G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;
   G.foxMode=false;G.foxTargetPid=null;
   G.masterOverrideActive=false;G.masterOverridePid=null;
 
   const fresh=await dbGet(`rooms/${G.roomId}`);
   if(!fresh||fresh.status!=='playing')return;
-  await showPuChoice(fresh,activePid);
+  if(wasFoxPlay){
+    addLog(`<span class='lpu'>🦊 Volpe</span>: turno passato al prossimo giocatore`,'system');
+    await nextTurn(fresh);
+  }else{
+    await showPuChoice(fresh,activePid);
+  }
 }
 
-// ── Powerup choice — FIX: unique 3 PUs, no duplicates ─────────
+// ══ PU choice — RULE: Owl blocks, unique 3 PUs ═══════════════════
 async function showPuChoice(state,activePid){
   if(state.activePowerups?.owl){
-    addLog(`<span class='lpu'>🦉 Gufo</span>: <span class='lp'>${state.players?.[activePid]?.name}</span> non può usare poteri.`);
-    toast('🦉 Gufo! Non puoi usare poteri questo turno.');
+    addLog(`<span class='lpu'>🦉 Gufo</span>: <span class='lp'>${state.players?.[activePid]?.name}</span> non può usare poteri.`,'system');
+    toast('🦉 Gufo! Nessun potere questo turno.');
     await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/owl':null});
     await nextTurn(state);return;
   }
@@ -1706,17 +1713,33 @@ async function showPuChoice(state,activePid){
   document.getElementById('confirm-row').style.display='flex';
   G.selectedPU=null;
   const enabled=POWERUPS.filter(p=>state.puEnabled?.[p.id]!==false);
-  // FIX: shuffle and slice for unique 3
-  const shuffled=[...enabled].sort(()=>Math.random()-.5);
-  const chosen=shuffled.slice(0,Math.min(3,shuffled.length));
+  const chosen=[...enabled].sort(()=>Math.random()-.5).slice(0,Math.min(3,enabled.length));
   const grid=document.getElementById('pu-grid');grid.innerHTML='';
   chosen.forEach(pu=>{
+    const th=PU_THEMES[pu.id]||{bg:'linear-gradient(160deg,#0e0e1e,#1a1a2e)',glow:'#c0c0c0',accent:'#e0e0e0'};
     const div=document.createElement('div');div.className='pu-choice';
-    div.innerHTML=`<div class="pu-icon-big">${pu.icon}</div><div class="pu-choice-name">${pu.name}</div><div class="pu-choice-desc">${pu.desc}</div>`;
+    div.style.cssText=`background:${th.bg};border:2px solid ${th.glow}50;box-shadow:0 8px 30px rgba(0,0,0,.7)`;
+    div.innerHTML=`
+      <div class="puc-art-zone" style="background:radial-gradient(ellipse 120% 100% at 50% 40%,${th.glow}40 0%,transparent 70%)">
+        <div class="puc-icon" style="filter:drop-shadow(0 0 18px ${th.glow}) drop-shadow(0 0 35px ${th.glow}60)">${pu.icon}</div>
+      </div>
+      <div class="puc-band" style="background:linear-gradient(180deg,transparent,rgba(0,0,0,.9) 30%)">
+        <div class="puc-name" style="color:${th.accent};text-shadow:0 0 14px ${th.glow}">${pu.name.toUpperCase()}</div>
+        <div class="puc-desc">${pu.desc}</div>
+      </div>
+      <div class="puc-corner" style="color:${th.accent}">${pu.icon}</div>
+      <div class="puc-shine"></div>
+    `;
+    div.addEventListener('mouseenter',()=>{div.style.transform='perspective(600px) rotateY(-6deg) rotateX(3deg) scale(1.05)';div.style.boxShadow=`0 16px 50px rgba(0,0,0,.8),0 0 30px ${th.glow}60`;div.style.borderColor=`${th.glow}90`;});
+    div.addEventListener('mouseleave',()=>{if(!div.classList.contains('chosen')){div.style.transform='';div.style.boxShadow=`0 8px 30px rgba(0,0,0,.7)`;div.style.borderColor=`${th.glow}50`;}});
     div.addEventListener('click',()=>{
-      playSound('flip');
-      document.querySelectorAll('.pu-choice').forEach(c=>c.classList.remove('chosen'));
-      div.classList.add('chosen');G.selectedPU=pu;
+      playSound('flip');vibrate([40]);
+      document.querySelectorAll('.pu-choice').forEach(c=>{c.classList.remove('chosen');c.style.transform='';c.style.boxShadow=`0 8px 30px rgba(0,0,0,.7)`;});
+      div.classList.add('chosen');
+      div.style.transform='perspective(600px) scale(1.07) translateY(-4px)';
+      div.style.boxShadow=`0 20px 60px rgba(0,0,0,.9),0 0 50px ${th.glow}70`;
+      div.style.borderColor=`${th.glow}`;
+      G.selectedPU=pu;
     });
     grid.appendChild(div);
   });
@@ -1727,7 +1750,8 @@ async function confirmPowerup(){
   const state=await dbGet(`rooms/${G.roomId}`);if(!state)return;
   const activePid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
   await activatePu(pu,state,activePid);
-  addLog(`<span class='lp'>${state.players?.[activePid]?.name}</span> attiva <span class='lpu'>${pu.icon} ${pu.name}</span>`);
+  triggerAnim(pu.id,{});
+  addLog(`<span class='lp'>${state.players?.[activePid]?.name}</span> attiva <span class='lpu'>${pu.icon} ${pu.name}</span>`,'powerup');
   playSound('pu');vibrate([40,20,40]);G.sessionStats.puUsed++;
   hidePuSection();await nextTurn(state);
 }
@@ -1740,7 +1764,7 @@ function hidePuSection(){
   document.getElementById('confirm-row').style.display='none';
 }
 
-// ── Activate powerup ───────────────────────────────────────────
+// ══ Activate PU ══════════════════════════════════════════════════
 async function activatePu(pu,state,pid){
   const ord=state.playerOrder||[];
   const alive=ord.filter(p=>state.players?.[p]?.alive);
@@ -1751,41 +1775,59 @@ async function activatePu(pu,state,pid){
 
   switch(pu.id){
     case 'eagle':    upd['activePowerups/eagle']={owner:pid,reveal:ord[rnd(0,ord.length-1)]}; break;
-    case 'rat':      upd['activePowerups/rat']={owner:pid}; break;
+    case 'rat':
+      if(state.activePowerups?.rat){toast('🐭 Topo già attivo!');return;}
+      upd['activePowerups/rat']={owner:pid};
+      break;
     case 'kangaroo': upd['activePowerups/kangaroo']={target:nextPid}; break;
-    case 'cheetah':  upd['activePowerups/cheetah']={target:nextPid}; break;
-    case 'bear':     upd['activePowerups/bear']={owner:pid}; break;
+    case 'cheetah':
+      if(state.activePowerups?.cheetah){toast('🐆 Ghepardo già attivo!');return;}
+      upd['activePowerups/cheetah']={owner:pid};
+      break;
+    case 'bear':     upd['activePowerups/bear']={owner:pid,target:nextPid}; break;
     case 'owl':      upd['activePowerups/owl']={target:nextPid}; break;
     case 'fox':      upd['activePowerups/fox']={owner:pid,target:nextPid}; break;
-    case 'dolphin':
-      upd['direction']=state.direction*-1;
-      upd[`players/${pid}/dolphinShield`]=true;
-      break;
     case 'shark':{
       const thresh=(state.initialHp||1000)*.15;
+      const victims=[];
       Object.entries(state.players||{}).forEach(([spid,sp])=>{
-        if(sp.alive&&sp.hp<thresh&&spid!==pid){upd[`players/${spid}/alive`]=false;upd[`players/${spid}/hp`]=0;}
+        if(sp.alive&&sp.hp<thresh&&spid!==pid){upd[`players/${spid}/alive`]=false;upd[`players/${spid}/hp`]=0;victims.push(sp.name);}
       });
-      toast(`🦈 Squalo! Eliminati tutti sotto ${Math.round(thresh)} HP!`);
+      triggerAnim('shark',{victims});
+      toast(`🦈 Squalo! ${victims.length?victims.join(', ')+' eliminati!':'Nessuno eliminato.'}`);
       break;
     }
     case 'bug':      upd[`players/${pid}/activeBug`]=true; break;
     case 'crocodile':upd['activePowerups/crocodile']={owner:pid}; break;
-    case 'tick':     upd['tickCard']={id:'tick-special',value:rnd(0,100),badge:'tick',assignedTo:'tick'}; break;
+    case 'tick':
+      if(state.tickCard){toast('🐜 Zecca già attiva!');return;}
+      upd['tickCard']={id:'tick-special',value:rnd(0,100),badge:'tick',assignedTo:'tick'};
+      triggerAnim('tick');
+      break;
     case 'rhino':    upd['activePowerups/rhino']={target:nextPid}; break;
     case 'butterfly':{
+      triggerAnim('butterfly');
       const bc={};
       alive.forEach((apid,i)=>{bc['bc'+i]={id:'bc'+i,value:rnd(0,100),assignedTo:apid,assignedName:state.players?.[apid]?.name,badge:'butterfly'};});
       upd['butterflyActive']=true;upd['butterflyOwner']=pid;upd['butterflyCards']=bc;
       break;
     }
-    case 'viper':    upd['activePowerups/viper']={value:rnd(0,100)}; break;
+    case 'viper':
+      if(state.activePowerups?.viper){toast('🐍 Vipera già attiva!');return;}
+      upd['activePowerups/viper']={value:rnd(0,100)};
+      break;
+    case 'chameleon':{
+      const v=rnd(30,80);
+      upd['activePowerups/chameleon']={value:v};
+      break;
+    }
     case 'walrus':{
+      triggerAnim('walrus');
       const en=[...POWERUPS.filter(p=>state.puEnabled?.[p.id]!==false)].sort(()=>Math.random()-.5);
       const p1=en[0],p2=en[1]||en[0];
       upd[`activePowerups/${p1.id}`]={target:prevPid,fromWalrus:true};
       upd[`activePowerups/${p2.id}`]={target:nextPid,fromWalrus:true};
-      toast(`🦭 Tricheco! ${p1.icon}${p1.name}→${state.players?.[prevPid]?.name} | ${p2.icon}${p2.name}→${state.players?.[nextPid]?.name}`);
+      toast(`🦭 Tricheco! ${p1.icon}${p1.name} → ${state.players?.[prevPid]?.name} | ${p2.icon}${p2.name} → ${state.players?.[nextPid]?.name}`);
       break;
     }
     default: upd[`activePowerups/${pu.id}`]={target:nextPid,value:rnd(0,100)};
@@ -1793,7 +1835,7 @@ async function activatePu(pu,state,pid){
   if(Object.keys(upd).length)await dbUpdate(`rooms/${G.roomId}`,upd);
 }
 
-// ── Next Turn ──────────────────────────────────────────────────
+// ══ Next turn ════════════════════════════════════════════════════
 async function nextTurn(state){
   hidePuSection();
   const fresh=await dbGet(`rooms/${G.roomId}`);if(!fresh)return;
@@ -1805,28 +1847,28 @@ async function nextTurn(state){
   let nextPid=alive[idx];
   const upd={};
 
-  // FIX: Rat — clear when rat owner's turn arrives again
+  // Ghepardo clears when owner's turn comes back
+  if(fresh.activePowerups?.cheetah?.owner===nextPid){
+    upd['activePowerups/cheetah']=null;toast('🐆 Ghepardo scaduto!');
+  }
+  // RULE FIX: Rat clears when activator's turn comes back
   if(fresh.activePowerups?.rat?.owner===nextPid){
-    upd['activePowerups/rat']=null;
-    toast('🐭 Topo scaduto — carte visibili!');
+    upd['activePowerups/rat']=null;toast('🐭 Topo scaduto!');
   }
-
-  // FIX: Butterfly — clear when butterfly owner's turn arrives
+  // Butterfly clears when owner's turn comes back
   if(fresh.butterflyActive&&fresh.butterflyOwner===nextPid){
-    upd['butterflyActive']=false;upd['butterflyCards']=null;upd['butterflyOwner']=null;
-    toast('🦋 Farfalla scaduta!');
+    upd['butterflyActive']=false;upd['butterflyCards']=null;upd['butterflyOwner']=null;toast('🦋 Farfalla scaduta!');
   }
 
-  // Kangaroo skip
+  // Kangaroo: skip
   if(fresh.activePowerups?.kangaroo?.target===nextPid){
-    toast(`🦘 Canguro! ${fresh.players?.[nextPid]?.name} salta il turno!`);
+    toast(`🦘 ${fresh.players?.[nextPid]?.name} salta il turno!`);
     upd['activePowerups/kangaroo']=null;
     idx=(idx+1)%alive.length;nextPid=alive[idx];
   }
-
   // Spider skipNext
   if(fresh.players?.[nextPid]?.skipNext){
-    toast(`🕷️ Ragno! ${fresh.players[nextPid]?.name} salta il turno.`);
+    toast(`🕷️ ${fresh.players[nextPid]?.name} salta il turno.`);
     upd[`players/${nextPid}/skipNext`]=false;
     idx=(idx+1)%alive.length;nextPid=alive[idx];
   }
@@ -1834,36 +1876,72 @@ async function nextTurn(state){
   // Generate new cards
   let cards=generateCards(fresh.players,fresh.mode);
 
-  // Tick: update value each turn
+  // RULE FIX: Zecca auto-damages the NEXT active player at turn start
   let tickCard=fresh.tickCard;
-  if(tickCard)tickCard={...tickCard,value:rnd(0,100)};
-
-  // Rhino: apply all-card damage before the turn starts
-  if(fresh.activePowerups?.rhino?.target===nextPid){
-    const totalDmg=(cards||[]).reduce((s,c)=>s+c.value,0);
-    upd['activePowerups/rhino']=null;
-    // Apply immediately
-    const p=fresh.players?.[nextPid];
-    if(p?.alive){
-      const newHp=Math.max(0,p.hp-totalDmg);
-      upd[`players/${nextPid}/hp`]=newHp;upd[`players/${nextPid}/alive`]=newHp>0;
-      if(newHp===0)triggerEliminationAnim(p.name||'?');
+  if(tickCard){
+    const newVal=rnd(0,100);
+    tickCard={...tickCard,value:newVal};
+    // Auto damage to nextPid
+    const np=fresh.players?.[nextPid];
+    if(np?.alive){
+      const newHp=Math.max(0,np.hp-newVal);
+      upd[`players/${nextPid}/hp`]=newHp;
+      upd[`players/${nextPid}/alive`]=newHp>0;
+      if(newHp===0)setTimeout(()=>triggerEliminationAnim(np.name||'?'),300);
+      // Anim + log will be triggered in renderState via flag
+      upd['_zeckaPendingDmg']={target:nextPid,dmg:newVal};
     }
-    addLog(`<span class='lpu'>🦏 Rinoceronte!</span> <span class='lp'>${fresh.players?.[nextPid]?.name}</span> subisce tutte le carte: <span class='ld'>-${totalDmg}</span>`);
-    shakeScreen();playSound('crit');vibrate([100,50,100,50,100]);
+  }
+
+  // Rhino: all cards damage before turn
+  if(fresh.activePowerups?.rhino?.target===nextPid){
+    const total=(cards||[]).reduce((s,c)=>s+c.value,0);
+    upd['activePowerups/rhino']=null;
+    const np=fresh.players?.[nextPid];
+    if(np?.alive){
+      const newHp=Math.max(0,np.hp-total);
+      upd[`players/${nextPid}/hp`]=newHp;upd[`players/${nextPid}/alive`]=newHp>0;
+      if(newHp===0)setTimeout(()=>triggerEliminationAnim(np.name||'?'),400);
+    }
+    addLog(`<span class='lpu'>🦏 Rinoceronte!</span> <span class='lp'>${fresh.players?.[nextPid]?.name}</span> subisce tutte le carte: <span class='ld'>-${total}</span>`,'damage');
+    setTimeout(()=>{triggerAnim('rhino');shakeScreen();playSound('crit');vibrate([100,50,100,50,100]);},200);
   }
 
   await dbUpdate(`rooms/${G.roomId}`,{
-    cards,currentTurnIndex:idx,
-    turnCount:(fresh.turnCount||0)+1,
+    cards,currentTurnIndex:idx,turnCount:(fresh.turnCount||0)+1,
     ...(tickCard?{tickCard}:{}),
     ...upd,
   });
   clearTimer();
-  // Reset local turn flags
   G.foxMode=false;G.foxTargetPid=null;
   G.masterOverrideActive=false;G.masterOverridePid=null;
-  G.bearMode=false;G.bearCardsChosen=0;
+  G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;
+}
+
+// Render zecca damage notification when state arrives (from _zeckaPendingDmg)
+let _lastZeckaPending=null;
+function tickDamageAnim(dmg){
+  const f=document.createElement('div');f.className='zecca-flash';document.body.appendChild(f);
+  setTimeout(()=>f.remove(),900);
+  spawnFloat(`🐜 -${dmg}`,'red');
+  playSound('zecca');vibrate([80,40,80]);
+}
+function checkZeckaDmg(state){
+  const z=state._zeckaPendingDmg;
+  if(!z)return;
+  const key=`${z.target}_${z.dmg}_${state.turnCount||0}`;
+  if(_lastZeckaPending===key)return;
+  _lastZeckaPending=key;
+  const pName=state.players?.[z.target]?.name||'?';
+  const isMe=z.target===G.playerId;
+  if(isMe||G.isSpectator){
+    tickDamageAnim(z.dmg);
+    addLog(`<span class='lpu'>🐜 Zecca</span>: <span class='lp'>${pName}</span> subisce <span class='ld'>-${z.dmg}</span> danni automatici`,'damage');
+  }
+  // Clear the pending flag from DB
+  if(G.isMaster||isMe){
+    dbUpdate(`rooms/${G.roomId}`,{_zeckaPendingDmg:null});
+  }
 }
 
 async function checkWin(state){
@@ -1872,7 +1950,7 @@ async function checkWin(state){
   if(alive.length<=1)await dbUpdate(`rooms/${G.roomId}`,{status:'gameover',winner:alive[0]?alive[0][0]:null});
 }
 
-// ── Timer ──────────────────────────────────────────────────────
+// ══ Timer ═════════════════════════════════════════════════════════
 const CIRC=119.4;
 function startTimer(secs,onExpire){
   clearTimer();G.timerSec=secs;G.timerActive=true;
@@ -1892,29 +1970,29 @@ function startTimer(secs,onExpire){
 }
 function clearTimer(){clearTimeout(G.timerTO);G.timerActive=false;}
 
-// ── Log render ─────────────────────────────────────────────────
+// ══ Log ═══════════════════════════════════════════════════════════
 function renderLog(log){
   const list=document.getElementById('log-list');if(!list)return;
   if(!log){list.innerHTML='';return;}
   const entries=Array.isArray(log)?log:Object.values(log);
-  list.innerHTML=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,30).map(e=>`<div class="log-entry">${e.html||''}</div>`).join('');
+  list.innerHTML=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,40).map(e=>`<div class="log-entry ${e.type||'system'}">${e.html||''}</div>`).join('');
 }
 
-// ── Master override ────────────────────────────────────────────
+// ══ Master override ═══════════════════════════════════════════════
 async function masterPlayForCurrent(){
   const state=await dbGet(`rooms/${G.roomId}`);if(!state)return;
   const ord=state.playerOrder||[];
   const alive=ord.filter(p=>state.players?.[p]?.alive);
-  const currentPid=alive[state.currentTurnIndex%alive.length];
-  if(!currentPid)return;
-  G.masterOverrideActive=true;G.masterOverridePid=currentPid;
-  toast(`⚡ Stai giocando per ${state.players[currentPid]?.name}`);
+  const cpid=alive[state.currentTurnIndex%alive.length];
+  if(!cpid)return;
+  G.masterOverrideActive=true;G.masterOverridePid=cpid;
+  toast(`⚡ Giochi per ${state.players[cpid]?.name}`);
   renderState(state);
 }
 
-// ── Game Over ──────────────────────────────────────────────────
+// ══ Game over ═════════════════════════════════════════════════════
 function showGameOver(state){
-  if(G._gameoverShown)return; G._gameoverShown=true;
+  if(G._gameoverShown)return;G._gameoverShown=true;
   showScreen('screen-gameover');clearTimer();dbUnsubAll();
   confetti();playSound('win');vibrate([100,50,100,50,200,50,300]);
   const winner=state.winner?state.players[state.winner]:null;
@@ -1944,14 +2022,14 @@ function showHistory(){
   showOverlay('overlay-history');
 }
 
-// ── Settings ───────────────────────────────────────────────────
+// ══ Settings ══════════════════════════════════════════════════════
 function showSettingsModal(){
   document.getElementById('settings-content').innerHTML=G.isMaster?`
     <button class="modal-btn" onclick="openPuManager()">🐾 Gestione Poteri</button>
     <button class="modal-btn" onclick="closeOverlay('overlay-settings');showOverlay('overlay-restart')">🔄 Riavvia Partita</button>
     <button class="modal-btn danger" onclick="endGameNow()">⛔ Termina Partita</button>
     <button class="modal-btn" onclick="reshowQR()">📷 Mostra QR Code</button>`
-    :`<p style="color:var(--muted);font-size:13px;text-align:center;padding:10px 0">Solo il Master può modificare le impostazioni.</p>`;
+    :`<p style="color:var(--muted);font-size:13px;text-align:center;padding:10px 0">Solo il Master può modificare.</p>`;
   showOverlay('overlay-settings');
 }
 function openPuManager(){
@@ -1970,16 +2048,16 @@ async function doRestart(){
   const hp=parseInt(document.getElementById('restart-hp').value)||1000;
   const room=await dbGet(`rooms/${G.roomId}`);if(!room)return;
   const players={};
-  Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false,dolphinShield:false};});
+  Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false};});
   const cards=generateCards(players,room.mode);
-  await dbUpdate(`rooms/${G.roomId}`,{status:'playing',players,cards,currentTurnIndex:0,turnCount:1,activePowerups:{},log:{},tickCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,lizardUsed:false,initialHp:hp});
+  await dbUpdate(`rooms/${G.roomId}`,{status:'playing',players,cards,currentTurnIndex:0,turnCount:1,activePowerups:{},log:{},tickCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,chameleonUsed:false,initialHp:hp,_zeckaPendingDmg:null});
   G._gameoverShown=false;closeOverlay('overlay-restart');
 }
 function reshowQR(){closeOverlay('overlay-settings');showLobby(G.roomId,{});}
-function restartGame(){if(G.isMaster)showOverlay('overlay-restart');else toast('Solo il Master può riavviare');}
-function goHome(){G._gameoverShown=false;showScreen('screen-home');}
+function restartGame(){if(G.isMaster)showOverlay('overlay-restart');else toast('Solo il Master può riavviare.');}
+function goHome(){G._gameoverShown=false;dbUnsubAll();showScreen('screen-home');}
 
-// ── URL param join ─────────────────────────────────────────────
+// ══ URL join ══════════════════════════════════════════════════════
 window.addEventListener('firebase-ready',()=>{
   const r=new URLSearchParams(location.search).get('room');
   if(r){document.getElementById('join-code').value=r;showScreen('screen-join');}
