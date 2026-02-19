@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="dark">
 <title>FATALBEAST</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -30,6 +31,7 @@
 <style>
 /* ═══ VARIABLES ═══════════════════════════════════════════════════════ */
 :root {
+  color-scheme: dark;
   --bg0:#03040a; --bg1:#07090f; --bg2:#0b1019; --bg3:#101622; --bg4:#161e2e;
   --red:#8b1a1a; --red2:#c0392b; --red3:#ff4136;
   --gold:#c8922a; --gold2:#f0b040; --gold3:#ffe580;
@@ -603,7 +605,6 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
       </div>
     </div>
     <button class="btn btn-blood" id="join-btn" onclick="joinGame()" style="display:none">🎮 ENTRA</button>
-    <button class="btn btn-ghost btn-sm" onclick="joinAsSpectator()">👁 Entra come spettatore</button>
     <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-home')">← Indietro</button>
   </div>
 </div>
@@ -621,7 +622,8 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
       <div id="waiting-players" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="copyRoomLink()">🔗 Copia link stanza</button>
-    <button class="btn btn-blood" id="start-btn" onclick="startGame()">⚔️ AVVIA PARTITA</button>
+    <button class="btn btn-blood" id="start-btn" onclick="startGame()" style="display:none">⚔️ AVVIA PARTITA</button>
+    <div id="lobby-waiting-msg" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted);text-align:center;padding:8px 0;letter-spacing:1px">⏳ In attesa che il Master avvii la partita...</div>
   </div>
 </div>
 
@@ -709,12 +711,25 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
     <div class="go-winner-name" id="winner-name">—</div>
     <div class="stats-grid" id="stats-grid"></div>
     <div class="final-list" id="final-list"></div>
-    <button class="btn btn-blood" onclick="restartGame()" style="margin-top:8px">🔄 Rivincita</button>
+    <button class="btn btn-blood" onclick="restartGame()" style="margin-top:8px" id="go-restart-btn">🔄 Rivincita</button>
+    <div id="go-waiting-msg" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted);text-align:center;padding:8px 0;letter-spacing:1px">⏳ In attesa che il Master riavvii la partita...</div>
     <button class="btn btn-ghost btn-sm" onclick="goHome()">← Home</button>
   </div>
 </div>
 
 <!-- ══════════════ OVERLAYS ══════════════════════════════════════ -->
+
+<!-- QR Code overlay (in-game) -->
+<div class="overlay" id="overlay-qr">
+  <div class="modal" style="text-align:center;max-width:320px">
+    <div class="modal-title">📷 CODICE STANZA</div>
+    <div class="lobby-code" id="qr-overlay-code" style="margin-bottom:12px">----</div>
+    <div id="qr-overlay-container" style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:10px;width:fit-content;margin:0 auto 16px"></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">Inquadra per accedere alla partita</div>
+    <button class="btn btn-ghost btn-sm" onclick="copyRoomLink();toast('🔗 Link copiato!')">🔗 Copia Link</button>
+    <button class="modal-close" onclick="closeOverlay('overlay-qr')">Chiudi</button>
+  </div>
+</div>
 
 <!-- Reveal -->
 <div class="overlay" id="overlay-reveal">
@@ -1154,6 +1169,11 @@ async function createGame(){
 function showLobby(roomId,players){
   showScreen('screen-lobby');
   document.getElementById('room-code-display').textContent=roomId;
+  // Show/hide start button based on master role
+  const startBtn=document.getElementById('start-btn');
+  const waitMsg=document.getElementById('lobby-waiting-msg');
+  if(startBtn) startBtn.style.display=G.isMaster?'block':'none';
+  if(waitMsg) waitMsg.style.display=G.isMaster?'none':'block';
   const qrEl=document.getElementById('qr-container');qrEl.innerHTML='';
   const url=`${location.origin}${location.pathname}?room=${roomId}`;
   new QRCode(qrEl,{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff'});
@@ -1237,20 +1257,20 @@ function startPlayingScreen(){
   G.sessionStats={dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0};
   G.bearMode=false;G.foxMode=false;G.dogMode=false;G.dogPuCount=0;
   G.masterOverrideActive=false;G._shownAnims={};
-  let _lastStateKey='';let _renderPending=false;
+  let _lastStateKey='';let _renderPending=false;let _latestState=null;
   dbListen(`rooms/${G.roomId}`,state=>{
     if(!state)return;
     if(state.status==='gameover'){showGameOver(state);return;}
     checkZeckaDmg(state);
     checkLionDmg(state);
     if(G.pendingConfirm)return;
-    // Throttle: skip if state hasn't meaningfully changed
+    _latestState=state;
     const stateKey=`${state.currentTurnIndex}_${state.turnCount}_${JSON.stringify(state.activePowerups||{})}_${Object.values(state.players||{}).map(p=>`${p.hp}${p.alive?1:0}`).join(',')}`;
     if(stateKey===_lastStateKey&&!_renderPending)return;
     _lastStateKey=stateKey;
     if(_renderPending)return;
     _renderPending=true;
-    requestAnimationFrame(()=>{_renderPending=false;if(!G.pendingConfirm)renderState(state);});
+    requestAnimationFrame(()=>{_renderPending=false;if(!G.pendingConfirm&&_latestState)renderState(_latestState);});
   });
 }
 
@@ -1268,8 +1288,9 @@ function renderState(state){
   if(foxActive&&foxActive.target===currentPid&&foxActive.owner===G.playerId&&!G.foxMode){
     G.foxMode=true;G.foxTargetPid=currentPid;
   }
-  // Bear
-  if(pu.bear&&pu.bear.target===G.playerId&&isMyTurn&&!G.bearMode&&G.bearCardsChosen===0){
+  // Bear — FIX 7: also activate for fox owner playing for bear target
+  const bearTargetPid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  if(pu.bear&&pu.bear.target===bearTargetPid&&(isMyTurn||G.foxMode||G.masterOverrideActive)&&!G.bearMode&&G.bearCardsChosen===0){
     G.bearMode=true;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   }
   const canPlay=isMyTurn||G.foxMode||G.masterOverrideActive;
@@ -1287,12 +1308,14 @@ function renderState(state){
   if(!G._shownAnims.owl_alert&&pu.owl?.target===G.playerId&&isMyTurn){G._shownAnims.owl_alert=true;showAnimalAlert('🦉','GUFO!','Non puoi attivare power-up!','#6c5ce7');}
   if(!G._shownAnims.wolf_alert&&pu.wolf&&canPlay){G._shownAnims.wolf_alert=true;showAnimalAlert('🐺','LUPO!','Nessun powerup disponibile questo giro!','#b71c1c');}
   if(!G._shownAnims.ostrich_alert&&pu.ostrich&&canPlay){G._shownAnims.ostrich_alert=true;showAnimalAlert('🪶','STRUZZO!','L\'ultima carta a destra è bloccata!','#d4a040');}
-  if(!G._shownAnims.rhino_alert&&pu.rhino?.target===G.playerId&&isMyTurn){G._shownAnims.rhino_alert=true;showAnimalAlert('🦏','RINOCERONTE!','Tutte le carte si attivano automaticamente! Vai ai powerup...','#9e9e9e');
-    // BUG FIX: Auto-advance to PU choice after delay, without requiring card click
+  // FIX G: rhino auto-advance works for normal turn, fox mode, AND masterOverride
+  const rhinoActivePid=G.masterOverrideActive?G.masterOverridePid:(G.foxMode?G.foxTargetPid:G.playerId);
+  const rhinoMyTurn=(isMyTurn||G.masterOverrideActive||G.foxMode)&&pu.rhino?.target===rhinoActivePid;
+  if(!G._shownAnims.rhino_alert&&rhinoMyTurn){G._shownAnims.rhino_alert=true;showAnimalAlert('🦏','RINOCERONTE!','Tutte le carte si attivano automaticamente! Vai ai powerup...','#9e9e9e');
     setTimeout(async()=>{
       await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/rhino':null});
       const fresh2=await dbGet(`rooms/${G.roomId}`);
-      if(fresh2&&fresh2.status==='playing') await showPuChoice(fresh2,G.playerId);
+      if(fresh2&&fresh2.status==='playing') await showPuChoice(fresh2,rhinoActivePid);
     },2300);
   }
 
@@ -1432,7 +1455,7 @@ function renderCards(state,canPlay,currentPid){
   // Zebra duplicate card
   if(pu.zebra?.target===currentPid&&pu.zebra.dupCard) cards.push({...pu.zebra.dupCard,badge:'zebra'});
   // Scarab card
-  if(pu.scarab?.target===currentPid) cards.push({id:'scarab-special',value:rnd(0,100),assignedTo:'scarab',assignedName:'???',badge:'scarab'});
+  if(pu.scarab?.target===currentPid) cards.push({id:'scarab-special',value:pu.scarab.cardValue??'½',assignedTo:'scarab',assignedName:'???',badge:'scarab'});
 
   // Donkey swap display: only show to non-active players
   if(pu.donkey&&!iAmActive){
@@ -1551,6 +1574,7 @@ async function resolveCard(card,state){
     addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la <span class='lpu'>🐜 Zecca</span>: <span class='ld'>-${card.value}</span> — zecca rimossa`,'damage');
     spawnFloat(`-${card.value}`,'red');shakeScreen();playSound('hit');vibrate([80]);
     await dbUpdate(`rooms/${G.roomId}`,{tickCard:null,...postUpd});
+    await clearAfterBadgePick(pu); // FIX 4+5
     await checkElimAndWin(activePid);
     await proceedAfterCard(state,activePid);return;
   }
@@ -1567,7 +1591,7 @@ async function resolveCard(card,state){
     G.bearMode=false;G.bearCardsChosen=0;G.foxMode=false;G.foxTargetPid=null;
     G.masterOverrideActive=false;G.masterOverridePid=null;
     const fresh=await dbGet(`rooms/${G.roomId}`);
-    if(fresh&&fresh.status==='playing') await nextTurn(fresh);
+    if(fresh&&fresh.status==='playing') await nextTurn(fresh, activePid); // FIX A: pass activePid so index is correct
     return;
   }
   if(card.badge==='revival'){
@@ -1579,6 +1603,7 @@ async function resolveCard(card,state){
       addLog(`<span class='lpu'>🦎 Camaleonte</span>: <span class='lp'>${rp.name}</span> risorge con <span class='lh'>+${card.value}</span> HP!`,'heal');
       spawnFloat(`+${card.value}`,'green');playSound('heal');
     }else{if(Object.keys(postUpd).length)await dbUpdate(`rooms/${G.roomId}`,postUpd);}
+    await clearAfterBadgePick(pu); // FIX 4+5
     await proceedAfterCard(state,activePid);return;
   }
   if(card.badge==='butterfly'){
@@ -1593,6 +1618,7 @@ async function resolveCard(card,state){
     if(state.butterflyCards){Object.entries(state.butterflyCards).forEach(([k,v])=>{if(v.id!==card.id)remainingBf[k]=v;});}
     const hasRemaining=Object.keys(remainingBf).length>0;
     await dbUpdate(`rooms/${G.roomId}`,{butterflyActive:hasRemaining,butterflyCards:hasRemaining?remainingBf:null,butterflyOwner:hasRemaining?owner:null,...postUpd});
+    await clearAfterBadgePick(pu); // FIX 4+5
     await proceedAfterCard(state,activePid);return;
   }
   // Penguin card (value 0 - harmless, but hidden until picked)
@@ -1602,6 +1628,7 @@ async function resolveCard(card,state){
     toast('🐧 Pinguino! La carta vale 0 — nessun danno!');
     // Penguin stays active until owner's next turn (not removed here)
     await dbUpdate(`rooms/${G.roomId}`,{...postUpd});
+    await clearAfterBadgePick(pu); // FIX 4+5
     await proceedAfterCard(state,activePid);return;
   }
   // Scorpion card (value 100 to SELF)
@@ -1611,6 +1638,7 @@ async function resolveCard(card,state){
     addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la carta dello <span class='lpu'>🦂 Scorpione</span>: <span class='ld'>-100 HP!</span>`,'damage');
     spawnFloat('-100','red');shakeScreen();playSound('crit');vibrate([100,50,100]);
     await dbUpdate(`rooms/${G.roomId}`,{...postUpd});
+    await clearAfterBadgePick(pu); // FIX 4+5
     await checkElimAndWin(activePid);
     await proceedAfterCard(state,activePid);return;
   }
@@ -1626,6 +1654,7 @@ async function resolveCard(card,state){
     addLog(`<span class='lp'>${players[activePid]?.name}</span> → ${players[zebraTarget]?.name}: <span class='ld'>-${zebraDmg}</span>`,'damage');
     spawnFloat(`-${zebraDmg}`,'red');shakeScreen();playSound('hit');
     await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/zebra':null,...postUpd});
+    await clearAfterBadgePick(pu); // FIX 4+5 (clear scarab etc)
     await checkElimAndWin(zebraTarget);
     await proceedAfterCard(state,activePid);return;
   }
@@ -1638,6 +1667,7 @@ async function resolveCard(card,state){
     addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie lo <span class='lpu'>🪲 Scarabeo</span>: <span class='ld'>-${halfHp} HP</span> (metà vita!)`, 'damage');
     spawnFloat(`-${halfHp}`,'red');shakeScreen();playSound('crit');vibrate([100,50,100]);
     await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/scarab':null,...postUpd});
+    await clearAfterBadgePick(pu); // FIX 4+5 (clear zebra etc)
     await checkElimAndWin(activePid);
     await proceedAfterCard(state,activePid);return;
   }
@@ -1683,8 +1713,8 @@ async function resolveCard(card,state){
     addLog(`<span class='lpu'>🫏 Asino</span>: valori scambiati!`,'powerup');
   }
 
-  // Frog: swap HP instead of damage
-  if(pu.frog&&target!==activePid){
+  // Frog: swap HP instead of damage — FIX 6: only if target is alive
+  if(pu.frog&&target!==activePid&&players[target]?.alive){
     triggerAnim('frog');
     const myHp=players[activePid]?.hp||0;
     const theirHp=players[target]?.hp||0;
@@ -1704,10 +1734,13 @@ async function resolveCard(card,state){
   // Crocodile block
   if(pu.crocodile?.owner&&target===pu.crocodile.owner&&activePid!==pu.crocodile.owner){
     triggerAnim('crocodile');
-    toast(`🐊 Coccodrillo! Non puoi colpire ${players[pu.crocodile.owner]?.name}!`);
+    toast(`🐊 Coccodrillo! Non puoi colpire ${players[pu.crocodile.owner]?.name}! Il turno prosegue.`);
+    addLog(`<span class='lpu'>🐊 Coccodrillo</span>: <span class='lp'>${players[activePid]?.name}</span> non può colpire <span class='lp'>${players[pu.crocodile.owner]?.name}</span> — danno nullo!`,'system');
+    await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/crocodile':null,...postUpd});
     G.pendingConfirm=false;_cardLocked=false;
     const freshCroc=await dbGet(`rooms/${G.roomId}`);
-    if(freshCroc) renderState(freshCroc);return;
+    if(freshCroc&&freshCroc.status==='playing') await proceedAfterCard(freshCroc,activePid);
+    return;
   }
 
   // Bug reflect
@@ -1906,7 +1939,7 @@ async function resolveCard(card,state){
       G.pendingConfirm=false;_cardLocked=false;
       G.bearMode=false;G.bearCardsChosen=0;G.foxMode=false;G.masterOverrideActive=false;
       const freshNext=await dbGet(`rooms/${G.roomId}`);
-      if(freshNext&&freshNext.status==='playing') await nextTurn(freshNext);
+      if(freshNext&&freshNext.status==='playing') await nextTurn(freshNext, activePid); // FIX A: pass activePid
       return;
     }
 
@@ -1986,6 +2019,13 @@ async function checkElimAndWin(pid){
   await checkWin(fresh);
 }
 
+// FIX 4+5: clear 'after' PUs that linger if a badge card is picked instead of normal card
+async function clearAfterBadgePick(puState){
+  const toCheck=['zebra','scarab','bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca'];
+  const upd={};
+  toCheck.forEach(id=>{if(puState?.[id])upd[`activePowerups/${id}`]=null;});
+  if(Object.keys(upd).length) await dbUpdate(`rooms/${G.roomId}`,upd);
+}
 async function clearAfterPU(pu){
   const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca','zebra','scarab'];
   const upd={};afters.forEach(id=>{if(pu[id])upd[`activePowerups/${id}`]=null;});
@@ -2029,12 +2069,15 @@ async function proceedAfterCard(state,activePid){
 
   // Check if player is eliminated - skip PU choice
   if(!fresh.players?.[activePid]?.alive){
-    await nextTurn(fresh);return;
+    await nextTurn(fresh, activePid);return;
   }
 
   if(wasFoxPlay){
+    // FIX 1: clear fox from Firebase after fox turn
+    await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/fox':null});
     addLog(`<span class='lpu'>🦊 Volpe</span>: turno passato`,'system');
-    await nextTurn(fresh);
+    const freshFox=await dbGet(`rooms/${G.roomId}`);
+    await nextTurn(freshFox||fresh, activePid);
   }else{
     await showPuChoice(fresh,activePid);
   }
@@ -2231,6 +2274,8 @@ async function activatePu(pu,state,pid){
       toast(`🦈 Squalo! ${victims.length?victims.join(', ')+' eliminati!':'Nessuno eliminato.'}`);
       if(victims.length){
         addLog(`<span class='lpu'>🦈 Squalo</span>: eliminati <span class='ld'>${victims.join(', ')}</span>!`,'elim');
+        // FIX 2: check win after shark eliminates players
+        setTimeout(async()=>{const afterShark=await dbGet(`rooms/${G.roomId}`);if(afterShark)await checkWin(afterShark);},600);
       }
       break;
     }
@@ -2279,7 +2324,7 @@ async function activatePu(pu,state,pid){
       upd['activePowerups/scorpion']={owner:pid};
       break;
     case 'peacock': {
-      // Randomize all alive players' HP 1-150
+      // Randomize all alive players' HP 1-150 (minimum 1 to avoid eliminations)
       Object.entries(state.players||{}).forEach(([ppid,pp])=>{
         if(pp.alive){
           const newHp=rnd(1,150);
@@ -2298,7 +2343,7 @@ async function activatePu(pu,state,pid){
       }
       break;
     }
-    case 'scarab': upd['activePowerups/scarab']={target:nextPid}; break;
+    case 'scarab': upd['activePowerups/scarab']={target:nextPid,cardValue:rnd(0,100)}; break;
     case 'swordfish': upd['activePowerups/swordfish']={target:nextPid}; break;
     case 'wolf':
       if(state.activePowerups?.wolf){toast('🐺 Lupo già attivo!');return;}
@@ -2330,18 +2375,37 @@ async function activatePu(pu,state,pid){
 }
 
 // ══ Next turn ════════════════════════════════════════════════════
-async function nextTurn(state){
+async function nextTurn(state, fromPid=null){
   hidePuSection();
   const fresh=await dbGet(`rooms/${G.roomId}`);if(!fresh)return;
   const ord=fresh.playerOrder||[];
   const alive=ord.filter(p=>fresh.players?.[p]?.alive);
   if(alive.length<=1){await checkWin(fresh);return;}
 
-  let idx=(fresh.currentTurnIndex+1)%alive.length;
-  let nextPid=alive[idx];
+  // FIX A: Robust next-player logic using playerOrder, not index arithmetic.
+  // When current player dies, currentTurnIndex points to wrong player in shrunk alive array.
+  // We find the player who JUST played (fromPid or alive[currentTurnIndex]),
+  // then scan playerOrder forward to find next alive player.
+  let playedPid = fromPid;
+  if(!playedPid){
+    const safeIdx=fresh.currentTurnIndex%Math.max(alive.length,1);
+    playedPid=alive[safeIdx];
+  }
+  const playedOrdIdx=ord.indexOf(playedPid);
+  let nextPid=null;
+  for(let s=1;s<=ord.length;s++){
+    const candidate=ord[(playedOrdIdx+s)%ord.length];
+    if(fresh.players?.[candidate]?.alive){nextPid=candidate;break;}
+  }
+  if(!nextPid){await checkWin(fresh);return;}
+  let idx=alive.indexOf(nextPid);
+  if(idx<0)idx=0;
+
   const upd={};
   const pu=fresh.activePowerups||{};
 
+  // FIX 3: Clear mosquito if owner just played and it didn't fire (e.g. koala/frog used)
+  if(pu.mosquito?.owner===playedPid) upd['activePowerups/mosquito']=null;
   // === Clear persistent PUs when owner's turn comes back ===
   if(pu.cheetah?.owner===nextPid){upd['activePowerups/cheetah']=null;toast('🐆 Ghepardo scaduto!');}
   if(pu.rat?.owner===nextPid){upd['activePowerups/rat']=null;toast('🐭 Topo scaduto!');}
@@ -2357,17 +2421,27 @@ async function nextTurn(state){
   if(pu.dog?.owner!==nextPid&&pu.dog){upd['activePowerups/dog']=null;}
   if(fresh.butterflyActive&&fresh.butterflyOwner===nextPid){upd['butterflyActive']=false;upd['butterflyCards']=null;upd['butterflyOwner']=null;toast('🦋 Farfalla scaduta!');}
 
-  // Kangaroo: skip
+  // Kangaroo: skip — FIX E: also clear skipNext on skipped player to avoid double-skip
   if(pu.kangaroo?.target===nextPid){
     toast(`🦘 ${fresh.players?.[nextPid]?.name} salta il turno!`);
     upd['activePowerups/kangaroo']=null;
-    idx=(idx+1)%alive.length;nextPid=alive[idx];
+    upd[`players/${nextPid}/skipNext`]=false; // clear spider if overlapping
+    // Advance to next alive in ord after skipped player
+    const skipOrdIdx=ord.indexOf(nextPid);
+    nextPid=null;
+    for(let s=1;s<=ord.length;s++){const c=ord[(skipOrdIdx+s)%ord.length];if(fresh.players?.[c]?.alive){nextPid=c;break;}}
+    if(!nextPid){await checkWin(fresh);return;}
+    idx=alive.indexOf(nextPid);if(idx<0)idx=0;
   }
-  // Spider skipNext
+  // Spider skipNext — also uses ord-based next-player search
   if(fresh.players?.[nextPid]?.skipNext){
     toast(`🕷️ ${fresh.players[nextPid]?.name} salta il turno.`);
     upd[`players/${nextPid}/skipNext`]=false;
-    idx=(idx+1)%alive.length;nextPid=alive[idx];
+    const skipOrdIdx2=ord.indexOf(nextPid);
+    nextPid=null;
+    for(let s=1;s<=ord.length;s++){const c=ord[(skipOrdIdx2+s)%ord.length];if(fresh.players?.[c]?.alive&&!upd[`players/${c}/skipNext`]===false){nextPid=c;break;}}
+    if(!nextPid){await checkWin(fresh);return;}
+    idx=alive.indexOf(nextPid);if(idx<0)idx=0;
   }
 
   // Generate new cards
@@ -2399,16 +2473,17 @@ async function nextTurn(state){
     setTimeout(()=>{triggerAnim('rhino');shakeScreen();playSound('crit');vibrate([100,50,100,50,100]);},200);
   }
 
-  // Zecca auto-damage
+  // Zecca auto-damage — FIX B: damages the player who just played (didn't pick tick)
   let tickCard=fresh.tickCard;
   if(tickCard){
     const newVal=rnd(0,100);
     tickCard={...tickCard,value:newVal};
-    const np=fresh.players?.[nextPid];
-    if(np?.alive){
-      if(!hpChanges[nextPid])hpChanges[nextPid]=0;
-      hpChanges[nextPid]-=newVal;
-      upd['_zeckaPendingDmg']={target:nextPid,dmg:newVal};
+    const tickTarget=playedPid; // the player whose turn just ended without picking tick
+    const tp=fresh.players?.[tickTarget];
+    if(tp?.alive){
+      if(!hpChanges[tickTarget])hpChanges[tickTarget]=0;
+      hpChanges[tickTarget]-=newVal;
+      upd['_zeckaPendingDmg']={target:tickTarget,dmg:newVal};
     }
   }
 
@@ -2435,6 +2510,11 @@ async function nextTurn(state){
   G.masterOverrideActive=false;G.masterOverridePid=null;
   G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   G.dogMode=false;G.dogPuCount=0;
+  // Check win after applying HP changes from lion/zecca/rhino
+  if(Object.keys(hpChanges).length>0){
+    const afterState=await dbGet(`rooms/${G.roomId}`);
+    if(afterState) await checkWin(afterState);
+  }
 }
 
 // ══ Pending damage notifications ══════════════════════════════════
@@ -2540,7 +2620,8 @@ async function masterPlayForCurrent(){
 // ══ Game over ═════════════════════════════════════════════════════
 function showGameOver(state){
   if(G._gameoverShown)return;G._gameoverShown=true;
-  showScreen('screen-gameover');clearTimer();dbUnsubAll();
+  showScreen('screen-gameover');clearTimer();
+  // DO NOT dbUnsubAll() here — keep listening for restart
   confetti();playSound('win');vibrate([100,50,100,50,200,50,300]);
   const winner=state.winner?state.players[state.winner]:null;
   document.getElementById('winner-name').textContent=winner?.name||'Nessuno';
@@ -2556,6 +2637,22 @@ function showGameOver(state){
       <div class="final-name">${p.name}</div>
       <div class="final-hp">${p.alive?p.hp:0} HP</div>
     </div>`).join('');
+  // Show/hide restart button based on role
+  const goBtn=document.getElementById('go-restart-btn');
+  const goWait=document.getElementById('go-waiting-msg');
+  if(goBtn)goBtn.style.display=G.isMaster?'block':'none';
+  if(goWait)goWait.style.display=G.isMaster?'none':'block';
+  // Re-listen for restart: if master resets status to 'playing', rejoin game
+  const{db,ref,onValue}=window._fb;
+  const statusRef=ref(db,`rooms/${G.roomId}/status`);
+  const unsub=onValue(statusRef,snap=>{
+    const s=snap.exists()?snap.val():null;
+    if(s==='playing'&&G._gameoverShown){
+      G._gameoverShown=false;
+      unsub(); // remove this specific listener
+      startPlayingScreen();
+    }
+  });
 }
 
 // ══ Settings ══════════════════════════════════════════════════════
@@ -2586,13 +2683,31 @@ async function doRestart(){
   const players={};
   Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false,cuttlefishShield:false};});
   const cards=generateCards(players,room.mode);
-  // Re-apply mode bans on restart
   const bans=MODE_BANS[room.mode]||[];
   const puEnabled={};POWERUPS.forEach(p=>puEnabled[p.id]=!bans.includes(p.id));
-  await dbUpdate(`rooms/${G.roomId}`,{status:'playing',players,cards,currentTurnIndex:0,turnCount:1,activePowerups:{},log:{},tickCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,chameleonUsed:false,initialHp:hp,_zeckaPendingDmg:null,_lionPendingDmg:null,puEnabled});
+  // Full state reset via dbSet to wipe all old fields
+  await dbSet(`rooms/${G.roomId}`,{
+    status:'playing',mode:room.mode,initialHp:hp,direction:1,
+    currentTurnIndex:0,turnCount:1,
+    players,playerOrder:room.playerOrder,
+    cards,activePowerups:{},puEnabled,log:{},
+    tickCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,
+    chameleonUsed:false,winner:null,
+    _zeckaPendingDmg:null,_lionPendingDmg:null,
+  });
   G._gameoverShown=false;closeOverlay('overlay-restart');startPlayingScreen();
 }
-function reshowQR(){closeOverlay('overlay-settings');showLobby(G.roomId,{});}
+function reshowQR(){
+  closeOverlay('overlay-settings');
+  document.getElementById('qr-overlay-code').textContent=G.roomId||'----';
+  const qrEl=document.getElementById('qr-overlay-container');
+  qrEl.innerHTML='';
+  if(G.roomId){
+    const url=`${location.origin}${location.pathname}?room=${G.roomId}`;
+    try{new QRCode(qrEl,{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff'});}catch(e){qrEl.textContent=url;}
+  }
+  showOverlay('overlay-qr');
+}
 function restartGame(){if(G.isMaster)showOverlay('overlay-restart');else toast('Solo il Master può riavviare.');}
 function goHome(){G._gameoverShown=false;clearTimer();dbUnsubAll();showScreen('screen-home');}
 
