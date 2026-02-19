@@ -73,6 +73,23 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .mode-row{display:flex;gap:8px}
 .mode-btn{flex:1;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:var(--r2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;transition:.2s;text-align:center}
 .mode-btn.selected{background:rgba(192,57,43,.15);border-color:var(--red2);color:var(--text)}
+#mode-chaos.selected{background:rgba(120,0,200,.2);border-color:#9b59b6;color:var(--text)}
+
+/* ─── Cheetah timer overlay ─────────────────────────────────── */
+.cheetah-ovl{
+  position:fixed;top:0;left:0;right:0;z-index:500;pointer-events:none;
+  background:linear-gradient(180deg,rgba(160,80,0,.96) 0%,rgba(120,50,0,0) 100%);
+  padding:8px 0 24px;display:flex;flex-direction:column;align-items:center;
+  animation:chOvlIn .3s ease;
+}
+@keyframes chOvlIn{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}
+.cheetah-ovl-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;
+  color:rgba(255,220,100,.85);text-transform:uppercase;margin-top:8px}
+.cheetah-ovl-num{font-family:'Bebas Neue',sans-serif;font-size:82px;line-height:1;color:#fff;
+  text-shadow:0 0 30px rgba(255,200,0,.9),0 0 60px rgba(255,140,0,.5);letter-spacing:2px}
+.cheetah-ovl-num.urgent{color:var(--red3);animation:chUrg .25s ease infinite alternate;
+  text-shadow:0 0 40px rgba(255,60,0,.9),0 0 80px rgba(255,0,0,.5)}
+@keyframes chUrg{to{transform:scale(1.12)}}
 
 /* ═══ BUTTONS ═════════════════════════════════════════════════════════ */
 .btn{padding:14px;border:none;border-radius:var(--r);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;width:100%;transition:.2s}
@@ -547,7 +564,7 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 
     <div class="section-card">
       <div class="section-title">Punti vita iniziali</div>
-      <input type="number" id="setup-hp" value="1000" min="10" max="99999">
+      <input type="number" id="setup-hp" value="300" min="10" max="99999">
     </div>
 
     <div class="section-card">
@@ -555,12 +572,13 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
       <div class="mode-row">
         <div class="mode-btn selected" id="mode-classic" onclick="selectMode('classic')">🎴 Classica</div>
         <div class="mode-btn" id="mode-hardcore" onclick="selectMode('hardcore')">💀 Hardcore</div>
+        <div class="mode-btn" id="mode-chaos" onclick="selectMode('chaos')">🌀 Caos</div>
       </div>
+      <div id="mode-desc" style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);line-height:1.5">🎴 Classica: vedi i valori delle carte, scegli il powerup dopo ogni turno.</div>
     </div>
 
     <button class="btn btn-blood" onclick="createGame()">⚔️ CREA PARTITA</button>
     <button class="btn btn-ghost" onclick="showScreen('screen-join')" style="margin-top:4px">Entra in una stanza</button>
-    <button class="btn btn-ghost btn-sm" onclick="showHistory()" style="margin-top:4px">📊 Storico partite</button>
   </div>
 </div>
 
@@ -573,15 +591,18 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
     </div>
     <div class="section-card">
       <div class="field">
-        <label>Il tuo nome</label>
-        <input type="text" id="join-name" placeholder="Nome giocatore" maxlength="16">
-      </div>
-      <div class="field">
         <label>Codice stanza</label>
-        <input class="pin-big" type="text" id="join-code" placeholder="XXXX" maxlength="4">
+        <div style="display:flex;gap:8px">
+          <input class="pin-big" type="text" id="join-code" placeholder="XXXX" maxlength="4" style="flex:1" oninput="onCodeInput(this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="loadRoomNames()" style="flex-shrink:0;padding:14px 16px;font-size:13px">Cerca</button>
+        </div>
+      </div>
+      <div class="field" id="join-name-field" style="display:none">
+        <label>Seleziona il tuo nome</label>
+        <div id="join-name-list" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
     </div>
-    <button class="btn btn-blood" onclick="joinGame()">🎮 ENTRA NELLA STANZA</button>
+    <button class="btn btn-blood" id="join-btn" onclick="joinGame()" style="display:none">🎮 ENTRA</button>
     <button class="btn btn-ghost btn-sm" onclick="joinAsSpectator()">👁 Entra come spettatore</button>
     <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-home')">← Indietro</button>
   </div>
@@ -665,7 +686,7 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
     </div>
     <div class="confirm-row" id="confirm-row" style="display:none">
       <button class="btn btn-gold" style="flex:1" onclick="confirmPowerup()">✓ Conferma</button>
-      <button class="btn btn-ghost" style="flex:0;padding:14px 20px" onclick="skipPowerup()">Salta</button>
+      
     </div>
 
     <!-- Log -->
@@ -734,19 +755,12 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
   </div>
 </div>
 
-<!-- History -->
-<div class="overlay" id="overlay-history">
-  <div class="modal">
-    <div class="modal-title">📊 STORICO PARTITE</div>
-    <div id="history-content"></div>
-    <button class="modal-close" onclick="closeOverlay('overlay-history')">Chiudi</button>
-  </div>
-</div>
+<!-- History removed per v7 -->
 
 
 <script>
 // ══════════════════════════════════════════════════════════════════
-//  FATALBEAST v3 — Engine + Animations
+//  FATALBEAST v7 — Full Engine with 40 Powerups
 // ══════════════════════════════════════════════════════════════════
 
 // ── State ─────────────────────────────────────────────────────────
@@ -757,67 +771,107 @@ const G = {
   unsubscribes:[],
   sessionStats:{dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0},
   masterOverrideActive:false,masterOverridePid:null,
-  bearMode:false,bearCardsChosen:0,bearFirstTarget:null,
+  bearMode:false,bearCardsChosen:0,bearFirstTarget:null,bearFirstCardId:null,
   foxMode:false,foxTargetPid:null,
+  dogMode:false,dogPuCount:0,
   timerTO:null,timerActive:false,timerSec:0,
   selectedPU:null,
-  _shownAnims:{},  // prevent animation replay per turn
+  _shownAnims:{},
   _gameoverShown:false,
   _logOpen:true,
 };
 
-// ── Power-up definitions (Seppia removed, Lucertola → Camaleonte) ─
+// ── MODE BANS ────────────────────────────────────────────────────
+const MODE_BANS = {
+  classic: [],
+  hardcore: ['rat'],
+  chaos: ['rat','owl','wolf','weasel'],
+};
+
+// ── Power-up definitions (40 total) ──────────────────────────────
 const POWERUPS = [
-  {id:'eagle',    icon:'🦅',name:'Aquila',    timing:'before',
-   desc:'Al tuo prossimo turno puoi vedere il nome di 1 carta prima di scegliere.'},
-  {id:'bull',     icon:'🐂',name:'Toro',      timing:'after',
-   desc:'Trigger: dopo la scelta. Il danno viene raddoppiato.'},
-  {id:'hedgehog', icon:'🦔',name:'Riccio',    timing:'after',
-   desc:'Trigger: dopo la scelta. Il danno viene applicato a TUTTI i giocatori vivi.'},
-  {id:'rat',      icon:'🐭',name:'Topo',      timing:'before',
-   desc:'Tutti gli altri giocatori vedono carte coperte fino al tuo prossimo turno.'},
-  {id:'kangaroo', icon:'🦘',name:'Canguro',   timing:'before',
+  // === ORIGINAL 24 ===
+  {id:'eagle',    icon:'🦅', name:'Aquila',     timing:'before',
+   desc:'Al tuo prossimo turno vedi il nome di 1 carta.'},
+  {id:'bull',     icon:'🐂', name:'Toro',       timing:'after',
+   desc:'Il danno della prossima carta viene raddoppiato.'},
+  {id:'hedgehog', icon:'🦔', name:'Riccio',     timing:'after',
+   desc:'Il danno viene applicato a TUTTI i giocatori vivi.'},
+  {id:'rat',      icon:'🐭', name:'Topo',       timing:'before',
+   desc:'Carte coperte per tutti gli altri fino al tuo prossimo turno.'},
+  {id:'kangaroo', icon:'🦘', name:'Canguro',    timing:'before',
    desc:'Il giocatore successivo salta il turno.'},
-  {id:'turtle',   icon:'🐢',name:'Tartaruga', timing:'after',
-   desc:'Trigger: dopo la scelta. Il danno viene dimezzato (arrotondamento per eccesso).'},
-  {id:'koala',    icon:'🐨',name:'Koala',     timing:'after',
-   desc:'Trigger: dopo la scelta. Il valore diventa guarigione invece di danno.'},
-  {id:'cheetah',  icon:'🐆',name:'Ghepardo',  timing:'before',
-   desc:'Il prossimo giocatore ha 7 secondi per scegliere. Timeout → turno saltato.'},
-  {id:'bear',     icon:'🐻',name:'Orso',      timing:'before',
-   desc:'Al tuo prossimo turno DEVI scegliere 2 carte (2 bersagli diversi, entrambi i danni applicati).'},
-  {id:'owl',      icon:'🦉',name:'Gufo',      timing:'before',
-   desc:'Il prossimo giocatore non può attivare nessun power-up.'},
-  {id:'chameleon',icon:'🦎',name:'Camaleonte',timing:'after',
-   desc:'Aggiunge una carta revival. Se scelta: rianima un eliminato con HP = valore carta. Usabile 1 volta.'},
-  {id:'armadillo',icon:'🛡️',name:'Armadillo', timing:'after',
-   desc:'Trigger: dopo la scelta. Il prossimo giocatore subisce anche lui lo stesso danno. Se sceglie se stesso: danno ×2.'},
-  {id:'crocodile',icon:'🐊',name:'Coccodrillo',timing:'before',
-   desc:'Il prossimo giocatore non può colpirti. Se sceglie la tua carta, la scelta viene annullata.'},
-  {id:'bug',      icon:'🐛',name:'Cimice',    timing:'before',
-   desc:'Annulla il prossimo danno ricevuto e lo riflette al mittente.'},
-  {id:'fox',      icon:'🦊',name:'Volpe',     timing:'before',
-   desc:'Giochi tu al posto del giocatore successivo. Lui salta il turno.'},
-  {id:'shark',    icon:'🦈',name:'Squalo',    timing:'before',
-   desc:'Elimina immediatamente tutti i giocatori con HP < 15% degli HP iniziali.'},
-  {id:'deer',     icon:'🦌',name:'Cervo',     timing:'after',
-   desc:'Trigger: dopo la scelta. Una carta casuale tra le rimanenti → danno a tutti.'},
-  {id:'tick',     icon:'🐜',name:'Zecca',     timing:'before',
-   desc:'Carta extra che cambia valore ogni turno. Infligge danno automatico all\'attivo a inizio turno finché non viene scelta.'},
-  {id:'rhino',    icon:'🦏',name:'Rinoceronte',timing:'before',
-   desc:'Il prossimo giocatore subisce automaticamente la somma di tutte le carte.'},
-  {id:'butterfly',icon:'🦋',name:'Farfalla',  timing:'after',
-   desc:'Trigger: dopo la scelta. Aggiunge 1 carta a tutti. Se scelta → il tuo HP aumenta.'},
-  {id:'viper',    icon:'🐍',name:'Vipera',    timing:'after',
-   desc:'Trigger: dopo la scelta. Carta trappola extra. Se scelta → eliminazione immediata.'},
-  {id:'spider',   icon:'🕷️',name:'Ragno',     timing:'after',
-   desc:'Trigger: dopo la scelta. Il prossimo giocatore colpito salta il turno successivo.'},
-  {id:'ram',      icon:'🐏',name:'Ariete',    timing:'after',
-   desc:'Trigger: dopo la scelta. Il danno si propaga per metà anche ai giocatori adiacenti.'},
-  {id:'walrus',   icon:'🦭',name:'Tricheco',  timing:'before',
-   desc:'Attiva 2 power-up casuali: uno contro il giocatore precedente, uno contro il successivo.'},
-  {id:'donkey',   icon:'🫏',name:'Asino',     timing:'after',
-   desc:'Trigger: dopo la scelta. Scambia il valore della carta più alta con quello della più bassa.'},
+  {id:'turtle',   icon:'🐢', name:'Tartaruga',  timing:'after',
+   desc:'Il danno viene dimezzato (arrotondamento per eccesso).'},
+  {id:'koala',    icon:'🐨', name:'Koala',      timing:'after',
+   desc:'Il valore diventa guarigione invece di danno.'},
+  {id:'cheetah',  icon:'🐆', name:'Ghepardo',   timing:'before',
+   desc:'7 secondi per scegliere carta e potere. Scaduto → turno saltato.'},
+  {id:'bear',     icon:'🐻', name:'Orso',       timing:'before',
+   desc:'Il giocatore successivo DEVE scegliere 2 carte diverse.'},
+  {id:'owl',      icon:'🦉', name:'Gufo',       timing:'before',
+   desc:'Il prossimo giocatore non può attivare power-up.'},
+  {id:'chameleon',icon:'🦎', name:'Camaleonte', timing:'after',
+   desc:'Carta revival: se scelta rianima un eliminato con HP = valore carta. 1 sola volta.'},
+  {id:'armadillo',icon:'🛡️', name:'Armadillo',  timing:'after',
+   desc:'Chi sceglie la carta subisce anche lo stesso danno. Self-target = danno ×2.'},
+  {id:'crocodile',icon:'🐊', name:'Coccodrillo',timing:'before',
+   desc:'Il prossimo giocatore non può colpirti.'},
+  {id:'bug',      icon:'🐛', name:'Cimice',     timing:'before',
+   desc:'Annulla e riflette il prossimo danno ricevuto.'},
+  {id:'fox',      icon:'🦊', name:'Volpe',      timing:'before',
+   desc:'Giochi al posto del prossimo giocatore.'},
+  {id:'shark',    icon:'🦈', name:'Squalo',     timing:'before',
+   desc:'Elimina tutti i giocatori con HP < 15% degli HP iniziali.'},
+  {id:'deer',     icon:'🦌', name:'Cervo',      timing:'after',
+   desc:'Dopo la scelta, una carta casuale infligge danno a tutti.'},
+  {id:'tick',     icon:'🐜', name:'Zecca',      timing:'before',
+   desc:'Carta extra con valore variabile. Infligge danno automatico ogni turno finché non viene scelta.'},
+  {id:'rhino',    icon:'🦏', name:'Rinoceronte',timing:'before',
+   desc:'Il prossimo giocatore attiva automaticamente tutte le carte.'},
+  {id:'butterfly',icon:'🦋', name:'Farfalla',   timing:'after',
+   desc:'Aggiunge 1 carta bonus a tutti. Se scelta, cura l\'attivatore.'},
+  {id:'viper',    icon:'🐍', name:'Vipera',     timing:'after',
+   desc:'Carta trappola: se scelta, eliminazione immediata.'},
+  {id:'spider',   icon:'🕷️', name:'Ragno',      timing:'after',
+   desc:'Il bersaglio colpito salta il turno successivo.'},
+  {id:'ram',      icon:'🐏', name:'Ariete',     timing:'after',
+   desc:'Il danno si propaga ai giocatori adiacenti al bersaglio.'},
+  {id:'donkey',   icon:'🫏', name:'Asino',      timing:'after',
+   desc:'Scambia il valore della carta più alta con quello della più bassa.'},
+  // === NEW 16 ===
+  {id:'mosquito', icon:'🦟', name:'Zanzara',    timing:'before',
+   desc:'Al tuo prossimo turno assorbi HP dal bersaglio: lo colpisci e ti curi dello stesso valore.'},
+  {id:'penguin',  icon:'🐧', name:'Pinguino',   timing:'before',
+   desc:'Carta extra valore 0 a tutti gli altri (nascosta). Scade al tuo prossimo turno.'},
+  {id:'scorpion', icon:'🦂', name:'Scorpione',  timing:'before',
+   desc:'Carta extra valore 100 a tutti gli altri (nascosta). Scade al tuo prossimo turno.'},
+  {id:'peacock',  icon:'🦚', name:'Pavone',     timing:'before',
+   desc:'I punti vita di tutti i giocatori vivi vengono randomizzati (1-150).'},
+  {id:'zebra',    icon:'🦓', name:'Zebra',      timing:'after',
+   desc:'Il prossimo giocatore ha una carta duplicata segreta.'},
+  {id:'scarab',   icon:'🪲', name:'Scarabeo',   timing:'after',
+   desc:'Carta extra al prossimo giocatore: se scelta, perde metà HP.'},
+  {id:'swordfish',icon:'🗡️', name:'Pesce Spada',timing:'after',
+   desc:'Il danno colpisce anche i 2 giocatori successivi al bersaglio.'},
+  {id:'wolf',     icon:'🐺', name:'Lupo',       timing:'before',
+   desc:'Nessuno può attivare powerup per un giro completo.'},
+  {id:'ostrich',  icon:'🪶', name:'Struzzo',    timing:'before',
+   desc:'L\'ultima carta a destra è bloccata per tutti fino al tuo prossimo turno.'},
+  {id:'gorilla',  icon:'🦍', name:'Gorilla',    timing:'before',
+   desc:'La prima carta a sinistra cura invece di danneggiare (nascosto). Scade al tuo prossimo turno.'},
+  {id:'lion',     icon:'🦁', name:'Leone',      timing:'before',
+   desc:'Ad ogni turno, danni casuali (1-100) a tutti i giocatori. Scade al tuo prossimo turno.'},
+  {id:'cuttlefish',icon:'🦑',name:'Seppia',     timing:'before',
+   desc:'Fino al tuo prossimo turno, sei immune ai danni dei powerup avversari.'},
+  {id:'dog',      icon:'🐕', name:'Cane',       timing:'before',
+   desc:'Questo turno puoi attivare 2 powerup invece di 1.'},
+  {id:'weasel',   icon:'🦦', name:'Donnola',    timing:'before',
+   desc:'Gli altri giocatori scelgono tra 2 powerup (invece di 3) fino al tuo prossimo turno.'},
+  {id:'frog',     icon:'🐸', name:'Rana',       timing:'after',
+   desc:'Il prossimo giocatore scambia i suoi HP con quelli del bersaglio (nessun danno).'},
+  {id:'orca',     icon:'🐋', name:'Orca',       timing:'after',
+   desc:'Il valore della carta del prossimo giocatore diventa pari agli HP del giocatore con meno vita.'},
 ];
 POWERUPS.forEach(p => G.puEnabled[p.id] = true);
 
@@ -838,6 +892,7 @@ function playSound(type){
       win:  [[523,.3,.5,'sine'],[659,.25,.6,'sine'],[784,.2,.7,'sine'],[880,.15,.85,'sine'],[1047,.1,1.1,'sine']],
       tick: [[880,.15,.12,'square'],[440,.1,.18,'square']],
       zecca:[[180,.3,.4,'sawtooth'],[90,.2,.6,'sawtooth']],
+      lion: [[150,.35,.3,'sawtooth'],[200,.3,.5,'sawtooth'],[80,.25,.7,'square']],
     };
     (M[type]||M.flip).forEach(([f,g,d,tp],i)=>{
       const o=ac.createOscillator(),gn=ac.createGain();
@@ -865,7 +920,7 @@ function vibrate(p){try{navigator.vibrate(p)}catch(e){}}
   })();
 })();
 
-// ══ ANIMATION SYSTEM v2 — Marvel Snap Style ══════════════════════
+// ══ ANIMATION SYSTEM v2 ══════════════════════════════════════════
 const PU_THEMES = {
   eagle:    {bg:'linear-gradient(160deg,#060e22,#0e2a5a,#1a4a9e)',glow:'#4fa3f7',accent:'#a8d4ff'},
   bull:     {bg:'linear-gradient(160deg,#1a0505,#600e0e,#b02020)',glow:'#ff4444',accent:'#ff9999'},
@@ -890,28 +945,36 @@ const PU_THEMES = {
   viper:    {bg:'linear-gradient(160deg,#001800,#003800,#007200)',glow:'#00e000',accent:'#a0ff80'},
   spider:   {bg:'linear-gradient(160deg,#080808,#100018,#1e0030)',glow:'#9c27b0',accent:'#e040fb'},
   ram:      {bg:'linear-gradient(160deg,#1e0000,#500000,#960000)',glow:'#f44336',accent:'#ef9a9a'},
-  walrus:   {bg:'linear-gradient(160deg,#001828,#003a5e,#005e96)',glow:'#29b6f6',accent:'#b3e5fc'},
   donkey:   {bg:'linear-gradient(160deg,#1a1200,#3e2c00,#706000)',glow:'#c8a000',accent:'#f5d500'},
+  // NEW 16
+  mosquito: {bg:'linear-gradient(160deg,#0a0018,#200040,#400080)',glow:'#bb86fc',accent:'#e1bee7'},
+  penguin:  {bg:'linear-gradient(160deg,#001420,#003050,#005080)',glow:'#80deea',accent:'#e0f7fa'},
+  scorpion: {bg:'linear-gradient(160deg,#1a0a00,#4a2000,#803800)',glow:'#ff6f00',accent:'#ffab40'},
+  peacock:  {bg:'linear-gradient(160deg,#001830,#003060,#0060a0)',glow:'#00bcd4',accent:'#84ffff'},
+  zebra:    {bg:'linear-gradient(160deg,#0a0a0a,#222222,#444444)',glow:'#e0e0e0',accent:'#ffffff'},
+  scarab:   {bg:'linear-gradient(160deg,#0a1400,#1e3800,#306000)',glow:'#76ff03',accent:'#ccff90'},
+  swordfish:{bg:'linear-gradient(160deg,#001028,#002858,#004888)',glow:'#2196f3',accent:'#90caf9'},
+  wolf:     {bg:'linear-gradient(160deg,#100808,#301818,#502828)',glow:'#b71c1c',accent:'#ef5350'},
+  ostrich:  {bg:'linear-gradient(160deg,#181208,#3a2e18,#5c4a28)',glow:'#d4a040',accent:'#ffe0a0'},
+  gorilla:  {bg:'linear-gradient(160deg,#080810,#181828,#282840)',glow:'#7986cb',accent:'#c5cae9'},
+  lion:     {bg:'linear-gradient(160deg,#1a1000,#4a3000,#805000)',glow:'#ff9800',accent:'#ffe0b2'},
+  cuttlefish:{bg:'linear-gradient(160deg,#0a0020,#1a0040,#300060)',glow:'#7c4dff',accent:'#b388ff'},
+  dog:      {bg:'linear-gradient(160deg,#1a0c00,#3e2800,#6a4400)',glow:'#ff8f00',accent:'#ffc46b'},
+  weasel:   {bg:'linear-gradient(160deg,#0c1000,#1e2c00,#344c00)',glow:'#aeea00',accent:'#f4ff81'},
+  frog:     {bg:'linear-gradient(160deg,#001a0a,#003a18,#005a28)',glow:'#00c853',accent:'#69f0ae'},
+  orca:     {bg:'linear-gradient(160deg,#000a1a,#001a3a,#002a5a)',glow:'#0288d1',accent:'#4fc3f7'},
 };
 
 function triggerAnim(id, opts={}) {
   const theme = PU_THEMES[id];
   const def = POWERUPS.find(p=>p.id===id);
   if(!theme || !def) return;
-
-  // Backdrop
   const bd = document.createElement('div');
   bd.className = 'pua-backdrop';
   document.body.appendChild(bd);
-
-  // Card
   const card = document.createElement('div');
   card.className = 'pua-card';
-  card.style.cssText = `
-    background:${theme.bg};
-    box-shadow:0 0 100px ${theme.glow}80,0 30px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.18);
-    border:2px solid ${theme.glow}70;
-  `;
+  card.style.cssText = `background:${theme.bg};box-shadow:0 0 100px ${theme.glow}80,0 30px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.18);border:2px solid ${theme.glow}70;`;
   const subtitle = opts.subtitle || '';
   card.innerHTML = `
     <div class="pua-card-glow" style="background:radial-gradient(ellipse 140% 120% at 50% 35%,${theme.glow}55 0%,transparent 65%)"></div>
@@ -925,18 +988,11 @@ function triggerAnim(id, opts={}) {
     <div class="pua-card-corner tl" style="color:${theme.accent}">${def.icon}</div>
     <div class="pua-card-corner br" style="color:${theme.accent}">${def.icon}</div>
     <div class="pua-card-border" style="border-color:${theme.glow}40"></div>
-    <div class="pua-card-shine"></div>
-  `;
+    <div class="pua-card-shine"></div>`;
   document.body.appendChild(card);
-
-  // Canvas particle burst
   spawnPuBurst(theme.glow, theme.accent, id);
-
-  // Special secondary effects
   if(id==='hedgehog') spawnHedgehogSpines();
   if(id==='spider') setTimeout(()=>drawSpiderWebCanvas(), 350);
-  if(id==='rat') {} // handled by css rat-active class
-
   setTimeout(()=>{
     bd.style.transition='opacity .5s';bd.style.opacity='0';
     setTimeout(()=>{try{bd.remove();card.remove();}catch(e){}},550);
@@ -951,78 +1007,34 @@ function spawnPuBurst(color1, color2, id) {
   const ctx = cv.getContext('2d');
   const cx = innerWidth/2, cy = innerHeight/2;
   const pts = [];
-  const count = 55;
-  for(let i=0;i<count;i++){
-    const a = (Math.PI*2*i/count)+Math.random()*.5;
+  for(let i=0;i<55;i++){
+    const a = (Math.PI*2*i/55)+Math.random()*.5;
     const spd = 2.5+Math.random()*7;
     pts.push({x:cx,y:cy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-2,r:2.5+Math.random()*4,
       life:1,decay:.018+Math.random()*.025,col:Math.random()<.55?color1:color2,trail:[]});
   }
-  // Also add some "sparks" that go up
   for(let i=0;i<20;i++){
     pts.push({x:cx+rnd(-20,20),y:cy,vx:(Math.random()-.5)*4,vy:-(3+Math.random()*8),r:1.5+Math.random()*2,
       life:1,decay:.025+Math.random()*.03,col:'#ffffff',trail:[]});
   }
   let frame=0;
+  const cvSafety=setTimeout(()=>{try{cv.remove();}catch(e){}},3500);
   (function draw(){
-    if(frame>90){cv.remove();return;}frame++;
+    if(frame>90){clearTimeout(cvSafety);try{cv.remove();}catch(e){}return;}frame++;
     ctx.clearRect(0,0,cv.width,cv.height);
-    // Shockwave
-    if(frame<18){
-      const pct=frame/18;
-      ctx.save();ctx.globalAlpha=(1-pct)*.6;
-      ctx.strokeStyle=color1;ctx.lineWidth=3;
-      ctx.shadowBlur=20;ctx.shadowColor=color1;
-      ctx.beginPath();ctx.arc(cx,cy,pct*140,0,Math.PI*2);ctx.stroke();
-      ctx.restore();
-    }
+    if(frame<18){const pct=frame/18;ctx.save();ctx.globalAlpha=(1-pct)*.6;ctx.strokeStyle=color1;ctx.lineWidth=3;ctx.shadowBlur=20;ctx.shadowColor=color1;ctx.beginPath();ctx.arc(cx,cy,pct*140,0,Math.PI*2);ctx.stroke();ctx.restore();}
     pts.forEach(p=>{
       if(p.life<=0)return;
-      p.trail.push({x:p.x,y:p.y,life:p.life});
-      if(p.trail.length>6)p.trail.shift();
+      p.trail.push({x:p.x,y:p.y,life:p.life});if(p.trail.length>6)p.trail.shift();
       p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.vx*=.97;p.life-=p.decay;
-      // Trail
-      p.trail.forEach((t,ti)=>{
-        ctx.save();ctx.globalAlpha=t.life*.3*(ti/p.trail.length);
-        ctx.fillStyle=p.col;ctx.beginPath();
-        ctx.arc(t.x,t.y,p.r*(ti/p.trail.length),0,Math.PI*2);ctx.fill();ctx.restore();
-      });
-      ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.col;
-      ctx.shadowBlur=12;ctx.shadowColor=p.col;
-      ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();ctx.restore();
+      p.trail.forEach((t,ti)=>{ctx.save();ctx.globalAlpha=t.life*.3*(ti/p.trail.length);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(t.x,t.y,p.r*(ti/p.trail.length),0,Math.PI*2);ctx.fill();ctx.restore();});
+      ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.col;ctx.shadowBlur=12;ctx.shadowColor=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();ctx.restore();
     });
     requestAnimationFrame(draw);
   })();
 }
-
-function spawnHedgehogSpines() {
-  for(let i=0;i<12;i++){
-    const el=document.createElement('div');el.className='spine3d';
-    const a=(Math.PI*2*i/12);
-    const d=170+Math.random()*60;
-    el.style.setProperty('--dx',`${Math.cos(a)*d}px`);
-    el.style.setProperty('--dy',`${Math.sin(a)*d}px`);
-    el.textContent=['💥','⚡','🔥','✨'][i%4];
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),1400);
-  }
-}
-
-function drawSpiderWebCanvas() {
-  const cv=document.createElement('canvas');
-  cv.className='spider-web-canvas';cv.width=innerWidth;cv.height=innerHeight;
-  document.body.appendChild(cv);
-  const ctx=cv.getContext('2d');
-  const drawWeb=(cx,cy,spk,rings,sz)=>{
-    ctx.strokeStyle='rgba(180,100,220,.55)';ctx.lineWidth=1;ctx.shadowBlur=6;ctx.shadowColor='#9c27b0';
-    for(let s=0;s<spk;s++){const a=s*(Math.PI*2/spk);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*sz,cy+Math.sin(a)*sz);ctx.stroke();}
-    for(let r=1;r<=rings;r++){ctx.beginPath();for(let s=0;s<=spk;s++){const a=s*(Math.PI*2/spk);const d=r*sz/rings;if(s===0)ctx.moveTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);else ctx.lineTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);}ctx.closePath();ctx.stroke();}
-  };
-  drawWeb(0,0,8,5,220);drawWeb(innerWidth,0,8,5,220);
-  drawWeb(0,innerHeight,8,5,220);drawWeb(innerWidth,innerHeight,8,5,220);
-  drawWeb(innerWidth/2,innerHeight/2,14,7,280);
-  setTimeout(()=>{cv.style.opacity='0';setTimeout(()=>cv.remove(),1600);},3000);
-}
+function spawnHedgehogSpines(){for(let i=0;i<12;i++){const el=document.createElement('div');el.className='spine3d';const a=(Math.PI*2*i/12);const d=170+Math.random()*60;el.style.setProperty('--dx',`${Math.cos(a)*d}px`);el.style.setProperty('--dy',`${Math.sin(a)*d}px`);el.textContent=['💥','⚡','🔥','✨'][i%4];document.body.appendChild(el);setTimeout(()=>el.remove(),1400);}}
+function drawSpiderWebCanvas(){const cv=document.createElement('canvas');cv.className='spider-web-canvas';cv.width=innerWidth;cv.height=innerHeight;document.body.appendChild(cv);const ctx=cv.getContext('2d');const drawWeb=(cx,cy,spk,rings,sz)=>{ctx.strokeStyle='rgba(180,100,220,.55)';ctx.lineWidth=1;ctx.shadowBlur=6;ctx.shadowColor='#9c27b0';for(let s=0;s<spk;s++){const a=s*(Math.PI*2/spk);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*sz,cy+Math.sin(a)*sz);ctx.stroke();}for(let r=1;r<=rings;r++){ctx.beginPath();for(let s=0;s<=spk;s++){const a=s*(Math.PI*2/spk);const d=r*sz/rings;if(s===0)ctx.moveTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);else ctx.lineTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);}ctx.closePath();ctx.stroke();}};drawWeb(0,0,8,5,220);drawWeb(innerWidth,0,8,5,220);drawWeb(0,innerHeight,8,5,220);drawWeb(innerWidth,innerHeight,8,5,220);drawWeb(innerWidth/2,innerHeight/2,14,7,280);setTimeout(()=>{cv.style.opacity='0';setTimeout(()=>cv.remove(),1600);},3000);}
 
 function showAnimalAlert(icon,title,desc,color) {
   const bd=document.createElement('div');bd.className='pua-backdrop';document.body.appendChild(bd);
@@ -1036,21 +1048,12 @@ function showAnimalAlert(icon,title,desc,color) {
   setTimeout(()=>{bd.style.transition='opacity .4s';bd.style.opacity='0';al.style.transition='opacity .4s';al.style.opacity='0';setTimeout(()=>{try{bd.remove();al.remove();}catch(e){}},450);},2100);
 }
 
-
-
 // ══ Visual effects ════════════════════════════════════════════════
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function spawnFloat(text,type='red',x,y){
-  const el=document.createElement('div');el.className=`dmg-float ${type}`;el.textContent=text;
-  el.style.left=(x||innerWidth/2-28)+'px';el.style.top=(y||innerHeight*.38)+'px';
-  document.body.appendChild(el);setTimeout(()=>el.remove(),1600);
-}
+function spawnFloat(text,type='red',x,y){const el=document.createElement('div');el.className=`dmg-float ${type}`;el.textContent=text;el.style.left=(x||innerWidth/2-28)+'px';el.style.top=(y||innerHeight*.38)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1600);}
 function shakeScreen(){const w=document.getElementById('game-wrap');if(!w)return;w.classList.remove('screen-shake');void w.offsetWidth;w.classList.add('screen-shake');setTimeout(()=>w.classList.remove('screen-shake'),500);}
 function critExplode(){const el=document.createElement('div');el.className='crit-explode';document.body.appendChild(el);setTimeout(()=>el.remove(),700);}
-function confetti(){
-  const cols=['#c0392b','#f0b040','#27d676','#3498db','#9b59b6','#e74c3c','#fff'];
-  for(let i=0;i<80;i++){const el=document.createElement('div');el.className='confetti-bit';el.style.cssText=`left:${rnd(5,95)}vw;top:-20px;background:${cols[rnd(0,cols.length-1)]};animation-duration:${rnd(12,22)/10}s;animation-delay:${rnd(0,14)/10}s;transform:rotateZ(${rnd(0,360)}deg);width:${rnd(6,12)}px;height:${rnd(10,18)}px;`;document.body.appendChild(el);setTimeout(()=>el.remove(),3000);}
-}
+function confetti(){const cols=['#c0392b','#f0b040','#27d676','#3498db','#9b59b6','#e74c3c','#fff'];for(let i=0;i<80;i++){const el=document.createElement('div');el.className='confetti-bit';el.style.cssText=`left:${rnd(5,95)}vw;top:-20px;background:${cols[rnd(0,cols.length-1)]};animation-duration:${rnd(12,22)/10}s;animation-delay:${rnd(0,14)/10}s;transform:rotateZ(${rnd(0,360)}deg);width:${rnd(6,12)}px;height:${rnd(10,18)}px;`;document.body.appendChild(el);setTimeout(()=>el.remove(),3000);}}
 function triggerEliminationAnim(name){
   playSound('elim');vibrate([120,60,120,60,250]);
   for(let i=0;i<14;i++){const b=document.createElement('div');b.className='blood-drop';const sz=rnd(14,36);b.style.cssText=`width:${sz}px;height:${sz*1.4}px;left:${rnd(15,85)}vw;top:${rnd(20,70)}vh;--rot:${rnd(-60,60)}deg;animation-duration:${rnd(8,14)/10}s;animation-delay:${rnd(0,4)/10}s;`;document.body.appendChild(b);setTimeout(()=>b.remove(),1700);}
@@ -1058,10 +1061,7 @@ function triggerEliminationAnim(name){
   w.innerHTML=`<div class="elim-skull">💀</div><div class="elim-name">${name}</div><div class="elim-sub">è stato eliminato!</div>`;
   document.body.appendChild(w);setTimeout(()=>w.remove(),2600);
 }
-function toast(msg,dur=2500){
-  const el=document.createElement('div');el.style.cssText=`position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5a0a0a,#c0392b);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;z-index:1000;white-space:nowrap;max-width:92vw;text-align:center;box-shadow:0 4px 20px rgba(192,57,43,.5)`;
-  el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';},dur-300);setTimeout(()=>el.remove(),dur);
-}
+function toast(msg,dur=2500){const el=document.createElement('div');el.style.cssText=`position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5a0a0a,#c0392b);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;z-index:1000;white-space:nowrap;max-width:92vw;text-align:center;box-shadow:0 4px 20px rgba(192,57,43,.5)`;el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';},dur-300);setTimeout(()=>el.remove(),dur);}
 
 // ══ Firebase helpers ══════════════════════════════════════════════
 function genRoomId(){return Math.random().toString(36).substr(2,4).toUpperCase();}
@@ -1071,45 +1071,57 @@ function closeOverlay(id){document.getElementById(id).classList.remove('show');}
 async function dbSet(p,d){const{db,ref,set}=window._fb;await set(ref(db,p),d);}
 async function dbUpdate(p,d){const{db,ref,update}=window._fb;await update(ref(db,p),d);}
 async function dbGet(p){const{db,ref,get}=window._fb;const s=await get(ref(db,p));return s.exists()?s.val():null;}
-function dbListen(p,cb){
-  const{db,ref,onValue}=window._fb;
-  const unsub=onValue(ref(db,p),s=>cb(s.exists()?s.val():null));
-  G.unsubscribes.push(unsub);
-}
+function dbListen(p,cb){const{db,ref,onValue}=window._fb;const unsub=onValue(ref(db,p),s=>cb(s.exists()?s.val():null));G.unsubscribes.push(unsub);}
 function dbUnsubAll(){G.unsubscribes.forEach(fn=>{try{fn();}catch(e){}});G.unsubscribes=[];}
+// Log system with micro-batching (max 15ms delay, max 10 entries per batch)
+const _logQueue=[];let _logFlushTO=null;
 function addLog(html,type='system'){
   if(!window._fb||!G.roomId)return;
-  const{db,ref,push}=window._fb;push(ref(db,`rooms/${G.roomId}/log`),{html,ts:Date.now(),type});
+  _logQueue.push({html,ts:Date.now(),type});
+  if(!_logFlushTO) _logFlushTO=setTimeout(_flushLogs,15);
+}
+function _flushLogs(){
+  _logFlushTO=null;
+  if(!_logQueue.length)return;
+  const batch=_logQueue.splice(0,10);
+  const{db,ref,update}=window._fb;
+  const upd={};
+  batch.forEach(entry=>{const k='log_'+entry.ts+'_'+Math.random().toString(36).substr(2,4);upd[k]=entry;});
+  update(ref(db,`rooms/${G.roomId}/log`),upd).catch(()=>{});
 }
 
 // ══ Setup ══════════════════════════════════════════════════════════
-(function(){addPlayerField();addPlayerField();})();
-function addPlayerField(){
+(function(){
+  // BUG FIX: empty player fields at start
+  for(let i=0;i<4;i++) addPlayerField('');
+  document.getElementById('setup-hp').value=300;
+})();
+function addPlayerField(defaultName){
   const list=document.getElementById('players-list');
   if(list.children.length>=17){toast('Max 17 giocatori');return;}
   const n=list.children.length+1;
   const row=document.createElement('div');row.className='player-row';
-  row.innerHTML=`<input type="text" placeholder="Giocatore ${n}" maxlength="16"><button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
+  const val=defaultName||'';
+  row.innerHTML=`<input type="text" value="${val}" placeholder="Giocatore ${n}" maxlength="16"><button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
   list.appendChild(row);
 }
 function selectMode(m){
   G.gameMode=m;
-  document.getElementById('mode-classic').classList.toggle('selected',m==='classic');
-  document.getElementById('mode-hardcore').classList.toggle('selected',m==='hardcore');
+  ['classic','hardcore','chaos'].forEach(id=>{const el=document.getElementById('mode-'+id);if(el)el.classList.toggle('selected',m===id);});
+  const descs={
+    classic:'🎴 Classica: vedi i valori delle carte, scegli il powerup dopo ogni turno.',
+    hardcore:'💀 Hardcore: carte coperte! Scegli alla cieca. Poi scegli il powerup.',
+    chaos:'🌀 Caos: carte coperte + powerup casuale assegnato automaticamente ogni turno!'
+  };
+  const el=document.getElementById('mode-desc');if(el)el.textContent=descs[m]||'';
 }
-function toggleLog(){
-  const h=document.getElementById('log-header');
-  const l=document.getElementById('log-list');
-  G._logOpen=!G._logOpen;
-  h.classList.toggle('open',G._logOpen);
-  l.style.display=G._logOpen?'block':'none';
-}
+function toggleLog(){const h=document.getElementById('log-header');const l=document.getElementById('log-list');G._logOpen=!G._logOpen;h.classList.toggle('open',G._logOpen);l.style.display=G._logOpen?'block':'none';}
 
 // ══ Create game ═══════════════════════════════════════════════════
 async function createGame(){
   if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
   const masterName=document.getElementById('master-name').value.trim()||'Master';
-  const hp=parseInt(document.getElementById('setup-hp').value)||1000;
+  const hp=parseInt(document.getElementById('setup-hp').value)||300;
   const inputs=document.querySelectorAll('#players-list .player-row input');
   const extras=Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
   if(extras.length<1){toast('Aggiungi almeno 1 giocatore');return;}
@@ -1118,9 +1130,13 @@ async function createGame(){
   const allNames=[masterName,...extras];
   const players={};
   allNames.forEach((name,i)=>{
-    players['p'+i]={id:'p'+i,name,hp,maxHp:hp,alive:true,ismaster:i===0,joined:true,skipNext:false,activeBug:false};
+    players['p'+i]={id:'p'+i,name,hp,maxHp:hp,alive:true,ismaster:i===0,joined:true,
+      skipNext:false,activeBug:false,cuttlefishShield:false};
   });
-  const puEnabled={};POWERUPS.forEach(p=>puEnabled[p.id]=true);
+  // Apply mode bans
+  const puEnabled={};
+  const bans=MODE_BANS[G.gameMode]||[];
+  POWERUPS.forEach(p=>puEnabled[p.id]=!bans.includes(p.id));
   const state={
     status:'lobby',mode:G.gameMode,initialHp:hp,direction:1,
     currentTurnIndex:0,turnCount:0,
@@ -1165,23 +1181,43 @@ function generateCards(players,mode){
   return [...alive].sort(()=>Math.random()-.5).map(([pid,p],i)=>({id:'c'+i,value:rnd(0,100),assignedTo:pid,assignedName:p.name}));
 }
 
+let _selectedJoinName=null;
+function onCodeInput(v){if(v.length!==4)return;loadRoomNames();}
+async function loadRoomNames(){
+  if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  if(code.length!==4){toast('Inserisci il codice stanza a 4 lettere');return;}
+  const room=await dbGet(`rooms/${code}`);
+  if(!room){toast('Stanza non trovata');return;}
+  const listEl=document.getElementById('join-name-list');
+  const fieldEl=document.getElementById('join-name-field');
+  const btnEl=document.getElementById('join-btn');
+  _selectedJoinName=null;btnEl.style.display='none';
+  listEl.innerHTML='';
+  const players=room.players||{};
+  const names=Object.values(players).filter(p=>!p.ismaster).map(p=>p.name);
+  if(!names.length){toast('Nessun giocatore in questa stanza');return;}
+  names.forEach(name=>{
+    const btn=document.createElement('button');btn.className='btn btn-ghost btn-sm';btn.textContent=name;
+    btn.style.cssText='text-align:left;padding:12px 16px;font-size:15px;font-weight:700;font-family:"Barlow Condensed",sans-serif;letter-spacing:.5px;transition:.2s';
+    btn.onclick=()=>{document.querySelectorAll('#join-name-list .btn').forEach(b=>b.style.background='');btn.style.background='rgba(200,146,42,.15)';btn.style.borderColor='rgba(200,146,42,.4)';_selectedJoinName=name;btnEl.style.display='block';};
+    listEl.appendChild(btn);
+  });
+  fieldEl.style.display='block';
+}
 async function joinGame(){
   if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
-  const name=document.getElementById('join-name').value.trim();
+  const name=_selectedJoinName||'';
   const code=document.getElementById('join-code').value.trim().toUpperCase();
-  if(!name){toast('Inserisci nome');return;}
+  if(!name){toast('Seleziona il tuo nome dalla lista');return;}
   if(code.length!==4){toast('Codice non valido');return;}
   const room=await dbGet(`rooms/${code}`);
   if(!room){toast('Stanza non trovata');return;}
   if(room.status==='gameover'){toast('Partita terminata');return;}
   G.roomId=code;G.playerName=name;G.isMaster=false;G.isSpectator=false;
   const match=Object.entries(room.players||{}).find(([_,p])=>p.name.toLowerCase()===name.toLowerCase());
-  if(match){
-    G.playerId=match[0];
-    await dbUpdate(`rooms/${code}/players/${G.playerId}`,{joined:true});
-    if(room.status==='playing'){startPlayingScreen();return;}
-    showLobby(code,room.players);
-  }else{toast('Nome non trovato. Contatta il Master.');}
+  if(match){G.playerId=match[0];await dbUpdate(`rooms/${code}/players/${G.playerId}`,{joined:true});if(room.status==='playing'){startPlayingScreen();return;}showLobby(code,room.players);}
+  else{toast('Nome non trovato. Contatta il Master.');}
 }
 async function joinAsSpectator(){
   if(!window._fb){toast('⚠️ Firebase non configurato!');return;}
@@ -1195,17 +1231,26 @@ async function joinAsSpectator(){
 // ══ Playing screen ════════════════════════════════════════════════
 let _lastTurnPid=null;
 function startPlayingScreen(){
-  dbUnsubAll();
-  showScreen('screen-game');
+  dbUnsubAll();showScreen('screen-game');
   document.getElementById('spectator-pill').style.display=G.isSpectator?'block':'none';
   clearTimer();
   G.sessionStats={dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0};
-  G.bearMode=false;G.foxMode=false;G.masterOverrideActive=false;G._shownAnims={};
+  G.bearMode=false;G.foxMode=false;G.dogMode=false;G.dogPuCount=0;
+  G.masterOverrideActive=false;G._shownAnims={};
+  let _lastStateKey='';let _renderPending=false;
   dbListen(`rooms/${G.roomId}`,state=>{
     if(!state)return;
     if(state.status==='gameover'){showGameOver(state);return;}
     checkZeckaDmg(state);
-    if(!G.pendingConfirm)renderState(state);
+    checkLionDmg(state);
+    if(G.pendingConfirm)return;
+    // Throttle: skip if state hasn't meaningfully changed
+    const stateKey=`${state.currentTurnIndex}_${state.turnCount}_${JSON.stringify(state.activePowerups||{})}_${Object.values(state.players||{}).map(p=>`${p.hp}${p.alive?1:0}`).join(',')}`;
+    if(stateKey===_lastStateKey&&!_renderPending)return;
+    _lastStateKey=stateKey;
+    if(_renderPending)return;
+    _renderPending=true;
+    requestAnimationFrame(()=>{_renderPending=false;if(!G.pendingConfirm)renderState(state);});
   });
 }
 
@@ -1223,66 +1268,50 @@ function renderState(state){
   if(foxActive&&foxActive.target===currentPid&&foxActive.owner===G.playerId&&!G.foxMode){
     G.foxMode=true;G.foxTargetPid=currentPid;
   }
-  // Bear: owner gets 2 picks next turn
+  // Bear
   if(pu.bear&&pu.bear.target===G.playerId&&isMyTurn&&!G.bearMode&&G.bearCardsChosen===0){
-    G.bearMode=true;G.bearCardsChosen=0;G.bearFirstTarget=null;
+    G.bearMode=true;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   }
   const canPlay=isMyTurn||G.foxMode||G.masterOverrideActive;
 
   // New turn announcement
   if(_lastTurnPid!==currentPid){
-    _lastTurnPid=currentPid;
-    G._shownAnims={};
+    _lastTurnPid=currentPid;G._shownAnims={};
     if(isMyTurn||G.foxMode){playSound('flip');vibrate([40,30,80]);}
   }
 
-  // Per-turn alerts to affected players
-  if(!G._shownAnims.kang_alert&&pu.kangaroo?.target===G.playerId){
-    G._shownAnims.kang_alert=true;
-    showAnimalAlert('🦘','TURNO SALTATO!','Il Canguro ti ha scavalcato — il tuo turno è saltato!','#f0b040');
-  }
-  if(!G._shownAnims.fox_alert&&foxActive?.target===G.playerId&&foxActive?.owner!==G.playerId){
-    G._shownAnims.fox_alert=true;
-    showAnimalAlert('🦊','VOLPE!','La Volpe gioca al posto tuo — il tuo turno è saltato!','#e67e22');
-  }
-  if(!G._shownAnims.bear_alert&&pu.bear?.target===G.playerId&&isMyTurn){
-    G._shownAnims.bear_alert=true;
-    showAnimalAlert('🐻','ORSO!','Devi scegliere 2 carte obbligatoriamente!','#c0392b');
-  }
-  if(!G._shownAnims.owl_alert&&pu.owl?.target===G.playerId&&isMyTurn){
-    G._shownAnims.owl_alert=true;
-    showAnimalAlert('🦉','GUFO!','Non puoi attivare nessun power-up questo turno!','#6c5ce7');
+  // Per-turn alerts
+  if(!G._shownAnims.kang_alert&&pu.kangaroo?.target===G.playerId){G._shownAnims.kang_alert=true;showAnimalAlert('🦘','TURNO SALTATO!','Il Canguro ti ha scavalcato!','#f0b040');}
+  if(!G._shownAnims.fox_alert&&foxActive?.target===G.playerId&&foxActive?.owner!==G.playerId){G._shownAnims.fox_alert=true;showAnimalAlert('🦊','VOLPE!','La Volpe gioca al posto tuo!','#e67e22');}
+  if(!G._shownAnims.bear_alert&&pu.bear?.target===G.playerId&&isMyTurn){G._shownAnims.bear_alert=true;showAnimalAlert('🐻','ORSO!','Devi scegliere 2 carte diverse!','#c0392b');}
+  if(!G._shownAnims.owl_alert&&pu.owl?.target===G.playerId&&isMyTurn){G._shownAnims.owl_alert=true;showAnimalAlert('🦉','GUFO!','Non puoi attivare power-up!','#6c5ce7');}
+  if(!G._shownAnims.wolf_alert&&pu.wolf&&canPlay){G._shownAnims.wolf_alert=true;showAnimalAlert('🐺','LUPO!','Nessun powerup disponibile questo giro!','#b71c1c');}
+  if(!G._shownAnims.ostrich_alert&&pu.ostrich&&canPlay){G._shownAnims.ostrich_alert=true;showAnimalAlert('🪶','STRUZZO!','L\'ultima carta a destra è bloccata!','#d4a040');}
+  if(!G._shownAnims.rhino_alert&&pu.rhino?.target===G.playerId&&isMyTurn){G._shownAnims.rhino_alert=true;showAnimalAlert('🦏','RINOCERONTE!','Tutte le carte si attivano automaticamente! Vai ai powerup...','#9e9e9e');
+    // BUG FIX: Auto-advance to PU choice after delay, without requiring card click
+    setTimeout(async()=>{
+      await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/rhino':null});
+      const fresh2=await dbGet(`rooms/${G.roomId}`);
+      if(fresh2&&fresh2.status==='playing') await showPuChoice(fresh2,G.playerId);
+    },2300);
   }
 
   // Per-turn anim triggers
-  if(canPlay&&!G._shownAnims.rat&&pu.rat&&pu.rat.owner!==G.playerId&&!G.foxMode){
-    G._shownAnims.rat=true;triggerAnim('rat');
-  }
-  if(canPlay&&!G._shownAnims.kangaroo&&pu.kangaroo?.target===currentPid){
-    G._shownAnims.kangaroo=true;
-    // kangaroo effect handled in nextTurn; just show anim here
-    triggerAnim('kangaroo');
-  }
-  if(canPlay&&!G._shownAnims.cheetah&&pu.cheetah&&!G.timerActive){
-    G._shownAnims.cheetah=true;triggerAnim('cheetah');
-  }
-  if(canPlay&&!G._shownAnims.owl&&pu.owl){
-    G._shownAnims.owl=true;triggerAnim('owl');
-  }
-  if(canPlay&&!G._shownAnims.crocodile&&pu.crocodile){
-    G._shownAnims.crocodile=true;triggerAnim('crocodile');
-  }
+  if(canPlay&&!G._shownAnims.rat&&pu.rat&&pu.rat.owner!==G.playerId&&!G.foxMode){G._shownAnims.rat=true;triggerAnim('rat');}
+  if(canPlay&&!G._shownAnims.cheetah&&pu.cheetah&&!G.timerActive){G._shownAnims.cheetah=true;triggerAnim('cheetah');}
+  if(canPlay&&!G._shownAnims.owl&&pu.owl){G._shownAnims.owl=true;triggerAnim('owl');}
+  if(canPlay&&!G._shownAnims.crocodile&&pu.crocodile){G._shownAnims.crocodile=true;triggerAnim('crocodile');}
 
   // UI updates
   document.getElementById('turn-name').textContent=
     G.foxMode?`${players[foxActive?.owner]?.name}→${players[currentPid]?.name}`:(players[currentPid]?.name||'—');
   document.getElementById('dir-bar').textContent=state.direction===1?'→ SENSO ORARIO':'← SENSO ANTIORARIO';
   renderHpStrip(players,order,currentPid,state.initialHp||1000);
-  renderPuBanner(pu);
+  renderPuBanner(pu,canPlay);
 
   const pill=document.getElementById('special-turn-pill');
   if(pill){
-    if(G.bearMode&&canPlay){pill.style.display='block';pill.innerHTML=`🐻 ORSO — Scegli carta<span class="bear-cards-left">${G.bearCardsChosen+1}/2</span>`;}
+    if(G.bearMode&&canPlay){pill.style.display='block';pill.innerHTML=`🐻 ORSO — Scegli carta <span class="bear-cards-left">${G.bearCardsChosen+1}/2</span>`;}
     else if(G.foxMode){pill.style.display='block';pill.innerHTML=`🦊 VOLPE — Giochi per <b>${players[currentPid]?.name}</b>`;}
     else{pill.style.display='none';}
   }
@@ -1302,11 +1331,15 @@ function renderState(state){
   const cheetahOwner=pu.cheetah?.owner;
   if(canPlay&&pu.cheetah&&!G.timerActive&&cheetahOwner!==G.playerId&&!G.isSpectator){
     startTimer(7,async()=>{
+      hidePuSection();
       const fresh=await dbGet(`rooms/${G.roomId}`);if(!fresh)return;
       addLog(`<span class='lpu'>⏱ Tempo scaduto!</span> <span class='lp'>${players[currentPid]?.name}</span> salta il turno.`,'system');
       await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/cheetah':null});
       await nextTurn(fresh);
     });
+  }else if(pu.cheetah&&!canPlay){
+    const tn=document.getElementById('timer-num');if(tn)tn.textContent='🐆';
+    const tw=document.getElementById('timer-wrap');if(tw)tw.classList.add('urgent');
   }else if(!pu.cheetah){
     clearTimer();
     const tn=document.getElementById('timer-num');if(tn)tn.textContent='—';
@@ -1327,8 +1360,8 @@ function renderHpStrip(players,order,currentPid,initialHp){
     card.id=`hp-${pid}`;
     card.className=`hp-card${!p.alive?' dead':''}${pid===currentPid?' active':''}${isDanger&&p.alive?' danger':''}`;
     card.innerHTML=`${isDanger&&p.alive?'<div class="danger-skull">💀</div>':''}
-
       ${p.activeBug?'<div class="bug-shield">🐛</div>':''}
+      ${p.cuttlefishShield?'<div class="bug-shield">🦑</div>':''}
       <div class="hpc-name">${p.name}</div>
       <div class="hpc-val" style="color:${!p.alive?'var(--muted)':pct>50?'var(--text)':pct>25?'var(--gold)':'var(--red3)'}">${p.alive?p.hp:'☠'}</div>
       <div class="hpc-bar"><div class="hpc-fill" style="width:${pct}%;background:${barColor}"></div></div>`;
@@ -1337,44 +1370,72 @@ function renderHpStrip(players,order,currentPid,initialHp){
 }
 
 // ══ PU Banner ═════════════════════════════════════════════════════
-function renderPuBanner(pu){
+const PU_AFTER_IDS=['bull','hedgehog','turtle','koala','spider','ram','deer','armadillo','chameleon','donkey','viper','crocodile','swordfish','frog','orca','zebra','scarab'];
+function renderPuBanner(pu,canPlay){
   const banner=document.getElementById('pu-banner');
-  const entries=pu?Object.entries(pu):[];
+  const entries=pu?Object.entries(pu).filter(([k])=>k!=='_lionPendingDmg'):[];
   if(!entries.length){banner.classList.remove('show');return;}
-  const [id]=entries[0];
-  const def=POWERUPS.find(p=>p.id===id);
-  if(!def){banner.classList.remove('show');return;}
-  document.getElementById('pu-banner-icon').textContent=def.icon;
-  document.getElementById('pu-banner-title').textContent=`${def.name.toUpperCase()} ATTIVO`;
-  document.getElementById('pu-banner-desc').textContent=def.desc;
-  banner.classList.add('show');
+  // Show first non-system PU
+  let shown=false;
+  for(const [id,val] of entries){
+    const def=POWERUPS.find(p=>p.id===id);
+    if(!def)continue;
+    const isAfterType=PU_AFTER_IDS.includes(id);
+    const hideFromActive=isAfterType&&canPlay&&!G.isSpectator;
+    document.getElementById('pu-banner-icon').textContent=hideFromActive?'❓':def.icon;
+    document.getElementById('pu-banner-title').textContent=hideFromActive?'POTERE SEGRETO':def.name.toUpperCase()+' ATTIVO';
+    document.getElementById('pu-banner-desc').textContent=hideFromActive?'Un potere sarà rivelato dopo la tua scelta...':def.desc;
+    banner.classList.add('show');shown=true;break;
+  }
+  if(!shown) banner.classList.remove('show');
 }
 
 // ══ Render Cards ══════════════════════════════════════════════════
-// RULE FIX: Classica = active sees values only (no names); others see values+names
-// RULE FIX: Hardcore = active sees nothing (covered); others see everything
 let _cardLocked=false;
 function renderCards(state,canPlay,currentPid){
   if(G.pendingConfirm)return;
   _cardLocked=false;
   const grid=document.getElementById('cards-grid');grid.innerHTML='';
   const pu=state.activePowerups||{};
+  const players=state.players||{};
+  const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  const iAmActive=canPlay;
 
   document.getElementById('cards-label').textContent=
     canPlay?(G.bearMode?`🐻 Orso: scegli carta ${G.bearCardsChosen+1} di 2`:'⚔️ Scegli la tua carta'):
     G.isSpectator?'👁 Vista spettatore':'⏳ Attendi il tuo turno';
 
-  let cards=[...(state.cards||[])];
-  if(state.tickCard)cards.push({...state.tickCard});
-  if(pu.viper)cards.push({id:'viper-special',value:pu.viper.value||42,assignedTo:'viper',assignedName:'???',badge:'viper'});
-  if(state.butterflyActive&&state.butterflyCards)Object.values(state.butterflyCards).forEach(bc=>cards.push({...bc,badge:'butterfly'}));
-  if(pu.chameleon&&!state.chameleonUsed){
-    const elim=Object.values(state.players||{}).filter(p=>!p.alive);
-    if(elim.length>0)cards.push({id:'revival-special',value:pu.chameleon.value||rnd(30,80),assignedTo:'revival',assignedName:'Rivivi',badge:'revival'});
+  // BUG FIX: Rinoceronte - block card selection while auto-advance is pending
+  const rhinoBlocked=!!(pu.rhino?.target===activePid&&iAmActive);
+  if(rhinoBlocked){
+    document.getElementById('cards-label').textContent='🦏 Rinoceronte — tutte le carte si attivano... attendi';
   }
 
-  // Donkey swap display
-  if(pu.donkey){
+  let cards=[...(state.cards||[])];
+  // Tick card
+  if(state.tickCard) cards.push({...state.tickCard});
+  // Viper card
+  if(pu.viper) cards.push({id:'viper-special',value:pu.viper.value||42,assignedTo:'viper',assignedName:'???',badge:'viper'});
+  // Butterfly cards - BUG FIX: only show the butterfly card assigned to the current active player
+  if(state.butterflyActive&&state.butterflyCards) Object.values(state.butterflyCards).forEach(bc=>{
+    if(bc.assignedTo===activePid) cards.push({...bc,badge:'butterfly',assignedName:'🦋'});
+  });
+  // Chameleon revival card - BUG FIX: only show to the designated target (next player after activator)
+  if(pu.chameleon&&!state.chameleonUsed&&pu.chameleon.target===activePid){
+    const elim=Object.values(players).filter(p=>!p.alive);
+    if(elim.length>0) cards.push({id:'revival-special',value:pu.chameleon.value||rnd(30,80),assignedTo:'revival',assignedName:'Rivivi',badge:'revival'});
+  }
+  // Penguin cards (value 0, HIDDEN effect - show as covered)
+  if(pu.penguin&&pu.penguin.owner!==activePid) cards.push({id:'penguin-special',value:0,assignedTo:'penguin',assignedName:'???',badge:'penguin',hidden:true});
+  // Scorpion cards (value 100, HIDDEN effect - show as covered)
+  if(pu.scorpion&&pu.scorpion.owner!==activePid) cards.push({id:'scorpion-special',value:100,assignedTo:'scorpion',assignedName:'???',badge:'scorpion',hidden:true});
+  // Zebra duplicate card
+  if(pu.zebra?.target===currentPid&&pu.zebra.dupCard) cards.push({...pu.zebra.dupCard,badge:'zebra'});
+  // Scarab card
+  if(pu.scarab?.target===currentPid) cards.push({id:'scarab-special',value:rnd(0,100),assignedTo:'scarab',assignedName:'???',badge:'scarab'});
+
+  // Donkey swap display: only show to non-active players
+  if(pu.donkey&&!iAmActive){
     const normal=cards.filter(c=>!c.badge);
     if(normal.length>=2){
       const vals=[...normal].map(c=>c.value).sort((a,b)=>a-b);
@@ -1388,67 +1449,66 @@ function renderCards(state,canPlay,currentPid){
     }
   }
 
-  // RULE FIX: visibility logic
-  // Classica: active player sees values ONLY (no names); other players see values + names
-  // Hardcore: active player sees NOTHING (covered); others see everything
-  // Topo: other players (non-activator) see covered; activator sees normally
-  // Spectator: always sees everything
-  const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
-  const iAmActive=canPlay;
-
+  // VISIBILITY LOGIC (BUG FIX: Rat now covers cards for active player too)
   let forceCovered=false;
   let showNames=true;
+  const ratActive=!!(pu.rat&&pu.rat.owner!==activePid&&!G.isSpectator);
 
   if(G.isSpectator){
     forceCovered=false;showNames=true;
-  }else if(state.mode==='hardcore'){
+  }else if(ratActive&&iAmActive){
+    // BUG FIX: Rat covers active player's cards (like hardcore mode)
+    forceCovered=true;showNames=false;
+  }else if(ratActive&&!iAmActive){
+    forceCovered=true;showNames=false;
+  }else if(state.mode==='hardcore'||state.mode==='chaos'){
     if(iAmActive){forceCovered=true;showNames=false;}
     else{forceCovered=false;showNames=true;}
   }else{
-    // Classica
-    if(iAmActive){
-      forceCovered=false;
-      // Active player in Classica: sees values but NOT names
-      showNames=false;
-      // Unless eagle reveals a specific card
-    }else{
-      // Topo: non-activators see covered
-      if(pu.rat&&pu.rat.owner!==G.playerId){
-        forceCovered=true;showNames=false;
-      }else{
-        forceCovered=false;showNames=true;
-      }
-    }
+    // Classic mode
+    if(iAmActive){forceCovered=false;showNames=false;}
+    else{forceCovered=false;showNames=true;}
   }
 
   // Eagle: active player sees 1 specific name
-  const eagleRevealPid=(pu.eagle&&pu.eagle.owner===G.playerId&&iAmActive)?pu.eagle.reveal:null;
-
-  // Rat active class on the cards section container
+  const eagleRevealPid=(pu.eagle&&pu.eagle.owner===activePid&&iAmActive)?pu.eagle.reveal:null;
+  // Rat class
   const sec=document.querySelector('.cards-section');
-  if(sec) sec.classList.toggle('rat-active', !!(pu.rat&&!G.isSpectator&&pu.rat.owner!==G.playerId));
+  if(sec) sec.classList.toggle('rat-active', ratActive);
   grid.className='cards-grid'+(cards.length>6?' compact':'');
 
-  // Bear mode: disable cards targeting already-chosen target
-  const bearUsedTargets=G.bearFirstTarget?[G.bearFirstTarget]:[];
+  // Ostrich: last card blocked
+  const ostrichActive=!!pu.ostrich&&pu.ostrich.owner!==activePid;
 
-  cards.forEach(card=>{
+  cards.forEach((card,idx)=>{
     const div=document.createElement('div');
-    const isCrit=card.value>=80&&!forceCovered;
-    const isBearDisabled=G.bearMode&&G.bearCardsChosen===1&&card.assignedTo===G.bearFirstTarget;
+    const isLastCard=(idx===cards.length-1);
+    const isOstrichBlocked=ostrichActive&&isLastCard&&!card.badge;
+    const isCrit=card.value>=80&&!forceCovered&&!card.hidden;
+    // BUG FIX: Bear must choose 2 different cards (different card IDs, not same-target restriction)
+    const isBearDisabled=G.bearMode&&G.bearCardsChosen===1&&card.id===G.bearFirstCardId;
     const cls=['game-card'];
-    if(!canPlay||isBearDisabled)cls.push('disabled');
+    if(!canPlay||isBearDisabled||isOstrichBlocked||rhinoBlocked)cls.push('disabled');
     if(isCrit&&!forceCovered)cls.push('critical-card');
-    if(forceCovered)cls.push('card-covered');
+    if(forceCovered||card.hidden)cls.push('card-covered');
+    if(isOstrichBlocked)cls.push('card-covered');
     div.className=cls.join(' ');
 
-    if(forceCovered){
-      div.innerHTML=`<div class="card-covered-pattern"></div><div class="card-covered-shimmer"></div><div class="card-covered-symbol">🐾</div>`;
+    if(forceCovered||(isOstrichBlocked&&!forceCovered)||card.hidden){
+      const sym=isOstrichBlocked&&!forceCovered?'🪶':card.badge==='penguin'?'🐧':card.badge==='scorpion'?'🦂':'🐾';
+      div.innerHTML=`<div class="card-covered-pattern"></div><div class="card-covered-shimmer"></div><div class="card-covered-symbol">${sym}</div>`;
     }else{
       const isEagle=eagleRevealPid&&eagleRevealPid===card.assignedTo;
       const showThisName=showNames||isEagle;
       const nameClass=showThisName?`revealed${isEagle?' eagle-glow':''}`:' hidden';
-      const badgeHtml=card.badge?`<div class="card-badge badge-${card.badge}">${{tick:'🐜 ZECCA',viper:'🐍 VIPERA',butterfly:'🦋 BONUS',revival:'💚 VITA'}[card.badge]||''}</div>`:'';
+      // Badge labels: hide from active player to avoid spoilers
+      const badgeLabels={
+        tick:iAmActive?'':'🐜 ZECCA',viper:iAmActive?'':'🐍 VIPERA',
+        butterfly:'🦋 BONUS',revival:'💚 VITA',
+        penguin:iAmActive?'':'',scorpion:iAmActive?'':'',
+        zebra:iAmActive?'':'🦓',scarab:iAmActive?'':''
+      };
+      const badgeHtml=card.badge?`<div class="card-badge badge-${card.badge}">${badgeLabels[card.badge]||''}</div>`:'';
       div.innerHTML=`
         <div class="card-corner tl">${card.value>=50?'♦':'♣'}</div>
         <div class="card-corner br">${card.value>=50?'♦':'♣'}</div>
@@ -1458,7 +1518,8 @@ function renderCards(state,canPlay,currentPid){
         <div class="card-name-reveal ${nameClass}">${showThisName&&card.assignedName?card.assignedName:''}</div>`;
     }
 
-    if(canPlay&&!isBearDisabled){
+    // BUG FIX: block multiple card selection - only allow click if canPlay and not locked
+    if(canPlay&&!isBearDisabled&&!isOstrichBlocked&&!rhinoBlocked){
       div.addEventListener('click',()=>{
         if(_cardLocked||G.pendingConfirm)return;
         _cardLocked=true;
@@ -1490,7 +1551,7 @@ async function resolveCard(card,state){
     addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la <span class='lpu'>🐜 Zecca</span>: <span class='ld'>-${card.value}</span> — zecca rimossa`,'damage');
     spawnFloat(`-${card.value}`,'red');shakeScreen();playSound('hit');vibrate([80]);
     await dbUpdate(`rooms/${G.roomId}`,{tickCard:null,...postUpd});
-    await checkWin(await dbGet(`rooms/${G.roomId}`));
+    await checkElimAndWin(activePid);
     await proceedAfterCard(state,activePid);return;
   }
   if(card.badge==='viper'){
@@ -1498,11 +1559,18 @@ async function resolveCard(card,state){
     await dbUpdate(`rooms/${G.roomId}`,{[`players/${activePid}/hp`]:0,[`players/${activePid}/alive`]:false,'activePowerups/viper':null,...postUpd});
     addLog(`<span class='lp'>${players[activePid]?.name}</span> cade nella <span class='lpu'>🐍 Vipera</span>: <span class='ld'>ELIMINATO!</span>`,'elim');
     triggerEliminationAnim(players[activePid]?.name||'?');
+    // BUG FIX: eliminated player loses active powerups and can't choose PU
+    await clearPlayerPowerups(activePid,state);
     await checkWin(await dbGet(`rooms/${G.roomId}`));
-    await proceedAfterCard(state,activePid);return;
+    // Skip PU choice since player is eliminated
+    G.pendingConfirm=false;_cardLocked=false;
+    G.bearMode=false;G.bearCardsChosen=0;G.foxMode=false;G.foxTargetPid=null;
+    G.masterOverrideActive=false;G.masterOverridePid=null;
+    const fresh=await dbGet(`rooms/${G.roomId}`);
+    if(fresh&&fresh.status==='playing') await nextTurn(fresh);
+    return;
   }
   if(card.badge==='revival'){
-    // Camaleonte revival
     const elim=Object.entries(players).filter(([_,p])=>!p.alive);
     if(elim.length>0){
       const [rpid,rp]=elim[rnd(0,elim.length-1)];
@@ -1515,13 +1583,62 @@ async function resolveCard(card,state){
   }
   if(card.badge==='butterfly'){
     const owner=state.butterflyOwner;
+    triggerAnim('butterfly');
     if(owner&&players[owner]?.alive){
-      triggerAnim('butterfly');
       await applyHpFresh(owner,card.value);
-      addLog(`<span class='lpu'>🦋 Farfalla</span>: <span class='lp'>${players[owner]?.name}</span> guadagna <span class='lh'>+${card.value}</span> HP`,'heal');
-      spawnFloat(`+${card.value}`,'green');playSound('heal');
+      addLog(`<span class='lpu'>🦋 Farfalla</span>: <span class='lp'>${players[owner]?.name}</span> guadagna <span class='lh'>+${card.value}</span> HP!`,'heal');
+      spawnFloat(`+${card.value}`,'green');playSound('heal');vibrate([60]);
     }
-    if(Object.keys(postUpd).length)await dbUpdate(`rooms/${G.roomId}`,postUpd);
+    const remainingBf={};
+    if(state.butterflyCards){Object.entries(state.butterflyCards).forEach(([k,v])=>{if(v.id!==card.id)remainingBf[k]=v;});}
+    const hasRemaining=Object.keys(remainingBf).length>0;
+    await dbUpdate(`rooms/${G.roomId}`,{butterflyActive:hasRemaining,butterflyCards:hasRemaining?remainingBf:null,butterflyOwner:hasRemaining?owner:null,...postUpd});
+    await proceedAfterCard(state,activePid);return;
+  }
+  // Penguin card (value 0 - harmless, but hidden until picked)
+  if(card.badge==='penguin'){
+    triggerAnim('penguin');
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la carta del <span class='lpu'>🐧 Pinguino</span>: valore 0! Nessun danno.`,'system');
+    toast('🐧 Pinguino! La carta vale 0 — nessun danno!');
+    // Penguin stays active until owner's next turn (not removed here)
+    await dbUpdate(`rooms/${G.roomId}`,{...postUpd});
+    await proceedAfterCard(state,activePid);return;
+  }
+  // Scorpion card (value 100 to SELF)
+  if(card.badge==='scorpion'){
+    triggerAnim('scorpion');
+    await applyHpFresh(activePid,-100);
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la carta dello <span class='lpu'>🦂 Scorpione</span>: <span class='ld'>-100 HP!</span>`,'damage');
+    spawnFloat('-100','red');shakeScreen();playSound('crit');vibrate([100,50,100]);
+    await dbUpdate(`rooms/${G.roomId}`,{...postUpd});
+    await checkElimAndWin(activePid);
+    await proceedAfterCard(state,activePid);return;
+  }
+  // Zebra duplicate card (same as original)
+  if(card.badge==='zebra'){
+    triggerAnim('zebra');
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie il doppione della <span class='lpu'>🦓 Zebra</span>!`,'powerup');
+    toast('🦓 Zebra! Hai scelto la carta duplicata!');
+    // Treat as normal card with same target/value
+    const zebraTarget=card.assignedTo;
+    const zebraDmg=card.value;
+    await applyHpFresh(zebraTarget,-zebraDmg);
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> → ${players[zebraTarget]?.name}: <span class='ld'>-${zebraDmg}</span>`,'damage');
+    spawnFloat(`-${zebraDmg}`,'red');shakeScreen();playSound('hit');
+    await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/zebra':null,...postUpd});
+    await checkElimAndWin(zebraTarget);
+    await proceedAfterCard(state,activePid);return;
+  }
+  // Scarab card (lose half HP)
+  if(card.badge==='scarab'){
+    triggerAnim('scarab');
+    const p=await dbGet(`rooms/${G.roomId}/players/${activePid}`);
+    const halfHp=Math.ceil((p?.hp||0)/2);
+    await applyHpFresh(activePid,-halfHp);
+    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie lo <span class='lpu'>🪲 Scarabeo</span>: <span class='ld'>-${halfHp} HP</span> (metà vita!)`, 'damage');
+    spawnFloat(`-${halfHp}`,'red');shakeScreen();playSound('crit');vibrate([100,50,100]);
+    await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/scarab':null,...postUpd});
+    await checkElimAndWin(activePid);
     await proceedAfterCard(state,activePid);return;
   }
 
@@ -1530,12 +1647,67 @@ async function resolveCard(card,state){
   let dmg=card.value;
   let dmgType='damage';
 
+  // Gorilla: if active and this is the FIRST card (index 0), convert to SELF-HEAL (hidden until now)
+  // BUG FIX: heals the ACTIVE PLAYER who picks the card, not the card's assigned target
+  if(pu.gorilla&&pu.gorilla.owner!==activePid){
+    const normalCards=(state.cards||[]).filter(c=>!c.badge);
+    if(normalCards.length>0&&card.id===normalCards[0].id){
+      dmgType='heal';
+      target=activePid; // FIX: heal goes to the picker, not the assigned target
+      triggerAnim('gorilla');
+      addLog(`<span class='lpu'>🦍 Gorilla</span>: la prima carta cura invece di danneggiare!`,'powerup');
+    }
+  }
+
+  // Orca: card value becomes lowest HP player's HP
+  if(pu.orca){
+    const alivePs=Object.entries(players).filter(([_,p])=>p.alive);
+    const minHp=Math.min(...alivePs.map(([_,p])=>p.hp));
+    dmg=minHp;
+    triggerAnim('orca');
+    addLog(`<span class='lpu'>🐋 Orca</span>: il valore della carta diventa ${dmg} (HP minimo in gioco)!`,'powerup');
+  }
+
+  // Donkey swap
+  if(pu.donkey){
+    const normalCards=(state.cards||[]).filter(c=>!c.badge);
+    if(normalCards.length>=2){
+      const vals=normalCards.map(c=>c.value).sort((a,b)=>a-b);
+      const minV=vals[0],maxV=vals[vals.length-1];
+      if(minV!==maxV){
+        if(card.value===minV)dmg=maxV;
+        else if(card.value===maxV)dmg=minV;
+      }
+    }
+    triggerAnim('donkey');
+    addLog(`<span class='lpu'>🫏 Asino</span>: valori scambiati!`,'powerup');
+  }
+
+  // Frog: swap HP instead of damage
+  if(pu.frog&&target!==activePid){
+    triggerAnim('frog');
+    const myHp=players[activePid]?.hp||0;
+    const theirHp=players[target]?.hp||0;
+    await dbUpdate(`rooms/${G.roomId}`,{
+      [`players/${activePid}/hp`]:theirHp,
+      [`players/${target}/hp`]:myHp,
+      'activePowerups/frog':null,...postUpd
+    });
+    addLog(`<span class='lpu'>🐸 Rana</span>: <span class='lp'>${players[activePid]?.name}</span> (${myHp} HP) ↔ <span class='lp'>${players[target]?.name}</span> (${theirHp} HP) — scambio vita!`,'powerup');
+    toast(`🐸 Rana! Scambio HP: ${myHp} ↔ ${theirHp}`);
+    spawnFloat('↔','green');playSound('heal');
+    await clearAfterPU(pu);
+    G.sessionStats.turnsPlayed++;
+    await proceedAfterCard(state,activePid);return;
+  }
+
   // Crocodile block
   if(pu.crocodile?.owner&&target===pu.crocodile.owner&&activePid!==pu.crocodile.owner){
-    toast(`🐊 Coccodrillo! Non puoi colpire ${players[pu.crocodile.owner]?.name}! Scelta annullata.`);
-    _cardLocked=false;G.pendingConfirm=false;
-    document.querySelectorAll('.game-card').forEach(c=>c.classList.remove('disabled','flip-anim'));
-    return;
+    triggerAnim('crocodile');
+    toast(`🐊 Coccodrillo! Non puoi colpire ${players[pu.crocodile.owner]?.name}!`);
+    G.pendingConfirm=false;_cardLocked=false;
+    const freshCroc=await dbGet(`rooms/${G.roomId}`);
+    if(freshCroc) renderState(freshCroc);return;
   }
 
   // Bug reflect
@@ -1546,73 +1718,115 @@ async function resolveCard(card,state){
     triggerAnim('bug');
   }
 
-  // Dolphin shield
+  // Cuttlefish shield: immune to PU damage (but not direct card damage)
+  // Seppia protects from PU effects like armadillo/ram/hedgehog but NOT from normal card choice
   const realTarget=bugReflect?activePid:card.assignedTo;
-  if(players[realTarget]?.dolphinShield&&dmgType==='damage'&&!bugReflect){
-    const sName=players[realTarget]?.name||'?';
-    addLog(`<span class='lpu'>🐬 Delfino</span>: danno su <span class='lp'>${sName}</span> bloccato!`,'system');
-    toast(`🐬 Delfino! ${sName} ha bloccato il danno!`);
-    await dbUpdate(`rooms/${G.roomId}`,{[`players/${realTarget}/dolphinShield`]:false,...postUpd});
-    await clearAfterPU(pu);
-    G.sessionStats.turnsPlayed++;
-    await proceedAfterCard(state,activePid);return;
-  }
+
+  // Mosquito drain: activator deals damage AND heals
+  const mosquitoActive=pu.mosquito&&pu.mosquito.owner===activePid;
 
   // Modifiers
   if(pu.bull){dmg=Math.min(99999,dmg*2);triggerAnim('bull');}
   if(pu.turtle)dmg=Math.ceil(dmg/2);
   if(pu.koala){dmgType='heal';triggerAnim('koala');}
   if(pu.hedgehog){dmgType='all';triggerAnim('hedgehog');}
-  if(pu.deer){
-    dmgType='all';triggerAnim('deer');
-    const normal=(state.cards||[]).filter(c=>!c.badge);
-    if(normal.length>0)dmg=normal[rnd(0,normal.length-1)].value;
-  }
+  const isDeer=!!pu.deer;
 
+  // tName must be computed AFTER gorilla may have changed target
   const tName=players[target]?.name||'???';
   const aName=players[activePid]?.name||'???';
   let icon,title,desc,dmgClass='red';
 
   if(bugReflect){icon='🐛';title='CIMICE! DANNO RIFLESSO';desc=`${aName} voleva colpire ${players[card.assignedTo]?.name} ma il danno è stato riflesso!`;dmgClass='red';}
-  else if(dmgType==='all'){icon=pu.deer?'🦌':'🦔';title=pu.deer?'CERVO! DANNI A TUTTI!':'RICCIO! DANNI A TUTTI!';desc=`${aName} infligge ${dmg} a TUTTI i giocatori vivi!`;}
+  else if(dmgType==='all'){icon='🦔';title='RICCIO! DANNI A TUTTI!';desc=`${aName} infligge ${dmg} a TUTTI!`;}
+  else if(dmgType==='heal'&&target===activePid&&!pu.koala){icon='🦍';title='GORILLA! CURA!';desc=`${aName} guadagna ${dmg} HP grazie al Gorilla!`;dmgClass='green';}
   else if(dmgType==='heal'){icon='💚';title='KOALA! CURA!';desc=`${aName} cura ${tName} di ${dmg} HP`;dmgClass='green';}
   else{
     icon=dmg>=80?'💥':'⚔️';title=dmg>=80?'COLPO CRITICO!':`COLPITO: ${tName.toUpperCase()}!`;
-    desc=`${aName} infligge ${dmg} danni a ${tName}${pu.bull?' (Toro ×2!)':pu.turtle?' (Tartaruga ÷2!)':''}${bugReflect?' [🐛 riflesso]':''}`;
+    desc=`${aName} infligge ${dmg} danni a ${tName}${pu.bull?' (Toro ×2!)':pu.turtle?' (Tartaruga ÷2!)':''}${mosquitoActive?' (🦟 Drain!)':''}`;
   }
 
   showReveal(icon,title,desc,dmg,dmgClass,async()=>{
+    // ── Accumulate ALL HP deltas into one batch ────────────────────
+    const hpDeltas=[]; // [{pid,delta}]
+    const extraUpd={}; // extra firebase keys (spider skipNext, mosquito clear, etc.)
+    const logLines=[]; // collect all log lines, flush in one push at end
+
     if(dmgType==='all'){
+      // Riccio / Orca all-hit
       const alivePs=Object.entries(players).filter(([_,p])=>p.alive).map(([id])=>id);
-      for(const apid of alivePs)await applyHpFresh(apid,-dmg);
+      for(const apid of alivePs){
+        if(players[apid]?.cuttlefishShield&&apid!==activePid) continue;
+        hpDeltas.push({pid:apid,delta:-dmg});
+      }
       spawnFloat(`-${dmg} TUTTI`,'red');shakeScreen();playSound(dmg>=80?'crit':'hit');vibrate([100,40,100]);
     }else{
-      await applyHpFresh(target,dmgType==='heal'?dmg:-dmg);
-      if(pu.armadillo&&dmgType!=='heal'){
-        // RULE FIX: if self-target, double damage
-        if(target===activePid){
-          await applyHpFresh(activePid,-dmg); // extra hit for self-target
-        }else{
-          await applyHpFresh(activePid,-dmg);
-        }
-        triggerAnim('armadillo');
+      // Primary target
+      hpDeltas.push({pid:target,delta:dmgType==='heal'?dmg:-dmg});
+
+      // Mosquito drain
+      if(mosquitoActive&&dmgType==='damage'){
+        hpDeltas.push({pid:activePid,delta:dmg});
+        logLines.push({html:`<span class='lpu'>🦟 Zanzara</span>: <span class='lp'>${aName}</span> si cura di <span class='lh'>+${dmg}</span>!`,type:'heal'});
+        spawnFloat(`+${dmg}`,'green');playSound('heal');
+        extraUpd['activePowerups/mosquito']=null;
       }
+
+      // Armadillo
+      if(pu.armadillo&&dmgType!=='heal'){
+        if(!players[activePid]?.cuttlefishShield){
+          hpDeltas.push({pid:activePid,delta:-dmg});
+          const armMsg=target===activePid?`danno ×2 su se stesso`:`subisce <span class='ld'>-${dmg}</span>`;
+          logLines.push({html:`<span class='lpu'>🛡️ Armadillo</span>: <span class='lp'>${aName}</span> ${armMsg}!`,type:'damage'});
+          triggerAnim('armadillo');
+        }else{
+          logLines.push({html:`<span class='lpu'>🦑 Seppia</span> blocca l'Armadillo su <span class='lp'>${aName}</span>!`,type:'system'});
+        }
+      }
+
+      // Ram: adjacent
       if(pu.ram&&dmgType==='damage'){
         const ord=state.playerOrder||[];
         const ai=ord.indexOf(target);
-        const prev=ord[(ai-1+ord.length)%ord.length];
-        const next=ord[(ai+1)%ord.length];
-        const half=Math.floor(dmg/2);
-        if(half>0){
-          if(players[prev]?.alive&&prev!==target)await applyHpFresh(prev,-half);
-          if(players[next]?.alive&&next!==target)await applyHpFresh(next,-half);
-          triggerAnim('ram');
+        let pi=ai,ni=ai;
+        for(let s=1;s<ord.length;s++){const lp=ord[(ai-s+ord.length)%ord.length];if(lp!==target&&players[lp]?.alive){pi=(ai-s+ord.length)%ord.length;break;}}
+        for(let s=1;s<ord.length;s++){const rp=ord[(ai+s)%ord.length];if(rp!==target&&players[rp]?.alive){ni=(ai+s)%ord.length;break;}}
+        const prevRam=ord[pi],nextRam=ord[ni];
+        if(prevRam!==target&&players[prevRam]?.alive&&!players[prevRam]?.cuttlefishShield){
+          hpDeltas.push({pid:prevRam,delta:-dmg});
+          logLines.push({html:`<span class='lpu'>🐏 Ariete</span>: <span class='lp'>${players[prevRam]?.name}</span> <span class='ld'>-${dmg}</span>`,type:'damage'});
         }
+        if(nextRam!==target&&nextRam!==prevRam&&players[nextRam]?.alive&&!players[nextRam]?.cuttlefishShield){
+          hpDeltas.push({pid:nextRam,delta:-dmg});
+          logLines.push({html:`<span class='lpu'>🐏 Ariete</span>: <span class='lp'>${players[nextRam]?.name}</span> <span class='ld'>-${dmg}</span>`,type:'damage'});
+        }
+        triggerAnim('ram');
       }
+
+      // Swordfish: 2 next after target
+      if(pu.swordfish&&dmgType==='damage'){
+        const ord=state.playerOrder||[];
+        const ti=ord.indexOf(target);
+        let count=0;
+        for(let s=1;s<ord.length&&count<2;s++){
+          const np=ord[(ti+s)%ord.length];
+          if(np!==target&&np!==activePid&&players[np]?.alive){
+            if(!players[np]?.cuttlefishShield){
+              hpDeltas.push({pid:np,delta:-dmg});
+              logLines.push({html:`<span class='lpu'>🗡️ Pesce Spada</span>: <span class='lp'>${players[np]?.name}</span> <span class='ld'>-${dmg}</span>!`,type:'damage'});
+            }
+            count++;
+          }
+        }
+        triggerAnim('swordfish');
+      }
+
+      // Spider: skip target next turn
       if(pu.spider&&target!==activePid&&dmgType==='damage'){
-        await dbUpdate(`rooms/${G.roomId}`,{[`players/${target}/skipNext`]:true});
+        extraUpd[`players/${target}/skipNext`]=true;
         triggerAnim('spider');
       }
+
       const isHeal=dmgType==='heal';
       spawnFloat(`${isHeal?'+':'-'}${dmg}`,isHeal?'green':'red');
       if(!isHeal){shakeScreen();playSound(dmg>=80?'crit':'hit');vibrate(dmg>=80?[100,50,100,50,200]:[80]);if(dmg>=80)critExplode();}
@@ -1620,24 +1834,127 @@ async function resolveCard(card,state){
       G.sessionStats.dmgDealt+=dmg;
       if(dmg>G.sessionStats.highCard)G.sessionStats.highCard=dmg;
     }
+
+    // Main log line
     const lc=dmgType==='heal'?'lh':'ld';
     const sym=dmgType==='heal'?'+':'-';
-    addLog(`<span class='lp'>${players[activePid]?.name}</span> → ${dmgType==='all'?'TUTTI':players[target]?.name}: <span class='${lc}'>${sym}${dmg}</span>${bugReflect?' 🐛':''}`,dmgType==='heal'?'heal':'damage');
+    logLines.unshift({html:`<span class='lp'>${aName}</span> → ${dmgType==='all'?'TUTTI':players[target]?.name}: <span class='${lc}'>${sym}${dmg}</span>${bugReflect?' 🐛':''}`,type:dmgType==='heal'?'heal':'damage'});
 
-    await clearAfterPU(pu);
-    if(Object.keys(postUpd).length)await dbUpdate(`rooms/${G.roomId}`,postUpd);
+    // ── Compute batch result from in-memory state ──────────────────
+    const batchResult=computeHpBatch(players,hpDeltas);
+    flashHpCards(hpDeltas,players);
+
+    // Cervo: pick another random card → all (uses batchResult.working for updated HP)
+    const deerDeltas=[];
+    if(isDeer&&dmgType!=='all'){
+      const remaining=(state.cards||[]).filter(c=>!c.badge&&c.id!==card.id);
+      if(remaining.length>0){
+        const deerCard=remaining[rnd(0,remaining.length-1)];
+        triggerAnim('deer');
+        Object.entries(batchResult.working).forEach(([dpid,p])=>{
+          if(p.alive) deerDeltas.push({pid:dpid,delta:-deerCard.value});
+        });
+        logLines.push({html:`<span class='lpu'>🦌 Cervo</span> carta ${deerCard.value} → <span class='ld'>-${deerCard.value} a TUTTI</span>`,type:'damage'});
+        spawnFloat(`🦌 -${deerCard.value}`,'red');shakeScreen();
+      }
+    }
+    // Merge deer deltas into final batch
+    const finalDeltas=[...hpDeltas,...deerDeltas];
+    const finalBatch=deerDeltas.length>0?computeHpBatch(players,finalDeltas):batchResult;
+
+    // Bear tracking
+    if(G.bearMode&&G.bearCardsChosen===0){G.bearFirstTarget=card.assignedTo;G.bearFirstCardId=card.id;}
+
+    // ── Build clearAfterPU block inline (no extra dbUpdate call) ──
+    const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca','zebra','scarab'];
+    afters.forEach(id=>{if(pu[id])extraUpd[`activePowerups/${id}`]=null;});
+    Object.assign(extraUpd,postUpd);
+
+    // ── SINGLE Firebase write ──────────────────────────────────────
+    const combinedUpd={...finalBatch.updates,...extraUpd};
+    if(Object.keys(combinedUpd).length) await dbUpdate(`rooms/${G.roomId}`,combinedUpd);
+
+    // Flush all logs in parallel (don't await each one)
+    logLines.forEach(l=>addLog(l.html,l.type));
+
+    // Trigger elimination anims for newly dead
+    finalBatch.eliminated.forEach(pid=>{
+      const p=players[pid];
+      if(p) triggerEliminationAnim(p.name||'?');
+    });
+
     G.sessionStats.turnsPlayed++;
 
-    // Bear: track first target
-    if(G.bearMode&&G.bearCardsChosen===0)G.bearFirstTarget=card.assignedTo;
+    // ── Check win & proceed ────────────────────────────────────────
+    // Use final computed state to check win without another dbGet
+    const computedPlayers={...players};
+    Object.entries(finalBatch.working).forEach(([pid,w])=>{computedPlayers[pid]={...players[pid],...w};});
+    const aliveCount=Object.values(computedPlayers).filter(p=>p.alive).length;
 
-    const fresh=await dbGet(`rooms/${G.roomId}`);
-    await checkWin(fresh);
-    await proceedAfterCard(fresh,activePid);
+    if(aliveCount<=1){
+      // Win condition: just do the gameover update
+      const winnerPid=Object.entries(computedPlayers).find(([_,p])=>p.alive)?.[0]||null;
+      await dbUpdate(`rooms/${G.roomId}`,{status:'gameover',winner:winnerPid});
+      G.pendingConfirm=false;return;
+    }
+
+    // Check if active player was eliminated
+    if(computedPlayers[activePid]&&!computedPlayers[activePid].alive){
+      // Clear their powerups then advance turn
+      const freshForElim=await dbGet(`rooms/${G.roomId}`);
+      if(freshForElim){await clearPlayerPowerups(activePid,freshForElim);}
+      G.pendingConfirm=false;_cardLocked=false;
+      G.bearMode=false;G.bearCardsChosen=0;G.foxMode=false;G.masterOverrideActive=false;
+      const freshNext=await dbGet(`rooms/${G.roomId}`);
+      if(freshNext&&freshNext.status==='playing') await nextTurn(freshNext);
+      return;
+    }
+
+    await proceedAfterCard({...state,players:computedPlayers},activePid);
     G.pendingConfirm=false;
   });
 }
 
+// ═══ BATCH HP SYSTEM ═════════════════════════════════════════════
+// Computes HP changes from in-memory state — NO extra Firebase GETs.
+// Returns: { updates: {}, eliminated: [pids], newPlayers: {...} }
+function computeHpBatch(players, deltas){
+  // deltas = [{pid, delta}, ...]
+  const upd={};
+  const eliminated=[];
+  const newPlayers={};
+  // Build a working copy of HP values to accumulate multiple deltas on same player
+  const working={};
+  Object.entries(players).forEach(([pid,p])=>{working[pid]={hp:p.hp,alive:p.alive,maxHp:p.maxHp||99999,name:p.name};});
+  for(const {pid,delta} of deltas){
+    const p=working[pid];
+    if(!p||!p.alive) continue;
+    const newHp=Math.max(0,Math.min(p.maxHp,p.hp+delta));
+    p.hp=newHp;
+    if(newHp===0&&p.alive){p.alive=false;eliminated.push(pid);}
+  }
+  // Build firebase update object only for changed players
+  Object.entries(working).forEach(([pid,p])=>{
+    const orig=players[pid];
+    if(p.hp!==orig.hp||p.alive!==orig.alive){
+      upd[`players/${pid}/hp`]=p.hp;
+      upd[`players/${pid}/alive`]=p.alive;
+      newPlayers[pid]={...orig,...p};
+    }
+  });
+  return {updates:upd,eliminated,working};
+}
+
+// Fire visual effects for HP changes (no Firebase)
+function flashHpCards(deltas,players){
+  for(const {pid,delta} of deltas){
+    const p=players[pid];if(!p||!p.alive)continue;
+    const el=document.getElementById(`hp-${pid}`);
+    if(el){el.classList.add(delta>0?'healed':'hit');setTimeout(()=>el.classList.remove('healed','hit'),600);}
+  }
+}
+
+// Legacy single-player apply used ONLY in isolated badge card paths
 async function applyHpFresh(pid,delta){
   const p=await dbGet(`rooms/${G.roomId}/players/${pid}`);
   if(!p||!p.alive)return;
@@ -1649,8 +1966,28 @@ async function applyHpFresh(pid,delta){
   if(el){el.classList.add(delta>0?'healed':'hit');setTimeout(()=>el.classList.remove('healed','hit'),600);}
 }
 
+// BUG FIX: clear active powerups owned by eliminated player
+async function clearPlayerPowerups(pid,state){
+  const pu=state?.activePowerups||{};
+  const upd={};
+  for(const [puId,val] of Object.entries(pu)){
+    if(val?.owner===pid) upd[`activePowerups/${puId}`]=null;
+  }
+  if(state?.butterflyActive&&state.butterflyOwner===pid){
+    upd['butterflyActive']=false;upd['butterflyCards']=null;upd['butterflyOwner']=null;
+  }
+  if(Object.keys(upd).length) await dbUpdate(`rooms/${G.roomId}`,upd);
+}
+
+async function checkElimAndWin(pid){
+  const fresh=await dbGet(`rooms/${G.roomId}`);
+  if(!fresh)return;
+  if(!fresh.players?.[pid]?.alive) await clearPlayerPowerups(pid,fresh);
+  await checkWin(fresh);
+}
+
 async function clearAfterPU(pu){
-  const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','viper','donkey','crocodile'];
+  const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca','zebra','scarab'];
   const upd={};afters.forEach(id=>{if(pu[id])upd[`activePowerups/${id}`]=null;});
   if(Object.keys(upd).length)await dbUpdate(`rooms/${G.roomId}`,upd);
 }
@@ -1666,55 +2003,133 @@ function showReveal(icon,title,desc,dmg,dmgClass,onClose){
   document.getElementById('overlay-reveal')._cb=onClose;
   showOverlay('overlay-reveal');
 }
-function closeReveal(){
-  const cb=document.getElementById('overlay-reveal')._cb;
-  closeOverlay('overlay-reveal');
-  if(cb)cb();
-}
+function closeReveal(){const cb=document.getElementById('overlay-reveal')._cb;closeOverlay('overlay-reveal');if(cb)cb();}
 
-// ══ Bear: proceed with 2 picks ════════════════════════════════════
+// ══ Proceed after card (Bear/Fox/Dog) ════════════════════════════
 async function proceedAfterCard(state,activePid){
   G.pendingConfirm=false;_cardLocked=false;
 
-  // Bear mode: allow 2nd pick if first done
+  // Bear mode: allow 2nd pick
   if(G.bearMode&&G.bearCardsChosen===0){
     G.bearCardsChosen=1;
     triggerAnim('bear');
     await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/bear':null});
     const fresh=await dbGet(`rooms/${G.roomId}`);
-    if(fresh&&fresh.status==='playing')renderCards(fresh,true,null);
+    if(fresh&&fresh.status==='playing') renderCards(fresh,true,null);
     return;
   }
 
   const wasFoxPlay=G.foxMode;
-  G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;
+  G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   G.foxMode=false;G.foxTargetPid=null;
   G.masterOverrideActive=false;G.masterOverridePid=null;
 
   const fresh=await dbGet(`rooms/${G.roomId}`);
   if(!fresh||fresh.status!=='playing')return;
+
+  // Check if player is eliminated - skip PU choice
+  if(!fresh.players?.[activePid]?.alive){
+    await nextTurn(fresh);return;
+  }
+
   if(wasFoxPlay){
-    addLog(`<span class='lpu'>🦊 Volpe</span>: turno passato al prossimo giocatore`,'system');
+    addLog(`<span class='lpu'>🦊 Volpe</span>: turno passato`,'system');
     await nextTurn(fresh);
   }else{
     await showPuChoice(fresh,activePid);
   }
 }
 
-// ══ PU choice — RULE: Owl blocks, unique 3 PUs ═══════════════════
+// ══ PU choice ═══════════════════════════════════════════════════
 async function showPuChoice(state,activePid){
-  if(state.activePowerups?.owl){
+  const pu=state.activePowerups||{};
+
+  // Wolf blocks all PU choices
+  if(pu.wolf&&pu.wolf.owner!==activePid){
+    addLog(`<span class='lpu'>🐺 Lupo</span>: nessun powerup disponibile.`,'system');
+    toast('🐺 Lupo! Nessun potere questo turno.');
+    await nextTurn(state);return;
+  }
+
+  // Owl blocks
+  if(pu.owl){
     addLog(`<span class='lpu'>🦉 Gufo</span>: <span class='lp'>${state.players?.[activePid]?.name}</span> non può usare poteri.`,'system');
     toast('🦉 Gufo! Nessun potere questo turno.');
     await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/owl':null});
     await nextTurn(state);return;
   }
+
+  // Chaos mode: random PU
+  if(state.mode==='chaos'){
+    const bans=MODE_BANS.chaos;
+    const hasElimChaos=Object.values(state.players||{}).some(pl=>!pl.alive);
+    const enabled=POWERUPS.filter(p=>{
+      if(bans.includes(p.id))return false;
+      if(state.puEnabled?.[p.id]===false)return false;
+      if(p.id==='chameleon'&&(!hasElimChaos||state.chameleonUsed))return false;
+      // Singleton checks
+      if(p.id==='rat'&&pu.rat)return false;
+      if(p.id==='cheetah'&&pu.cheetah)return false;
+      if(p.id==='tick'&&state.tickCard)return false;
+      if(p.id==='viper'&&pu.viper)return false;
+      if(p.id==='wolf'&&pu.wolf)return false;
+      if(p.id==='ostrich'&&pu.ostrich)return false;
+      if(p.id==='penguin'&&pu.penguin)return false;
+      if(p.id==='scorpion'&&pu.scorpion)return false;
+      if(p.id==='lion'&&pu.lion)return false;
+      if(p.id==='weasel'&&pu.weasel)return false;
+      return true;
+    });
+    // Dog in chaos: 2 random PU
+    const dogActive=pu.dog?.owner===activePid;
+    const puCount=dogActive?2:1;
+    for(let i=0;i<puCount&&enabled.length>0;i++){
+      const pick=enabled.splice(Math.floor(Math.random()*enabled.length),1)[0];
+      await activatePu(pick,state,activePid);
+      triggerAnim(pick.id);
+      addLog(`<span class='lp'>${state.players?.[activePid]?.name}</span> 🌀 casuale: <span class='lpu'>${pick.icon} ${pick.name}</span>`,'powerup');
+      playSound('pu');G.sessionStats.puUsed++;
+    }
+    if(dogActive) await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/dog':null});
+    await nextTurn(state);return;
+  }
+
+  // Normal PU choice
   document.getElementById('pu-section').style.display='block';
   document.getElementById('confirm-row').style.display='flex';
   G.selectedPU=null;
-  const enabled=POWERUPS.filter(p=>state.puEnabled?.[p.id]!==false);
-  const chosen=[...enabled].sort(()=>Math.random()-.5).slice(0,Math.min(3,enabled.length));
+  G.dogMode=!!(pu.dog?.owner===activePid);
+  G.dogPuCount=0;
+
+  const bans=MODE_BANS[state.mode]||[];
+  const hasElim=Object.values(state.players||{}).some(pl=>!pl.alive);
+  const weaselActive=pu.weasel&&pu.weasel.owner!==activePid;
+  const puChoiceCount=weaselActive?2:3;
+
+  const enabled=POWERUPS.filter(p=>{
+    if(bans.includes(p.id))return false;
+    if(state.puEnabled?.[p.id]===false)return false;
+    if(p.id==='chameleon'){if(!hasElim||state.chameleonUsed)return false;}
+    // Singleton checks
+    if(p.id==='rat'&&pu.rat)return false;
+    if(p.id==='cheetah'&&pu.cheetah)return false;
+    if(p.id==='tick'&&state.tickCard)return false;
+    if(p.id==='viper'&&pu.viper)return false;
+    if(p.id==='wolf'&&pu.wolf)return false;
+    if(p.id==='ostrich'&&pu.ostrich)return false;
+    if(p.id==='penguin'&&pu.penguin)return false;
+    if(p.id==='scorpion'&&pu.scorpion)return false;
+    if(p.id==='lion'&&pu.lion)return false;
+    if(p.id==='weasel'&&pu.weasel)return false;
+    return true;
+  });
+  const chosen=[...enabled].sort(()=>Math.random()-.5).slice(0,Math.min(puChoiceCount,enabled.length));
   const grid=document.getElementById('pu-grid');grid.innerHTML='';
+
+  if(weaselActive){
+    toast('🦦 Donnola! Solo 2 poteri tra cui scegliere.');
+  }
+
   chosen.forEach(pu=>{
     const th=PU_THEMES[pu.id]||{bg:'linear-gradient(160deg,#0e0e1e,#1a1a2e)',glow:'#c0c0c0',accent:'#e0e0e0'};
     const div=document.createElement('div');div.className='pu-choice';
@@ -1728,8 +2143,7 @@ async function showPuChoice(state,activePid){
         <div class="puc-desc">${pu.desc}</div>
       </div>
       <div class="puc-corner" style="color:${th.accent}">${pu.icon}</div>
-      <div class="puc-shine"></div>
-    `;
+      <div class="puc-shine"></div>`;
     div.addEventListener('mouseenter',()=>{div.style.transform='perspective(600px) rotateY(-6deg) rotateX(3deg) scale(1.05)';div.style.boxShadow=`0 16px 50px rgba(0,0,0,.8),0 0 30px ${th.glow}60`;div.style.borderColor=`${th.glow}90`;});
     div.addEventListener('mouseleave',()=>{if(!div.classList.contains('chosen')){div.style.transform='';div.style.boxShadow=`0 8px 30px rgba(0,0,0,.7)`;div.style.borderColor=`${th.glow}50`;}});
     div.addEventListener('click',()=>{
@@ -1744,24 +2158,38 @@ async function showPuChoice(state,activePid){
     grid.appendChild(div);
   });
 }
+
 async function confirmPowerup(){
-  if(!G.selectedPU){toast('Scegli un potere o premi Salta');return;}
+  if(!G.selectedPU){toast('Scegli un potere');return;}
+  if(!document.getElementById('pu-section')||document.getElementById('pu-section').style.display==='none')return;
   const pu=G.selectedPU;
   const state=await dbGet(`rooms/${G.roomId}`);if(!state)return;
   const activePid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
   await activatePu(pu,state,activePid);
-  triggerAnim(pu.id,{});
+  triggerAnim(pu.id);
   addLog(`<span class='lp'>${state.players?.[activePid]?.name}</span> attiva <span class='lpu'>${pu.icon} ${pu.name}</span>`,'powerup');
   playSound('pu');vibrate([40,20,40]);G.sessionStats.puUsed++;
-  hidePuSection();await nextTurn(state);
+
+  // Dog mode: allow 2nd PU choice
+  if(G.dogMode&&G.dogPuCount===0){
+    G.dogPuCount=1;G.selectedPU=null;
+    toast('🐕 Cane! Scegli un secondo potere.');
+    // Re-render PU choices (re-pick random set)
+    const freshState=await dbGet(`rooms/${G.roomId}`);
+    if(freshState) await showPuChoice(freshState,activePid);
+    return;
+  }
+
+  G.dogMode=false;G.dogPuCount=0;
+  hidePuSection();
+  // BUG FIX: fetch fresh state before nextTurn (especially after dog's 2nd PU was activated)
+  const freshForNext=await dbGet(`rooms/${G.roomId}`);
+  await nextTurn(freshForNext||state);
 }
-async function skipPowerup(){
-  const state=await dbGet(`rooms/${G.roomId}`);if(!state)return;
-  hidePuSection();await nextTurn(state);
-}
+
 function hidePuSection(){
-  document.getElementById('pu-section').style.display='none';
-  document.getElementById('confirm-row').style.display='none';
+  const s=document.getElementById('pu-section');if(s)s.style.display='none';
+  const c=document.getElementById('confirm-row');if(c)c.style.display='none';
 }
 
 // ══ Activate PU ══════════════════════════════════════════════════
@@ -1770,11 +2198,15 @@ async function activatePu(pu,state,pid){
   const alive=ord.filter(p=>state.players?.[p]?.alive);
   const myI=alive.indexOf(pid);
   const nextPid=alive[(myI+1)%alive.length];
-  const prevPid=alive[(myI-1+alive.length)%alive.length];
   const upd={};
 
   switch(pu.id){
-    case 'eagle':    upd['activePowerups/eagle']={owner:pid,reveal:ord[rnd(0,ord.length-1)]}; break;
+    case 'eagle': {
+      const eagleAlive=ord.filter(p=>state.players?.[p]?.alive&&p!==pid);
+      const eaglePick=eagleAlive.length>0?eagleAlive[rnd(0,eagleAlive.length-1)]:null;
+      if(eaglePick) upd['activePowerups/eagle']={owner:pid,reveal:eaglePick};
+      break;
+    }
     case 'rat':
       if(state.activePowerups?.rat){toast('🐭 Topo già attivo!');return;}
       upd['activePowerups/rat']={owner:pid};
@@ -1784,55 +2216,117 @@ async function activatePu(pu,state,pid){
       if(state.activePowerups?.cheetah){toast('🐆 Ghepardo già attivo!');return;}
       upd['activePowerups/cheetah']={owner:pid};
       break;
-    case 'bear':     upd['activePowerups/bear']={owner:pid,target:nextPid}; break;
-    case 'owl':      upd['activePowerups/owl']={target:nextPid}; break;
-    case 'fox':      upd['activePowerups/fox']={owner:pid,target:nextPid}; break;
-    case 'shark':{
+    case 'bear': upd['activePowerups/bear']={owner:pid,target:nextPid}; break;
+    case 'owl':  upd['activePowerups/owl']={target:nextPid}; break;
+    case 'fox':  upd['activePowerups/fox']={owner:pid,target:nextPid}; break;
+    case 'shark': {
       const thresh=(state.initialHp||1000)*.15;
       const victims=[];
       Object.entries(state.players||{}).forEach(([spid,sp])=>{
-        if(sp.alive&&sp.hp<thresh&&spid!==pid){upd[`players/${spid}/alive`]=false;upd[`players/${spid}/hp`]=0;victims.push(sp.name);}
+        if(sp.alive&&sp.hp<thresh){
+          upd[`players/${spid}/alive`]=false;upd[`players/${spid}/hp`]=0;victims.push(sp.name);
+          setTimeout(()=>triggerEliminationAnim(sp.name||'?'),400);
+        }
       });
-      triggerAnim('shark',{victims});
       toast(`🦈 Squalo! ${victims.length?victims.join(', ')+' eliminati!':'Nessuno eliminato.'}`);
+      if(victims.length){
+        addLog(`<span class='lpu'>🦈 Squalo</span>: eliminati <span class='ld'>${victims.join(', ')}</span>!`,'elim');
+      }
       break;
     }
-    case 'bug':      upd[`players/${pid}/activeBug`]=true; break;
-    case 'crocodile':upd['activePowerups/crocodile']={owner:pid}; break;
+    case 'bug': upd[`players/${pid}/activeBug`]=true; break;
+    case 'crocodile': upd['activePowerups/crocodile']={owner:pid}; break;
     case 'tick':
       if(state.tickCard){toast('🐜 Zecca già attiva!');return;}
       upd['tickCard']={id:'tick-special',value:rnd(0,100),badge:'tick',assignedTo:'tick'};
-      triggerAnim('tick');
       break;
-    case 'rhino':    upd['activePowerups/rhino']={target:nextPid}; break;
-    case 'butterfly':{
-      triggerAnim('butterfly');
-      const bc={};
-      alive.forEach((apid,i)=>{bc['bc'+i]={id:'bc'+i,value:rnd(0,100),assignedTo:apid,assignedName:state.players?.[apid]?.name,badge:'butterfly'};});
-      upd['butterflyActive']=true;upd['butterflyOwner']=pid;upd['butterflyCards']=bc;
+    case 'rhino': upd['activePowerups/rhino']={target:nextPid}; break;
+    case 'butterfly': {
+      const bfAlive=Object.entries(state.players||{}).filter(([bpid,bp])=>bp.alive&&bpid!==pid);
+      const bfCards={};
+      // BUG FIX: each player gets their OWN butterfly card assigned to their pid
+      bfAlive.forEach(([bpid],i)=>{bfCards[`bc${i}`]={id:`bc${i}`,value:rnd(10,80),assignedTo:bpid,assignedName:'🦋',badge:'butterfly'};});
+      upd['butterflyActive']=true;upd['butterflyOwner']=pid;upd['butterflyCards']=bfCards;
       break;
     }
     case 'viper':
       if(state.activePowerups?.viper){toast('🐍 Vipera già attiva!');return;}
       upd['activePowerups/viper']={value:rnd(0,100)};
       break;
-    case 'chameleon':{
-      const v=rnd(30,80);
-      upd['activePowerups/chameleon']={value:v};
+    case 'chameleon': {
+      // BUG FIX: store target so only the next player sees the revival card
+      upd['activePowerups/chameleon']={value:rnd(30,80),target:nextPid};
       break;
     }
-    case 'walrus':{
-      triggerAnim('walrus');
-      const en=[...POWERUPS.filter(p=>state.puEnabled?.[p.id]!==false)].sort(()=>Math.random()-.5);
-      const p1=en[0],p2=en[1]||en[0];
-      upd[`activePowerups/${p1.id}`]={target:prevPid,fromWalrus:true};
-      upd[`activePowerups/${p2.id}`]={target:nextPid,fromWalrus:true};
-      toast(`🦭 Tricheco! ${p1.icon}${p1.name} → ${state.players?.[prevPid]?.name} | ${p2.icon}${p2.name} → ${state.players?.[nextPid]?.name}`);
+    case 'spider':  upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'ram':     upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'donkey':  upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'bull':    upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'hedgehog':upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'turtle':  upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'koala':   upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'deer':    upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'armadillo':upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+
+    // === NEW POWERUPS ===
+    case 'mosquito': upd['activePowerups/mosquito']={owner:pid}; break;
+    case 'penguin':
+      if(state.activePowerups?.penguin){toast('🐧 Pinguino già attivo!');return;}
+      upd['activePowerups/penguin']={owner:pid};
+      break;
+    case 'scorpion':
+      if(state.activePowerups?.scorpion){toast('🦂 Scorpione già attivo!');return;}
+      upd['activePowerups/scorpion']={owner:pid};
+      break;
+    case 'peacock': {
+      // Randomize all alive players' HP 1-150
+      Object.entries(state.players||{}).forEach(([ppid,pp])=>{
+        if(pp.alive){
+          const newHp=rnd(1,150);
+          upd[`players/${ppid}/hp`]=newHp;
+        }
+      });
+      addLog(`<span class='lpu'>🦚 Pavone</span>: HP di tutti randomizzati!`,'powerup');
       break;
     }
+    case 'zebra': {
+      // Pick a random normal card from next player's deck and duplicate it
+      const nextCards=(state.cards||[]).filter(c=>c.assignedTo===nextPid);
+      if(nextCards.length>0){
+        const orig=nextCards[rnd(0,nextCards.length-1)];
+        upd['activePowerups/zebra']={target:nextPid,dupCard:{id:'zebra-dup',value:orig.value,assignedTo:orig.assignedTo,assignedName:orig.assignedName}};
+      }
+      break;
+    }
+    case 'scarab': upd['activePowerups/scarab']={target:nextPid}; break;
+    case 'swordfish': upd['activePowerups/swordfish']={target:nextPid}; break;
+    case 'wolf':
+      if(state.activePowerups?.wolf){toast('🐺 Lupo già attivo!');return;}
+      upd['activePowerups/wolf']={owner:pid};
+      break;
+    case 'ostrich':
+      if(state.activePowerups?.ostrich){toast('🪶 Struzzo già attivo!');return;}
+      upd['activePowerups/ostrich']={owner:pid};
+      break;
+    case 'gorilla':
+      if(state.activePowerups?.gorilla){toast('🦍 Gorilla già attivo!');return;}
+      upd['activePowerups/gorilla']={owner:pid};
+      break;
+    case 'lion':
+      if(state.activePowerups?.lion){toast('🦁 Leone già attivo!');return;}
+      upd['activePowerups/lion']={owner:pid};
+      break;
+    case 'cuttlefish': upd[`players/${pid}/cuttlefishShield`]=true; upd['activePowerups/cuttlefish']={owner:pid}; break;
+    case 'dog': upd['activePowerups/dog']={owner:pid}; break;
+    case 'weasel':
+      if(state.activePowerups?.weasel){toast('🦦 Donnola già attiva!');return;}
+      upd['activePowerups/weasel']={owner:pid};
+      break;
+    case 'frog': upd['activePowerups/frog']={target:nextPid}; break;
+    case 'orca': upd['activePowerups/orca']={target:nextPid}; break;
     default: upd[`activePowerups/${pu.id}`]={target:nextPid,value:rnd(0,100)};
   }
-  if(Object.keys(upd).length)await dbUpdate(`rooms/${G.roomId}`,upd);
+  if(Object.keys(upd).length) await dbUpdate(`rooms/${G.roomId}`,upd);
 }
 
 // ══ Next turn ════════════════════════════════════════════════════
@@ -1846,22 +2340,25 @@ async function nextTurn(state){
   let idx=(fresh.currentTurnIndex+1)%alive.length;
   let nextPid=alive[idx];
   const upd={};
+  const pu=fresh.activePowerups||{};
 
-  // Ghepardo clears when owner's turn comes back
-  if(fresh.activePowerups?.cheetah?.owner===nextPid){
-    upd['activePowerups/cheetah']=null;toast('🐆 Ghepardo scaduto!');
-  }
-  // RULE FIX: Rat clears when activator's turn comes back
-  if(fresh.activePowerups?.rat?.owner===nextPid){
-    upd['activePowerups/rat']=null;toast('🐭 Topo scaduto!');
-  }
-  // Butterfly clears when owner's turn comes back
-  if(fresh.butterflyActive&&fresh.butterflyOwner===nextPid){
-    upd['butterflyActive']=false;upd['butterflyCards']=null;upd['butterflyOwner']=null;toast('🦋 Farfalla scaduta!');
-  }
+  // === Clear persistent PUs when owner's turn comes back ===
+  if(pu.cheetah?.owner===nextPid){upd['activePowerups/cheetah']=null;toast('🐆 Ghepardo scaduto!');}
+  if(pu.rat?.owner===nextPid){upd['activePowerups/rat']=null;toast('🐭 Topo scaduto!');}
+  if(pu.wolf?.owner===nextPid){upd['activePowerups/wolf']=null;toast('🐺 Lupo scaduto!');}
+  if(pu.ostrich?.owner===nextPid){upd['activePowerups/ostrich']=null;toast('🪶 Struzzo scaduto!');}
+  if(pu.gorilla?.owner===nextPid){upd['activePowerups/gorilla']=null;toast('🦍 Gorilla scaduto!');}
+  if(pu.lion?.owner===nextPid){upd['activePowerups/lion']=null;toast('🦁 Leone scaduto!');}
+  if(pu.cuttlefish?.owner===nextPid){upd['activePowerups/cuttlefish']=null;upd[`players/${nextPid}/cuttlefishShield`]=false;toast('🦑 Seppia scaduta!');}
+  if(pu.weasel?.owner===nextPid){upd['activePowerups/weasel']=null;toast('🦦 Donnola scaduta!');}
+  if(pu.penguin?.owner===nextPid){upd['activePowerups/penguin']=null;toast('🐧 Pinguino scaduto!');}
+  if(pu.scorpion?.owner===nextPid){upd['activePowerups/scorpion']=null;toast('🦂 Scorpione scaduto!');}
+  if(pu.mosquito?.owner===nextPid){/* mosquito stays until it activates during their card choice */}
+  if(pu.dog?.owner!==nextPid&&pu.dog){upd['activePowerups/dog']=null;}
+  if(fresh.butterflyActive&&fresh.butterflyOwner===nextPid){upd['butterflyActive']=false;upd['butterflyCards']=null;upd['butterflyOwner']=null;toast('🦋 Farfalla scaduta!');}
 
   // Kangaroo: skip
-  if(fresh.activePowerups?.kangaroo?.target===nextPid){
+  if(pu.kangaroo?.target===nextPid){
     toast(`🦘 ${fresh.players?.[nextPid]?.name} salta il turno!`);
     upd['activePowerups/kangaroo']=null;
     idx=(idx+1)%alive.length;nextPid=alive[idx];
@@ -1875,36 +2372,57 @@ async function nextTurn(state){
 
   // Generate new cards
   let cards=generateCards(fresh.players,fresh.mode);
+  const hpChanges={};
 
-  // RULE FIX: Zecca auto-damages the NEXT active player at turn start
+  // === Lion: random damage to all at turn start ===
+  if(pu.lion&&pu.lion.owner!==nextPid){
+    const lionAlive=Object.entries(fresh.players||{}).filter(([_,p])=>p.alive);
+    const lionDmgs={};
+    lionAlive.forEach(([lpid])=>{
+      const d=rnd(1,100);
+      lionDmgs[lpid]=d;
+      if(!hpChanges[lpid])hpChanges[lpid]=0;
+      hpChanges[lpid]-=d;
+    });
+    upd['_lionPendingDmg']={dmgs:lionDmgs,turn:(fresh.turnCount||0)+1};
+  }
+
+  // Rhino: auto-activate all cards
+  // BUG FIX: Don't clear rhino here; keep it active so renderState can detect and auto-advance
+  // without forcing the player to click a card (which would deal damage a second time)
+  if(pu.rhino?.target===nextPid){
+    for(const rc of cards){
+      if(!hpChanges[rc.assignedTo])hpChanges[rc.assignedTo]=0;
+      hpChanges[rc.assignedTo]-=rc.value;
+    }
+    addLog(`<span class='lpu'>🦏 Rinoceronte!</span> <span class='lp'>${fresh.players?.[nextPid]?.name}</span> attiva tutte le carte automaticamente!`,'damage');
+    setTimeout(()=>{triggerAnim('rhino');shakeScreen();playSound('crit');vibrate([100,50,100,50,100]);},200);
+  }
+
+  // Zecca auto-damage
   let tickCard=fresh.tickCard;
   if(tickCard){
     const newVal=rnd(0,100);
     tickCard={...tickCard,value:newVal};
-    // Auto damage to nextPid
     const np=fresh.players?.[nextPid];
     if(np?.alive){
-      const newHp=Math.max(0,np.hp-newVal);
-      upd[`players/${nextPid}/hp`]=newHp;
-      upd[`players/${nextPid}/alive`]=newHp>0;
-      if(newHp===0)setTimeout(()=>triggerEliminationAnim(np.name||'?'),300);
-      // Anim + log will be triggered in renderState via flag
+      if(!hpChanges[nextPid])hpChanges[nextPid]=0;
+      hpChanges[nextPid]-=newVal;
       upd['_zeckaPendingDmg']={target:nextPid,dmg:newVal};
     }
   }
 
-  // Rhino: all cards damage before turn
-  if(fresh.activePowerups?.rhino?.target===nextPid){
-    const total=(cards||[]).reduce((s,c)=>s+c.value,0);
-    upd['activePowerups/rhino']=null;
-    const np=fresh.players?.[nextPid];
-    if(np?.alive){
-      const newHp=Math.max(0,np.hp-total);
-      upd[`players/${nextPid}/hp`]=newHp;upd[`players/${nextPid}/alive`]=newHp>0;
-      if(newHp===0)setTimeout(()=>triggerEliminationAnim(np.name||'?'),400);
-    }
-    addLog(`<span class='lpu'>🦏 Rinoceronte!</span> <span class='lp'>${fresh.players?.[nextPid]?.name}</span> subisce tutte le carte: <span class='ld'>-${total}</span>`,'damage');
-    setTimeout(()=>{triggerAnim('rhino');shakeScreen();playSound('crit');vibrate([100,50,100,50,100]);},200);
+  // Gorilla: first card heals (modify card data)
+  // This is handled in resolveCard since we need to detect which card is "first"
+
+  // Apply accumulated HP changes
+  for(const [pid,delta] of Object.entries(hpChanges)){
+    const p=fresh.players?.[pid];
+    if(!p?.alive)continue;
+    const newHp=Math.max(0,p.hp+delta);
+    upd[`players/${pid}/hp`]=newHp;
+    upd[`players/${pid}/alive`]=newHp>0;
+    if(newHp===0)setTimeout(()=>triggerEliminationAnim(p.name||'?'),400);
   }
 
   await dbUpdate(`rooms/${G.roomId}`,{
@@ -1915,10 +2433,11 @@ async function nextTurn(state){
   clearTimer();
   G.foxMode=false;G.foxTargetPid=null;
   G.masterOverrideActive=false;G.masterOverridePid=null;
-  G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;
+  G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
+  G.dogMode=false;G.dogPuCount=0;
 }
 
-// Render zecca damage notification when state arrives (from _zeckaPendingDmg)
+// ══ Pending damage notifications ══════════════════════════════════
 let _lastZeckaPending=null;
 function tickDamageAnim(dmg){
   const f=document.createElement('div');f.className='zecca-flash';document.body.appendChild(f);
@@ -1927,8 +2446,7 @@ function tickDamageAnim(dmg){
   playSound('zecca');vibrate([80,40,80]);
 }
 function checkZeckaDmg(state){
-  const z=state._zeckaPendingDmg;
-  if(!z)return;
+  const z=state._zeckaPendingDmg;if(!z)return;
   const key=`${z.target}_${z.dmg}_${state.turnCount||0}`;
   if(_lastZeckaPending===key)return;
   _lastZeckaPending=key;
@@ -1936,46 +2454,75 @@ function checkZeckaDmg(state){
   const isMe=z.target===G.playerId;
   if(isMe||G.isSpectator){
     tickDamageAnim(z.dmg);
-    addLog(`<span class='lpu'>🐜 Zecca</span>: <span class='lp'>${pName}</span> subisce <span class='ld'>-${z.dmg}</span> danni automatici`,'damage');
+    addLog(`<span class='lpu'>🐜 Zecca</span>: <span class='lp'>${pName}</span> subisce <span class='ld'>-${z.dmg}</span>`,'damage');
   }
-  // Clear the pending flag from DB
-  if(G.isMaster||isMe){
-    dbUpdate(`rooms/${G.roomId}`,{_zeckaPendingDmg:null});
+  if(G.isMaster||isMe) dbUpdate(`rooms/${G.roomId}`,{_zeckaPendingDmg:null});
+}
+
+let _lastLionPending=null;
+function checkLionDmg(state){
+  const l=state._lionPendingDmg;if(!l)return;
+  const key=`lion_${l.turn}`;
+  if(_lastLionPending===key)return;
+  _lastLionPending=key;
+  const dmgs=l.dmgs||{};
+  let logParts=[];
+  Object.entries(dmgs).forEach(([pid,d])=>{
+    const name=state.players?.[pid]?.name||'?';
+    logParts.push(`${name}: -${d}`);
+    if(pid===G.playerId||G.isSpectator) spawnFloat(`🦁 -${d}`,'red');
+  });
+  if(G.playerId in dmgs||G.isSpectator){
+    playSound('lion');vibrate([60,30,60]);shakeScreen();
   }
+  addLog(`<span class='lpu'>🦁 Leone</span>: danni casuali a tutti! ${logParts.join(', ')}`,'damage');
+  if(G.isMaster) dbUpdate(`rooms/${G.roomId}`,{_lionPendingDmg:null});
 }
 
 async function checkWin(state){
   if(!state)return;
   const alive=Object.entries(state.players||{}).filter(([_,p])=>p.alive);
-  if(alive.length<=1)await dbUpdate(`rooms/${G.roomId}`,{status:'gameover',winner:alive[0]?alive[0][0]:null});
+  if(alive.length<=1) await dbUpdate(`rooms/${G.roomId}`,{status:'gameover',winner:alive[0]?alive[0][0]:null});
 }
 
 // ══ Timer ═════════════════════════════════════════════════════════
 const CIRC=119.4;
+function _getOrCreateCheetahOvl(){
+  let ovl=document.getElementById('cheetah-ovl');
+  if(!ovl){
+    ovl=document.createElement('div');ovl.id='cheetah-ovl';ovl.className='cheetah-ovl';
+    ovl.innerHTML='<div class="cheetah-ovl-lbl">🐆 Ghepardo — Tempo rimanente</div><div class="cheetah-ovl-num" id="cheetah-ovl-num">7</div>';
+    document.body.appendChild(ovl);
+  }
+  return ovl;
+}
 function startTimer(secs,onExpire){
   clearTimer();G.timerSec=secs;G.timerActive=true;
   const num=document.getElementById('timer-num');
   const ring=document.getElementById('timer-ring');
   const wrap=document.getElementById('timer-wrap');
+  _getOrCreateCheetahOvl();
   function tick(){
     if(!G.timerActive)return;
     if(num)num.textContent=G.timerSec;
     if(ring)ring.style.strokeDashoffset=CIRC*(1-G.timerSec/secs);
     if(wrap)wrap.classList.toggle('urgent',G.timerSec<=3);
+    const bigNum=document.getElementById('cheetah-ovl-num');
+    if(bigNum){bigNum.textContent=G.timerSec;bigNum.classList.toggle('urgent',G.timerSec<=3);}
     if(G.timerSec<=3){playSound('tick');vibrate([30]);}
     if(G.timerSec<=0){clearTimer();onExpire();return;}
     G.timerSec--;G.timerTO=setTimeout(tick,1000);
   }
   tick();
 }
-function clearTimer(){clearTimeout(G.timerTO);G.timerActive=false;}
+function clearTimer(){clearTimeout(G.timerTO);G.timerActive=false;const ovl=document.getElementById('cheetah-ovl');if(ovl)ovl.remove();}
 
 // ══ Log ═══════════════════════════════════════════════════════════
 function renderLog(log){
   const list=document.getElementById('log-list');if(!list)return;
   if(!log){list.innerHTML='';return;}
   const entries=Array.isArray(log)?log:Object.values(log);
-  list.innerHTML=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,40).map(e=>`<div class="log-entry ${e.type||'system'}">${e.html||''}</div>`).join('');
+  list.innerHTML=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,60).map(e=>`<div class="log-entry ${e.type||'system'}">${e.html||''}</div>`).join('');
 }
 
 // ══ Master override ═══════════════════════════════════════════════
@@ -2009,17 +2556,6 @@ function showGameOver(state){
       <div class="final-name">${p.name}</div>
       <div class="final-hp">${p.alive?p.hp:0} HP</div>
     </div>`).join('');
-  saveHistory({date:new Date().toLocaleDateString('it-IT'),winner:winner?.name||'—',players:sorted.map(p=>p.name).join(', '),turns:state.turnCount||0});
-}
-function saveHistory(e){try{const h=JSON.parse(localStorage.getItem('fb_history')||'[]');h.unshift(e);if(h.length>20)h.pop();localStorage.setItem('fb_history',JSON.stringify(h));}catch(ex){}}
-function showHistory(){
-  try{
-    const h=JSON.parse(localStorage.getItem('fb_history')||'[]');
-    document.getElementById('history-content').innerHTML=!h.length
-      ?'<p style="color:var(--muted);text-align:center;padding:20px">Nessuna partita ancora.</p>'
-      :h.map(e=>`<div class="history-item"><div class="history-winner">🏆 ${e.winner}</div><div class="history-meta">${e.date} · ${e.turns} turni · ${e.players}</div></div>`).join('');
-  }catch(ex){}
-  showOverlay('overlay-history');
 }
 
 // ══ Settings ══════════════════════════════════════════════════════
@@ -2048,20 +2584,24 @@ async function doRestart(){
   const hp=parseInt(document.getElementById('restart-hp').value)||1000;
   const room=await dbGet(`rooms/${G.roomId}`);if(!room)return;
   const players={};
-  Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false};});
+  Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false,cuttlefishShield:false};});
   const cards=generateCards(players,room.mode);
-  await dbUpdate(`rooms/${G.roomId}`,{status:'playing',players,cards,currentTurnIndex:0,turnCount:1,activePowerups:{},log:{},tickCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,chameleonUsed:false,initialHp:hp,_zeckaPendingDmg:null});
-  G._gameoverShown=false;closeOverlay('overlay-restart');
+  // Re-apply mode bans on restart
+  const bans=MODE_BANS[room.mode]||[];
+  const puEnabled={};POWERUPS.forEach(p=>puEnabled[p.id]=!bans.includes(p.id));
+  await dbUpdate(`rooms/${G.roomId}`,{status:'playing',players,cards,currentTurnIndex:0,turnCount:1,activePowerups:{},log:{},tickCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,chameleonUsed:false,initialHp:hp,_zeckaPendingDmg:null,_lionPendingDmg:null,puEnabled});
+  G._gameoverShown=false;closeOverlay('overlay-restart');startPlayingScreen();
 }
 function reshowQR(){closeOverlay('overlay-settings');showLobby(G.roomId,{});}
 function restartGame(){if(G.isMaster)showOverlay('overlay-restart');else toast('Solo il Master può riavviare.');}
-function goHome(){G._gameoverShown=false;dbUnsubAll();showScreen('screen-home');}
+function goHome(){G._gameoverShown=false;clearTimer();dbUnsubAll();showScreen('screen-home');}
 
 // ══ URL join ══════════════════════════════════════════════════════
 window.addEventListener('firebase-ready',()=>{
   const r=new URLSearchParams(location.search).get('room');
-  if(r){document.getElementById('join-code').value=r;showScreen('screen-join');}
+  if(r){document.getElementById('join-code').value=r;showScreen('screen-join');setTimeout(loadRoomNames,500);}
 });
+
 </script>
 </body>
 </html>
