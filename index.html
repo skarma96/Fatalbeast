@@ -835,6 +835,7 @@ const G = {
   roomId:null,playerId:null,playerName:null,
   isMaster:false,isSpectator:false,gameMode:'classic',isTestMode:false,
   pendingConfirm:false,puEnabled:{},
+  _cardPickedOnTurn:-1,
   unsubscribes:[],
   sessionStats:{dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0},
   masterOverrideActive:false,masterOverridePid:null,
@@ -1405,6 +1406,7 @@ function startPlayingScreen(){
   G.sessionStats={dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0};
   G.bearMode=false;G.foxMode=false;G.dogMode=false;G.dogPuCount=0;
   G.masterOverrideActive=false;G._shownAnims={};
+  G._cardPickedOnTurn=-1;G._lastRenderedTurn=-1;
   let _lastStateKey='';let _renderPending=false;let _latestState=null;
   dbListen(`rooms/${G.roomId}`,state=>{
     if(!state)return;
@@ -1513,6 +1515,12 @@ function renderState(state){
     else{pill.style.display='none';}
   }
 
+  // Reset card-pick lock when turnCount advances (new turn started)
+  if((state.turnCount||0) !== G._lastRenderedTurn){
+    G._lastRenderedTurn = state.turnCount||0;
+    G._cardPickedOnTurn = -1; // new turn → allow picking again
+    _cardLocked = false;
+  }
   renderCards(state,canPlay,currentPid);
   renderLog(state.log);
 
@@ -1600,7 +1608,7 @@ function renderPuBanner(pu,canPlay){
 let _cardLocked=false;
 function renderCards(state,canPlay,currentPid){
   if(G.pendingConfirm)return;
-  _cardLocked=false;
+  // NOTE: _cardLocked is only reset by the turnCount change in renderState above.
   const grid=document.getElementById('cards-grid');grid.innerHTML='';
   const pu=state.activePowerups||{};
   const players=state.players||{};
@@ -1743,17 +1751,23 @@ function renderCards(state,canPlay,currentPid){
         <div class="card-name-reveal ${nameClass}">${showThisName&&card.assignedName?card.assignedName:''}</div>`;
     }
 
-    // BUG FIX: block multiple card selection - only allow click if canPlay and not locked
     if(canPlay&&!isBearDisabled&&!isOstrichBlocked&&!rhinoBlocked&&!isPigeonBlocked){
       div.addEventListener('click',()=>{
+        const currentTurnCount=state.turnCount||0;
+        const isBearSecondPick=G.bearMode&&G.bearCardsChosen===1;
+        // PRIMARY LOCK: turn-based. Block if already picked a card this turn,
+        // unless this is Bear's mandatory second pick.
+        if(G._cardPickedOnTurn===currentTurnCount&&!isBearSecondPick)return;
+        // SECONDARY LOCK: in-flight guard (prevents double-click race)
         if(_cardLocked||G.pendingConfirm)return;
+        // Acquire locks
         _cardLocked=true;
-        G.pendingConfirm=true; // CRITICAL: immediate lock before async to prevent double-pick
+        G.pendingConfirm=true;
+        if(!isBearSecondPick) G._cardPickedOnTurn=currentTurnCount;
         div.classList.add('flip-anim');
         playSound(card.value>=80?'crit':'flip');vibrate([60]);
         document.querySelectorAll('.game-card').forEach(c=>c.classList.add('disabled'));
         setTimeout(async()=>{
-          // PERF FIX: use cached state instead of fetching from Firebase on every click
           const fresh=G._lastState;
           if(fresh&&fresh.status==='playing'){
             await resolveCard(card,fresh);
