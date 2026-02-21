@@ -168,7 +168,6 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 
 /* ═══ GAME SCREEN TOP BAR ════════════════════════════════════════════ */
 #screen-game{padding-bottom:max(20px, var(--safe-bottom))}
-.game-top{display:flex;align-items:center;gap:10px;padding:max(10px, calc(var(--safe-top) + 4px)) 14px 10px;background:rgba(3,4,10,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:50;width:100%}
 .game-logo-sm{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--red2);text-shadow:0 0 15px rgba(192,57,43,.5);flex-shrink:0}
 .game-logo-sm span{color:var(--gold2)}
 .turn-info{flex:1;text-align:center}
@@ -191,25 +190,10 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .hp-strip-wrap::-webkit-scrollbar{height:3px}
 .hp-strip-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
 .hp-strip{display:flex;gap:8px;padding-bottom:4px;min-width:fit-content}
-.hp-card{
-  min-width:130px;height:112px;border-radius:12px;
-  background:var(--bg3);border:1px solid rgba(255,255,255,.07);
-  padding:10px 12px 8px;position:relative;flex-shrink:0;
-  transition:border-color .3s,box-shadow .3s,transform .2s;
-  overflow:hidden;
-}
-.hp-card.active{border-color:rgba(240,176,64,.5);box-shadow:0 0 20px rgba(240,176,64,.15),inset 0 0 20px rgba(240,176,64,.04)}
-.hp-card.dead{opacity:.45;filter:grayscale(.8)}
-.hp-card.danger{border-color:rgba(204,17,17,.5);animation:dangerPulse 1.2s ease infinite}
-@keyframes dangerPulse{0%,100%{box-shadow:0 0 10px rgba(204,17,17,.3)}50%{box-shadow:0 0 24px rgba(204,17,17,.6)}}
-.hp-card.hit{animation:hpHit .5s ease}
-.hp-card.healed{animation:hpHeal .5s ease}
-@keyframes hpHit{0%,100%{background:var(--bg3)}40%{background:rgba(192,57,43,.35)}}
-@keyframes hpHeal{0%,100%{background:var(--bg3)}40%{background:rgba(26,158,88,.3)}}
 .hpc-name{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px;line-height:1.1}
 .hpc-val{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;letter-spacing:1px;margin-top:1px}
 .hpc-bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:4px;overflow:hidden}
-.hpc-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.hpc-fill{height:100%;border-radius:3px;transition:width .45s ease}
 .danger-skull{position:absolute;top:6px;right:8px;font-size:16px;animation:skullBob .8s ease infinite alternate}
 @keyframes skullBob{to{transform:translateY(-3px)}}
 .bug-shield{position:absolute;top:6px;right:8px;font-size:14px;animation:shieldPulse 1s ease infinite}
@@ -217,12 +201,13 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .dolphin-shield{position:absolute;top:5px;left:8px;font-size:13px;opacity:.7}
 
 /* ═══ PU BANNER ══════════════════════════════════════════════════════ */
-.pu-banner{display:none;align-items:center;gap:10px;margin:6px 14px;padding:10px 14px;background:linear-gradient(135deg,rgba(200,146,42,.1),rgba(200,146,42,.04));border:1px solid rgba(200,146,42,.25);border-radius:var(--r2)}
+.pu-banner{display:none;align-items:center;gap:10px;margin:6px 14px;padding:12px 16px;background:linear-gradient(135deg,rgba(200,146,42,.12),rgba(200,146,42,.04));border:1px solid rgba(200,146,42,.3);border-radius:var(--r2);box-shadow:0 0 20px rgba(200,146,42,.08);animation:bannerGlow 2s ease infinite alternate}
+@keyframes bannerGlow{0%{box-shadow:0 0 15px rgba(200,146,42,.06)}100%{box-shadow:0 0 25px rgba(200,146,42,.12)}}
 .pu-banner.show{display:flex}
-.pu-banner-icon{font-size:26px;flex-shrink:0}
+.pu-banner-icon{font-size:28px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(200,146,42,.4))}
 .pu-banner-text{flex:1;min-width:0}
-.pu-banner-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold2);text-transform:uppercase}
-.pu-banner-desc{font-family:'Barlow',sans-serif;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.pu-banner-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold2);text-transform:uppercase}
+.pu-banner-desc{font-family:'Barlow',sans-serif;font-size:13px;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.45}
 
 /* ═══ RAT + CARDS SECTION ════════════════════════════════════════════ */
 /* Single merged definition — position:relative needed for rat ::after, overflow:hidden for rat clip */
@@ -244,28 +229,10 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .master-override:hover{background:rgba(200,146,42,.14)}
 
 /* ═══ CARDS SECTION — REAL PLAYING CARDS ════════════════════════════ */
-.cards-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding:0 2px}
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;justify-items:center}
 @media(max-width:380px){.cards-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}}
 .cards-grid.compact{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
 
-/* The real card */
-.game-card{
-  width:148px;height:215px;border-radius:14px;position:relative;
-  background:linear-gradient(160deg,#1c2540,#0e1525);
-  border:2px solid rgba(200,146,42,.2);
-  box-shadow:0 8px 32px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
-  cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.3,1),box-shadow .25s;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  overflow:hidden;transform-style:preserve-3d;
-  flex-shrink:0;user-select:none;
-}
-.game-card:hover:not(.disabled){transform:translateY(-10px) scale(1.04);box-shadow:0 24px 56px rgba(0,0,0,.85),0 0 0 2px var(--gold)}
-.game-card.disabled{cursor:default;opacity:.75}
-.game-card.critical-card{border-color:rgba(255,65,54,.6);animation:critGlow 1.5s ease infinite alternate}
-@keyframes critGlow{from{box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 15px rgba(255,65,54,.3)}to{box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 35px rgba(255,65,54,.6)}}
-.game-card.flip-anim{animation:cardFlip3d .5s ease forwards}
-@keyframes cardFlip3d{0%{transform:rotateY(0) scale(1)}40%{transform:rotateY(90deg) scale(1.08)}65%{transform:rotateY(-15deg) scale(1.04)}100%{transform:rotateY(0) scale(.93);opacity:.4}}
 /* Card inner parts */
 .card-corner{position:absolute;font-size:14px;color:rgba(200,146,42,.35);line-height:1}
 .card-corner.tl{top:8px;left:10px}
@@ -295,20 +262,23 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 /* ═══ PU CHOICE — Marvel Snap Card Style ════════════════════════════ */
 .pu-section{padding:8px 14px 0;animation:slideUp .35s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.pu-section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
 .pu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .pu-choice{
   border-radius:16px;cursor:pointer;position:relative;overflow:hidden;
   transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s,border-color .2s;
-  transform-style:preserve-3d;height:190px;display:flex;flex-direction:column;
+  transform-style:preserve-3d;min-height:210px;display:flex;flex-direction:column;
+  will-change:transform;contain:layout style;
 }
 .pu-choice.chosen .puc-shine{opacity:1}
-.puc-art-zone{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0}
-.puc-icon{font-size:52px;display:block;position:relative;z-index:2;transition:transform .2s}
-.pu-choice:hover .puc-icon,.pu-choice.chosen .puc-icon{transform:scale(1.12)}
-.puc-band{padding:8px 6px 10px;flex-shrink:0;position:relative;z-index:2}
-.puc-name{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;text-align:center;margin-bottom:3px;line-height:1}
-.puc-desc{font-size:9px;color:rgba(255,255,255,.5);line-height:1.3;text-align:center;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.pu-choice.chosen{animation:puChosen .35s ease}
+@keyframes puChosen{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1.04)}}
+.puc-art-zone{flex:0 0 85px;display:flex;align-items:center;justify-content:center;position:relative}
+.puc-icon{font-size:46px;display:block;position:relative;z-index:2;transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.pu-choice:hover .puc-icon,.pu-choice.chosen .puc-icon{transform:scale(1.15) translateY(-2px)}
+.puc-band{padding:6px 8px 12px;flex:1;position:relative;z-index:2;display:flex;flex-direction:column}
+.puc-name{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;text-align:center;margin-bottom:4px;line-height:1}
+.puc-desc{font-size:11.5px;color:rgba(255,255,255,.72);line-height:1.35;text-align:center;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px;overflow-y:auto;max-height:80px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.puc-desc::-webkit-scrollbar{display:none}
 .puc-corner{position:absolute;top:7px;left:9px;font-size:14px;opacity:.4;z-index:3;line-height:1}
 .puc-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,transparent 45%,rgba(255,255,255,.04) 100%);border-radius:14px;pointer-events:none;z-index:4;opacity:0;transition:opacity .2s}
 .pu-choice:hover .puc-shine{opacity:.6}
@@ -320,11 +290,6 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .log-header-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase}
 .log-header-arrow{font-size:12px;color:var(--muted);transition:.2s}
 .log-header.open .log-header-arrow{transform:rotate(180deg)}
-#log-list{height:340px;overflow-y:auto;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.35)}
-#log-list::-webkit-scrollbar{width:3px}
-#log-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
-.log-entry{font-family:'Barlow Condensed',sans-serif;font-size:16px;line-height:1.55;padding:9px 14px 9px 16px;border-bottom:1px solid rgba(255,255,255,.04);border-left:3px solid transparent;transition:background .15s;letter-spacing:.2px}
-.log-entry:hover{background:rgba(255,255,255,.025)}
 .log-entry.damage{border-left-color:var(--red2)}
 .log-entry.heal{border-left-color:var(--heal2)}
 .log-entry.powerup{border-left-color:var(--gold)}
@@ -351,10 +316,6 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .modal-btn.danger{color:var(--red3);border-color:rgba(192,57,43,.2)}
 .modal-btn.danger:hover{background:rgba(192,57,43,.15)}
 
-/* Reveal overlay */
-.reveal-card{width:100%;max-width:360px;padding:28px 24px;text-align:center;border-radius:20px 20px 0 0}
-.reveal-animal{font-size:72px;margin-bottom:8px;animation:revealPop .4s cubic-bezier(.2,.8,.3,1)}
-@keyframes revealPop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
 .reveal-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--text);margin-bottom:8px}
 .reveal-desc{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:16px}
 .reveal-dmg{font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:2px;margin:8px 0}
@@ -383,7 +344,6 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .gameover-wrap{width:100%;max-width:420px;padding:30px 16px 50px;display:flex;flex-direction:column;align-items:center;gap:16px}
 .go-fire{font-size:80px;animation:fireFloat 1.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 24px rgba(255,120,0,.7))}
 @keyframes fireFloat{to{transform:translateY(-12px) scale(1.07)}}
-.go-winner-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,12vw,60px);letter-spacing:3px;color:var(--gold2);text-align:center;text-shadow:0 0 40px rgba(240,176,64,.6)}
 .go-sub{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
 .final-list{width:100%;display:flex;flex-direction:column;gap:8px}
 .final-row{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);animation:rowIn .4s ease both}
@@ -403,23 +363,13 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 .history-meta{font-size:11px;color:var(--muted);margin-top:2px}
 
 /* ═══ DAMAGE FLOAT ═══════════════════════════════════════════════════ */
-.dmg-float{position:fixed;pointer-events:none;z-index:900;font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;text-shadow:0 3px 12px rgba(0,0,0,.95);animation:floatUp 1.5s ease forwards}
-@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}20%{transform:translateY(-16px) scale(1.3)}100%{opacity:0;transform:translateY(-100px) scale(.7)}}
-.dmg-float.red{color:var(--red3)}
-.dmg-float.green{color:var(--heal2)}
-.dmg-float.gold{color:var(--gold3)}
-
 /* ═══ SCREEN FX ══════════════════════════════════════════════════════ */
 .crit-explode{position:fixed;inset:0;pointer-events:none;z-index:890;animation:critExAnim .65s ease forwards;background:radial-gradient(ellipse 65% 45% at 50% 50%,rgba(255,65,54,.18) 0%,transparent 70%)}
 @keyframes critExAnim{0%{opacity:0}25%{opacity:1}100%{opacity:0;transform:scale(1.6)}}
-@keyframes screenShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-5px,3px)}30%{transform:translate(5px,-3px)}45%{transform:translate(-3px,5px)}60%{transform:translate(3px,-3px)}75%{transform:translate(-3px,2px)}}
-.screen-shake{animation:screenShake .45s ease}
 .confetti-bit{position:fixed;border-radius:1px;pointer-events:none;z-index:890;animation:confettiFall linear forwards}
 @keyframes confettiFall{0%{transform:translateY(-20px) rotateZ(0);opacity:1}100%{transform:translateY(100vh) rotateZ(720deg);opacity:0}}
 
 /* ═══ ELIMINATION ANIMATION ══════════════════════════════════════════ */
-.elim-anim-wrap{position:fixed;inset:0;z-index:950;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:elimFade 2.5s ease forwards}
-@keyframes elimFade{0%{background:rgba(0,0,0,0)}15%{background:rgba(90,0,0,.8)}70%{background:rgba(25,0,0,.65)}100%{background:rgba(0,0,0,0);opacity:0}}
 .elim-skull{font-size:110px;animation:elimSkull 2.5s ease forwards;filter:drop-shadow(0 0 40px rgba(255,65,54,.9))}
 @keyframes elimSkull{0%{transform:scale(0) rotate(-40deg);opacity:0}20%{transform:scale(1.5) rotate(10deg);opacity:1}40%{transform:scale(1) rotate(0);opacity:1}80%{opacity:1}100%{transform:scale(1.3) translateY(-30px);opacity:0}}
 .elim-name{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;color:var(--red3);margin-top:12px;text-shadow:0 0 40px rgba(255,65,54,.9);animation:elimName 2.5s ease forwards}
@@ -559,6 +509,170 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
 /* ── ZECCA auto-damage flash ────────────────────────────────────── */
 @keyframes zeckaDmg{0%{background:rgba(180,80,0,0)}30%{background:rgba(180,80,0,.4)}100%{background:rgba(180,80,0,0)}}
 .zecca-flash{position:fixed;inset:0;pointer-events:none;z-index:799;animation:zeckaDmg .8s ease forwards}
+
+/* ═══ VISUAL OVERHAUL — Modern FX & Layout ═══════════════════════ */
+
+/* ── GPU-optimized damage flash overlay ─────────────────────────── */
+.fx-damage-flash{position:fixed;inset:0;pointer-events:none;z-index:780;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(255,30,30,.25) 0%,transparent 70%);
+  animation:fxDmgFlash .45s ease forwards;will-change:opacity}
+@keyframes fxDmgFlash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+.fx-heal-flash{position:fixed;inset:0;pointer-events:none;z-index:780;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(30,220,100,.2) 0%,transparent 70%);
+  animation:fxHealFlash .5s ease forwards;will-change:opacity}
+@keyframes fxHealFlash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+/* ── HP card improvements ───────────────────────────────────────── */
+.hp-card{
+  min-width:130px;height:112px;border-radius:12px;
+  background:linear-gradient(160deg,rgba(16,22,34,.95),rgba(11,16,25,.98));
+  border:1px solid rgba(255,255,255,.08);
+  padding:10px 12px 8px;position:relative;flex-shrink:0;
+  transition:border-color .3s,box-shadow .3s,transform .15s;
+  overflow:hidden;will-change:transform;contain:layout style;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.hp-card::before{content:'';position:absolute;inset:0;border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,transparent 40%);pointer-events:none}
+.hp-card.active{border-color:rgba(240,176,64,.5);box-shadow:0 0 20px rgba(240,176,64,.15),inset 0 0 20px rgba(240,176,64,.04);
+  transform:scale(1.02)}
+.hp-card.active::after{content:'';position:absolute;bottom:-1px;left:15%;right:15%;height:3px;
+  background:var(--gold2);border-radius:3px;box-shadow:0 0 12px var(--gold2);animation:activeGlow 1.5s ease infinite alternate}
+@keyframes activeGlow{0%{opacity:.5;box-shadow:0 0 8px var(--gold2)}100%{opacity:1;box-shadow:0 0 18px var(--gold2)}}
+.hp-card.dead{opacity:.4;filter:grayscale(.85);transform:scale(.97)}
+.hp-card.danger{border-color:rgba(204,17,17,.5);animation:dangerPulse 1.2s ease infinite}
+@keyframes dangerPulse{0%,100%{box-shadow:0 0 10px rgba(204,17,17,.3)}50%{box-shadow:0 0 24px rgba(204,17,17,.6)}}
+.hp-card.hit{animation:hpHitV2 .5s ease}
+.hp-card.healed{animation:hpHealV2 .5s ease}
+@keyframes hpHitV2{0%{background:linear-gradient(160deg,rgba(16,22,34,.95),rgba(11,16,25,.98));transform:scale(1)}
+  20%{background:linear-gradient(160deg,rgba(120,20,20,.6),rgba(80,10,10,.5));transform:scale(1.04)}
+  100%{background:linear-gradient(160deg,rgba(16,22,34,.95),rgba(11,16,25,.98));transform:scale(1)}}
+@keyframes hpHealV2{0%{background:linear-gradient(160deg,rgba(16,22,34,.95),rgba(11,16,25,.98));transform:scale(1)}
+  20%{background:linear-gradient(160deg,rgba(15,90,50,.5),rgba(10,60,30,.4));transform:scale(1.04)}
+  100%{background:linear-gradient(160deg,rgba(16,22,34,.95),rgba(11,16,25,.98));transform:scale(1)}}
+
+/* ── Card visual improvements ───────────────────────────────────── */
+.game-card{
+  width:148px;height:215px;border-radius:14px;position:relative;
+  background:linear-gradient(160deg,#1c2540,#0e1525);
+  border:2px solid rgba(200,146,42,.2);
+  box-shadow:0 8px 32px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
+  cursor:pointer;transition:transform .2s cubic-bezier(.2,.8,.3,1),box-shadow .2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;transform-style:preserve-3d;
+  flex-shrink:0;user-select:none;will-change:transform;contain:layout style;
+}
+.game-card::before{content:'';position:absolute;inset:0;border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none;z-index:1}
+.game-card:hover:not(.disabled){transform:translateY(-8px) scale(1.03);box-shadow:0 20px 50px rgba(0,0,0,.85),0 0 0 2px var(--gold)}
+.game-card.disabled{cursor:default;opacity:.7}
+.game-card.critical-card{border-color:rgba(255,65,54,.6);animation:critGlow 1.5s ease infinite alternate}
+@keyframes critGlow{from{box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 15px rgba(255,65,54,.3)}to{box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 35px rgba(255,65,54,.6)}}
+.game-card.flip-anim{animation:cardFlip3d .45s ease forwards}
+@keyframes cardFlip3d{0%{transform:rotateY(0) scale(1)}35%{transform:rotateY(90deg) scale(1.06)}55%{transform:rotateY(-10deg) scale(1.03)}100%{transform:rotateY(0) scale(.92);opacity:.35}}
+
+/* ── Card click ripple ──────────────────────────────────────────── */
+.card-ripple{position:absolute;border-radius:50%;background:rgba(240,176,64,.3);
+  pointer-events:none;transform:scale(0);animation:cardRipple .5s ease forwards;z-index:10}
+@keyframes cardRipple{0%{transform:scale(0);opacity:1}100%{transform:scale(3);opacity:0}}
+
+/* ── Improved floating damage numbers ───────────────────────────── */
+.dmg-float{position:fixed;pointer-events:none;z-index:900;font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:2px;text-shadow:0 3px 16px rgba(0,0,0,.95),0 0 40px currentColor;animation:floatUpV2 1.4s cubic-bezier(.2,.8,.3,1) forwards;will-change:transform,opacity}
+@keyframes floatUpV2{0%{opacity:0;transform:translateY(10px) scale(.5)}12%{opacity:1;transform:translateY(0) scale(1.3)}30%{transform:translateY(-14px) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(.6)}}
+.dmg-float.red{color:var(--red3)}
+.dmg-float.green{color:var(--heal2)}
+.dmg-float.gold{color:var(--gold3)}
+
+/* ── Better screen shake ────────────────────────────────────────── */
+@keyframes screenShakeV2{0%,100%{transform:translate3d(0,0,0)}12%{transform:translate3d(-6px,3px,0)}25%{transform:translate3d(6px,-4px,0)}37%{transform:translate3d(-4px,5px,0)}50%{transform:translate3d(4px,-3px,0)}62%{transform:translate3d(-3px,2px,0)}75%{transform:translate3d(2px,-1px,0)}}
+.screen-shake{animation:screenShakeV2 .4s ease}
+
+/* ── Improved toast ─────────────────────────────────────────────── */
+.toast-v2{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(135deg,rgba(20,10,10,.95),rgba(120,30,30,.9));
+  color:#fff;padding:12px 24px;border-radius:16px;font-size:14px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;
+  z-index:1000;white-space:nowrap;max-width:92vw;text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  animation:toastIn .35s cubic-bezier(.22,1,.36,1) forwards;will-change:transform,opacity}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+.toast-v2.out{animation:toastOut .3s ease forwards}
+@keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(-10px) scale(.95)}}
+
+/* ── Reveal overlay improvements ────────────────────────────────── */
+.reveal-card{width:100%;max-width:360px;padding:28px 24px;text-align:center;border-radius:20px 20px 0 0;
+  background:linear-gradient(160deg,rgba(19,26,38,.98),rgba(13,20,32,.98));
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.reveal-animal{font-size:76px;margin-bottom:8px;animation:revealPopV2 .5s cubic-bezier(.2,.8,.3,1);
+  filter:drop-shadow(0 0 30px rgba(240,176,64,.5))}
+@keyframes revealPopV2{0%{transform:scale(0) rotate(-25deg);opacity:0}60%{transform:scale(1.2) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+
+/* ── Section labels with subtle glow ────────────────────────────── */
+.cards-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding:0 2px}
+.pu-section-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+
+/* ── Game top bar glassmorphism ─────────────────────────────────── */
+.game-top{display:flex;align-items:center;gap:10px;padding:max(10px, calc(var(--safe-top) + 4px)) 14px 10px;
+  background:rgba(3,4,10,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:50;width:100%;
+  box-shadow:0 4px 20px rgba(0,0,0,.3)}
+
+/* ── Log section visual improvements ────────────────────────────── */
+#log-list{height:450px;overflow-y:auto;border-radius:12px;border:1px solid rgba(255,255,255,.06);
+  background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(0,0,0,.3));contain:strict}
+.log-entry{font-family:'Barlow Condensed',sans-serif;font-size:16px;line-height:1.55;
+  padding:9px 14px 9px 16px;border-bottom:1px solid rgba(255,255,255,.04);
+  border-left:3px solid transparent;transition:background .12s;letter-spacing:.2px;contain:layout style}
+
+/* ── Powerup activation screen flash ────────────────────────────── */
+.fx-pu-flash{position:fixed;inset:0;pointer-events:none;z-index:785;will-change:opacity;
+  animation:fxPuFlash .6s ease forwards}
+@keyframes fxPuFlash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+
+/* ── Turn transition effect ─────────────────────────────────────── */
+.fx-turn-flash{position:fixed;inset:0;pointer-events:none;z-index:48;
+  background:linear-gradient(180deg,rgba(240,176,64,.08) 0%,transparent 40%);
+  animation:fxTurnFlash .7s ease forwards;will-change:opacity}
+@keyframes fxTurnFlash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+
+/* ── Active turn name glow ──────────────────────────────────────── */
+.turn-name-glow{animation:turnNameGlow 2s ease infinite alternate}
+@keyframes turnNameGlow{0%{text-shadow:none}100%{text-shadow:0 0 20px rgba(240,176,64,.4)}}
+
+/* ── Performance: contain on scroll containers ──────────────────── */
+.hp-strip-wrap{contain:content;will-change:scroll-position}
+.cards-grid{contain:layout style}
+#log-list{contain:strict}
+
+/* ── Improved elimination animation ─────────────────────────────── */
+.elim-anim-wrap{position:fixed;inset:0;z-index:950;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:elimFadeV2 2.5s ease forwards;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+@keyframes elimFadeV2{0%{background:rgba(0,0,0,0)}10%{background:rgba(100,0,0,.85)}60%{background:rgba(40,0,0,.7)}100%{background:rgba(0,0,0,0);opacity:0}}
+
+/* ── Game over improvements ─────────────────────────────────────── */
+.go-winner-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,12vw,60px);letter-spacing:3px;
+  color:var(--gold2);text-align:center;text-shadow:0 0 40px rgba(240,176,64,.6);
+  animation:winnerPulse 2s ease infinite alternate}
+@keyframes winnerPulse{0%{text-shadow:0 0 30px rgba(240,176,64,.4)}100%{text-shadow:0 0 60px rgba(240,176,64,.8),0 0 100px rgba(240,176,64,.3)}}
+
+/* ── Mobile responsive card grid improvements ───────────────────── */
+@media(max-width:380px){
+  .pu-grid{gap:6px}
+  .puc-desc{font-size:10.5px;max-height:68px}
+  .puc-art-zone{height:72px}
+  .puc-icon{font-size:38px}
+}
+@media(max-width:320px){
+  .pu-grid{grid-template-columns:repeat(3,1fr);gap:4px}
+  .puc-desc{font-size:10px}
+}
+
+/* ── Reduced motion for accessibility/battery ───────────────────── */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .hp-card,.game-card,.pu-choice{will-change:auto}
+}
 
 /* ── ANIMAL ALERT (canguro/volpe/orso/gufo) ─────────────────────── */
 .animal-alert{
@@ -763,6 +877,10 @@ input:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(192,57,43,.15)}
     <div class="go-winner-name" id="winner-name">—</div>
     <div class="stats-grid" id="stats-grid"></div>
     <div class="final-list" id="final-list"></div>
+    <div class="section-card" style="width:100%;margin-top:8px">
+      <div class="section-title">📜 Storico completo della partita</div>
+      <div id="final-log" style="max-height:400px;overflow-y:auto;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.35)"></div>
+    </div>
     <button class="btn btn-blood" onclick="restartGame()" style="margin-top:8px" id="go-restart-btn">🔄 Rivincita</button>
     <div id="go-waiting-msg" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted);text-align:center;padding:8px 0;letter-spacing:1px">⏳ In attesa che il Master riavvii la partita...</div>
     <button class="btn btn-ghost btn-sm" onclick="goHome()">← Home</button>
@@ -840,7 +958,7 @@ const G = {
   sessionStats:{dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0},
   masterOverrideActive:false,masterOverridePid:null,
   bearMode:false,bearCardsChosen:0,bearFirstTarget:null,bearFirstCardId:null,
-  foxMode:false,foxTargetPid:null,
+
   dogMode:false,dogPuCount:0,
   timerTO:null,timerActive:false,timerSec:0,
   selectedPU:null,
@@ -853,8 +971,8 @@ const G = {
 // ── MODE BANS ────────────────────────────────────────────────────
 const MODE_BANS = {
   classic: [],
-  hardcore: ['rat'],
-  chaos: ['rat','owl','wolf','weasel'],
+  hardcore: ['rat','donkey','cheetah'],
+  chaos: ['rat','owl','wolf','weasel','donkey','cheetah'],
 };
 
 // ── Power-up definitions (40 total) ──────────────────────────────
@@ -875,7 +993,7 @@ const POWERUPS = [
   {id:'koala',    icon:'🐨', name:'Koala',      timing:'after',
    desc:'Il valore diventa guarigione invece di danno.'},
   {id:'cheetah',  icon:'🐆', name:'Ghepardo',   timing:'before',
-   desc:'7 secondi per scegliere carta e potere. Scaduto → turno saltato.'},
+   desc:'10 secondi per scegliere carta e potere. Scaduto → turno saltato.'},
   {id:'bear',     icon:'🐻', name:'Orso',       timing:'before',
    desc:'Il giocatore successivo DEVE scegliere 2 carte diverse.'},
   {id:'owl',      icon:'🦉', name:'Gufo',       timing:'before',
@@ -888,8 +1006,7 @@ const POWERUPS = [
    desc:'Il prossimo giocatore non può colpirti.'},
   {id:'bug',      icon:'🐛', name:'Cimice',     timing:'before',
    desc:'Annulla e riflette il prossimo danno ricevuto.'},
-  {id:'fox',      icon:'🦊', name:'Volpe',      timing:'before',
-   desc:'Giochi al posto del prossimo giocatore.'},
+
   {id:'shark',    icon:'🦈', name:'Squalo',     timing:'before',
    desc:'Elimina tutti i giocatori con HP < 15% degli HP iniziali.'},
   {id:'deer',     icon:'🦌', name:'Cervo',      timing:'after',
@@ -911,8 +1028,7 @@ const POWERUPS = [
   // === NEW 16 ===
   {id:'mosquito', icon:'🦟', name:'Zanzara',    timing:'before',
    desc:'Al tuo prossimo turno assorbi HP dal bersaglio: lo colpisci e ti curi dello stesso valore.'},
-  {id:'penguin',  icon:'🐧', name:'Pinguino',   timing:'before',
-   desc:'Carta extra valore 0 a tutti gli altri (nascosta). Scade al tuo prossimo turno.'},
+
   {id:'scorpion', icon:'🦂', name:'Scorpione',  timing:'before',
    desc:'Carta extra valore 100 a tutti gli altri (nascosta). Scade al tuo prossimo turno.'},
   {id:'peacock',  icon:'🦚', name:'Pavone',     timing:'before',
@@ -931,16 +1047,14 @@ const POWERUPS = [
    desc:'La prima carta a sinistra cura invece di danneggiare (nascosto). Scade al tuo prossimo turno.'},
   {id:'lion',     icon:'🦁', name:'Leone',      timing:'before',
    desc:'Ad ogni turno, danni casuali (1-100) a tutti i giocatori. Scade al tuo prossimo turno.'},
-  {id:'cuttlefish',icon:'🦑',name:'Seppia',     timing:'before',
-   desc:'Fino al tuo prossimo turno, sei immune ai danni dei powerup avversari.'},
+
   {id:'dog',      icon:'🐕', name:'Cane',       timing:'before',
-   desc:'Questo turno puoi attivare 2 powerup invece di 1.'},
+   desc:'Attiva immediatamente gli altri 2 powerup della lista (tutti e 3 si attivano).'},
   {id:'weasel',   icon:'🦦', name:'Donnola',    timing:'before',
    desc:'Gli altri giocatori scelgono tra 2 powerup (invece di 3) fino al tuo prossimo turno.'},
   {id:'frog',     icon:'🐸', name:'Rana',       timing:'after',
    desc:'Il prossimo giocatore scambia i suoi HP con quelli del bersaglio (nessun danno).'},
-  {id:'orca',     icon:'🐋', name:'Orca',       timing:'after',
-   desc:'Il valore della carta del prossimo giocatore diventa pari agli HP del giocatore con meno vita.'},
+
   // === 17 NUOVI POWERUP ===
   {id:'pigeon',    icon:'🕊️', name:'Piccione',       timing:'before',
    desc:'Una carta casuale per ogni avversario è bloccata fino al tuo prossimo turno.'},
@@ -962,12 +1076,9 @@ const POWERUPS = [
    desc:'Al prossimo turno, il giocatore con più HP subisce la somma di tutte le carte del prossimo giocatore.'},
   {id:'giraffe',   icon:'🦒', name:'Giraffa',         timing:'before',
    desc:'Il giocatore con più HP perde metà HP; quella quota viene distribuita a tutti gli altri. Immediato.'},
-  {id:'magpie',    icon:'🐦‍⬛',name:'Gazza Ladra',     timing:'before',
-   desc:'Ruba il prossimo powerup attivato dal giocatore successivo e lo usi tu. Effetto nascosto.'},
-  {id:'seaurchin', icon:'🌊', name:'Riccio di Mare',  timing:'before',
-   desc:'Il prossimo colpo che ricevi viene riflettuto doppio sull\'attaccante. Effetto nascosto.'},
-  {id:'seahorse',  icon:'🐟', name:'Cavalluccio Marino',timing:'before',
-   desc:'Guadagni HP pari alla carta scelta dal giocatore successivo. Nascosto fino alla scelta.'},
+
+
+
   {id:'duck',      icon:'🦆', name:'Papera',          timing:'before',
    desc:'La prossima carta del giocatore successivo applica danni a lui stesso. Effetto nascosto.'},
   {id:'tiger',     icon:'🐯', name:'Tigre',           timing:'before',
@@ -1008,20 +1119,26 @@ function playSound(type){
 }
 function vibrate(p){try{navigator.vibrate(p)}catch(e){}}
 
-// ── Particles ─────────────────────────────────────────────────────
+// ── Particles — optimized for mobile ──────────────────────────────
 (function(){
   const cv=document.getElementById('particle-canvas');if(!cv)return;
-  const ctx=cv.getContext('2d');let W,H,pts=[];
-  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
-  resize();window.addEventListener('resize',resize);
+  const ctx=cv.getContext('2d',{alpha:true});let W,H,pts=[];
+  const isMobile='ontouchstart' in window||innerWidth<768;
+  const MAX_PTS=isMobile?10:20;
+  function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  resize();let _resizeTimer;window.addEventListener('resize',()=>{clearTimeout(_resizeTimer);_resizeTimer=setTimeout(resize,200);});
   function mk(){return{x:Math.random()*W,y:H+10,r:Math.random()*2+.5,vx:(Math.random()-.5)*.3,vy:-(Math.random()*.7+.2),life:1,decay:Math.random()*.003+.001,col:`hsl(${Math.random()<.5?'5,75%':'38,80%'},${25+Math.random()*25}%)`};}
-  for(let i=0;i<18;i++)pts.push({...mk(),y:Math.random()*H});
-  (function draw(){
-    ctx.clearRect(0,0,W,H);if(pts.length<22)pts.push(mk());
+  for(let i=0;i<Math.min(MAX_PTS,12);i++)pts.push({...mk(),y:Math.random()*H});
+  let lastTime=0;
+  (function draw(now){
+    // Throttle to ~30fps on mobile for battery
+    if(isMobile&&now-lastTime<33){requestAnimationFrame(draw);return;}
+    lastTime=now;
+    ctx.clearRect(0,0,W,H);if(pts.length<MAX_PTS)pts.push(mk());
     pts=pts.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;if(p.life<=0)return false;
-      ctx.save();ctx.globalAlpha=p.life*.35;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();return true;});
+      ctx.save();ctx.globalAlpha=p.life*.3;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();return true;});
     requestAnimationFrame(draw);
-  })();
+  })(0);
 })();
 
 // ══ ANIMATION SYSTEM v2 ══════════════════════════════════════════
@@ -1040,7 +1157,6 @@ const PU_THEMES = {
   armadillo:{bg:'linear-gradient(160deg,#181000,#403000,#806000)',glow:'#d4af37',accent:'#fce38a'},
   crocodile:{bg:'linear-gradient(160deg,#041200,#0e3a00,#1a6600)',glow:'#4caf50',accent:'#a5d6a7'},
   bug:      {bg:'linear-gradient(160deg,#1e1400,#4a3200,#806000)',glow:'#cda800',accent:'#f5e642'},
-  fox:      {bg:'linear-gradient(160deg,#200800,#5a1e00,#b04000)',glow:'#ff6b35',accent:'#ffa07a'},
   shark:    {bg:'linear-gradient(160deg,#001426,#002a52,#004080)',glow:'#0984e3',accent:'#74b9ff'},
   deer:     {bg:'linear-gradient(160deg,#180a00,#3e2000,#7a4400)',glow:'#c89030',accent:'#f0c060'},
   tick:     {bg:'linear-gradient(160deg,#0a1200,#203000,#3a5800)',glow:'#8bc34a',accent:'#c5e1a5'},
@@ -1052,7 +1168,6 @@ const PU_THEMES = {
   donkey:   {bg:'linear-gradient(160deg,#1a1200,#3e2c00,#706000)',glow:'#c8a000',accent:'#f5d500'},
   // NEW 16
   mosquito: {bg:'linear-gradient(160deg,#0a0018,#200040,#400080)',glow:'#bb86fc',accent:'#e1bee7'},
-  penguin:  {bg:'linear-gradient(160deg,#001420,#003050,#005080)',glow:'#80deea',accent:'#e0f7fa'},
   scorpion: {bg:'linear-gradient(160deg,#1a0a00,#4a2000,#803800)',glow:'#ff6f00',accent:'#ffab40'},
   peacock:  {bg:'linear-gradient(160deg,#001830,#003060,#0060a0)',glow:'#00bcd4',accent:'#84ffff'},
   zebra:    {bg:'linear-gradient(160deg,#0a0a0a,#222222,#444444)',glow:'#e0e0e0',accent:'#ffffff'},
@@ -1068,9 +1183,6 @@ const PU_THEMES = {
   walrus:{bg:'linear-gradient(160deg,#001a2e,#003d5c)',glow:'#00acc1',accent:'#b2ebf2'},
   hyena:{bg:'linear-gradient(160deg,#1a1700,#3d3500)',glow:'#fbc02d',accent:'#fff9c4'},
   giraffe:{bg:'linear-gradient(160deg,#1a0f00,#3d2400)',glow:'#ffa000',accent:'#ffecb3'},
-  magpie:{bg:'linear-gradient(160deg,#0a0a0a,#1a1a1a)',glow:'#607d8b',accent:'#eceff1'},
-  seaurchin:{bg:'linear-gradient(160deg,#001a2e,#003d6e)',glow:'#1565c0',accent:'#bbdefb'},
-  seahorse:{bg:'linear-gradient(160deg,#001a1a,#003d3d)',glow:'#00838f',accent:'#b2ebf2'},
   duck:{bg:'linear-gradient(160deg,#1a1500,#3d3200)',glow:'#f9a825',accent:'#fff9c4'},
   tiger:{bg:'linear-gradient(160deg,#1a0700,#3d1700)',glow:'#e64a19',accent:'#ffccbc'},
   mantis:{bg:'linear-gradient(160deg,#0d1a00,#1a3300)',glow:'#33691e',accent:'#dcedc8'},
@@ -1079,11 +1191,9 @@ const PU_THEMES = {
   ostrich:  {bg:'linear-gradient(160deg,#181208,#3a2e18,#5c4a28)',glow:'#d4a040',accent:'#ffe0a0'},
   gorilla:  {bg:'linear-gradient(160deg,#080810,#181828,#282840)',glow:'#7986cb',accent:'#c5cae9'},
   lion:     {bg:'linear-gradient(160deg,#1a1000,#4a3000,#805000)',glow:'#ff9800',accent:'#ffe0b2'},
-  cuttlefish:{bg:'linear-gradient(160deg,#0a0020,#1a0040,#300060)',glow:'#7c4dff',accent:'#b388ff'},
   dog:      {bg:'linear-gradient(160deg,#1a0c00,#3e2800,#6a4400)',glow:'#ff8f00',accent:'#ffc46b'},
   weasel:   {bg:'linear-gradient(160deg,#0c1000,#1e2c00,#344c00)',glow:'#aeea00',accent:'#f4ff81'},
   frog:     {bg:'linear-gradient(160deg,#001a0a,#003a18,#005a28)',glow:'#00c853',accent:'#69f0ae'},
-  orca:     {bg:'linear-gradient(160deg,#000a1a,#001a3a,#002a5a)',glow:'#0288d1',accent:'#4fc3f7'},
 };
 
 function triggerAnim(id, opts={}) {
@@ -1112,6 +1222,7 @@ function triggerAnim(id, opts={}) {
     <div class="pua-card-shine"></div>`;
   document.body.appendChild(card);
   spawnPuBurst(theme.glow, theme.accent, id);
+  flashPu(theme.glow);
   if(id==='hedgehog') spawnHedgehogSpines();
   if(id==='spider') setTimeout(()=>drawSpiderWebCanvas(), 350);
   setTimeout(()=>{
@@ -1123,33 +1234,38 @@ function triggerAnim(id, opts={}) {
 function spawnPuBurst(color1, color2, id) {
   const cv = document.createElement('canvas');
   cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:801';
-  cv.width = innerWidth; cv.height = innerHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width = innerWidth*dpr; cv.height = innerHeight*dpr;
   document.body.appendChild(cv);
   const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
   const cx = innerWidth/2, cy = innerHeight/2;
+  const isMobile='ontouchstart' in window;
+  const mainCount=isMobile?30:55;const sparkCount=isMobile?10:20;
   const pts = [];
-  for(let i=0;i<55;i++){
-    const a = (Math.PI*2*i/55)+Math.random()*.5;
+  for(let i=0;i<mainCount;i++){
+    const a = (Math.PI*2*i/mainCount)+Math.random()*.5;
     const spd = 2.5+Math.random()*7;
     pts.push({x:cx,y:cy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-2,r:2.5+Math.random()*4,
       life:1,decay:.018+Math.random()*.025,col:Math.random()<.55?color1:color2,trail:[]});
   }
-  for(let i=0;i<20;i++){
+  for(let i=0;i<sparkCount;i++){
     pts.push({x:cx+rnd(-20,20),y:cy,vx:(Math.random()-.5)*4,vy:-(3+Math.random()*8),r:1.5+Math.random()*2,
       life:1,decay:.025+Math.random()*.03,col:'#ffffff',trail:[]});
   }
   let frame=0;
+  const maxFrames=isMobile?60:90;
   const cvSafety=setTimeout(()=>{try{cv.remove();}catch(e){}},3500);
   (function draw(){
-    if(frame>90){clearTimeout(cvSafety);try{cv.remove();}catch(e){}return;}frame++;
-    ctx.clearRect(0,0,cv.width,cv.height);
+    if(frame>maxFrames){clearTimeout(cvSafety);try{cv.remove();}catch(e){}return;}frame++;
+    ctx.clearRect(0,0,innerWidth,innerHeight);
     if(frame<18){const pct=frame/18;ctx.save();ctx.globalAlpha=(1-pct)*.6;ctx.strokeStyle=color1;ctx.lineWidth=3;ctx.shadowBlur=20;ctx.shadowColor=color1;ctx.beginPath();ctx.arc(cx,cy,pct*140,0,Math.PI*2);ctx.stroke();ctx.restore();}
     pts.forEach(p=>{
       if(p.life<=0)return;
-      p.trail.push({x:p.x,y:p.y,life:p.life});if(p.trail.length>6)p.trail.shift();
+      if(!isMobile){p.trail.push({x:p.x,y:p.y,life:p.life});if(p.trail.length>6)p.trail.shift();
+      p.trail.forEach((t,ti)=>{ctx.save();ctx.globalAlpha=t.life*.3*(ti/p.trail.length);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(t.x,t.y,p.r*(ti/p.trail.length),0,Math.PI*2);ctx.fill();ctx.restore();});}
       p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.vx*=.97;p.life-=p.decay;
-      p.trail.forEach((t,ti)=>{ctx.save();ctx.globalAlpha=t.life*.3*(ti/p.trail.length);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(t.x,t.y,p.r*(ti/p.trail.length),0,Math.PI*2);ctx.fill();ctx.restore();});
-      ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.col;ctx.shadowBlur=12;ctx.shadowColor=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.col;ctx.shadowBlur=isMobile?6:12;ctx.shadowColor=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();ctx.restore();
     });
     requestAnimationFrame(draw);
   })();
@@ -1171,8 +1287,18 @@ function showAnimalAlert(icon,title,desc,color) {
 
 // ══ Visual effects ════════════════════════════════════════════════
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function spawnFloat(text,type='red',x,y){const el=document.createElement('div');el.className=`dmg-float ${type}`;el.textContent=text;el.style.left=(x||innerWidth/2-28)+'px';el.style.top=(y||innerHeight*.38)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1600);}
-function shakeScreen(){const w=document.getElementById('game-wrap');if(!w)return;w.classList.remove('screen-shake');void w.offsetWidth;w.classList.add('screen-shake');setTimeout(()=>w.classList.remove('screen-shake'),500);}
+function spawnFloat(text,type='red',x,y){
+  const el=document.createElement('div');el.className=`dmg-float ${type}`;el.textContent=text;
+  el.style.left=(x||innerWidth/2-28)+'px';el.style.top=(y||innerHeight*.38)+'px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1500);
+  // Also trigger screen flash
+  if(type==='red')flashDamage();else if(type==='green')flashHeal();
+}
+function flashDamage(){const el=document.createElement('div');el.className='fx-damage-flash';document.body.appendChild(el);setTimeout(()=>el.remove(),500);}
+function flashHeal(){const el=document.createElement('div');el.className='fx-heal-flash';document.body.appendChild(el);setTimeout(()=>el.remove(),550);}
+function flashPu(color){const el=document.createElement('div');el.className='fx-pu-flash';el.style.background=`radial-gradient(ellipse 80% 60% at 50% 50%,${color}30 0%,transparent 70%)`;document.body.appendChild(el);setTimeout(()=>el.remove(),650);}
+function flashTurn(){const el=document.createElement('div');el.className='fx-turn-flash';document.body.appendChild(el);setTimeout(()=>el.remove(),750);}
+function shakeScreen(){const w=document.getElementById('game-wrap');if(!w)return;w.classList.remove('screen-shake');void w.offsetWidth;w.classList.add('screen-shake');setTimeout(()=>w.classList.remove('screen-shake'),450);}
 function critExplode(){const el=document.createElement('div');el.className='crit-explode';document.body.appendChild(el);setTimeout(()=>el.remove(),700);}
 function confetti(){const cols=['#c0392b','#f0b040','#27d676','#3498db','#9b59b6','#e74c3c','#fff'];for(let i=0;i<80;i++){const el=document.createElement('div');el.className='confetti-bit';el.style.cssText=`left:${rnd(5,95)}vw;top:-20px;background:${cols[rnd(0,cols.length-1)]};animation-duration:${rnd(12,22)/10}s;animation-delay:${rnd(0,14)/10}s;transform:rotateZ(${rnd(0,360)}deg);width:${rnd(6,12)}px;height:${rnd(10,18)}px;`;document.body.appendChild(el);setTimeout(()=>el.remove(),3000);}}
 function triggerEliminationAnim(name){
@@ -1182,7 +1308,7 @@ function triggerEliminationAnim(name){
   w.innerHTML=`<div class="elim-skull">💀</div><div class="elim-name">${name}</div><div class="elim-sub">è stato eliminato!</div>`;
   document.body.appendChild(w);setTimeout(()=>w.remove(),2600);
 }
-function toast(msg,dur=2500){const el=document.createElement('div');el.style.cssText=`position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5a0a0a,#c0392b);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;z-index:1000;white-space:nowrap;max-width:92vw;text-align:center;box-shadow:0 4px 20px rgba(192,57,43,.5)`;el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';},dur-300);setTimeout(()=>el.remove(),dur);}
+function toast(msg,dur=2500){const el=document.createElement('div');el.className='toast-v2';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.classList.add('out');},dur-300);setTimeout(()=>el.remove(),dur);}
 
 // ══ Firebase helpers ══════════════════════════════════════════════
 function genRoomId(){return Math.random().toString(36).substr(2,4).toUpperCase();}
@@ -1258,7 +1384,7 @@ async function createGame(){
   const players={};
   allNames.forEach((name,i)=>{
     players['p'+i]={id:'p'+i,name,hp,maxHp:hp,alive:true,ismaster:i===0,joined:true,
-      skipNext:false,activeBug:false,cuttlefishShield:false};
+      skipNext:false,activeBug:false};
   });
   // Apply mode bans
   const puEnabled={};
@@ -1292,7 +1418,7 @@ async function createGameTest(){
   const players={};
   allNames.forEach((name,i)=>{
     players['p'+i]={id:'p'+i,name,hp,maxHp:hp,alive:true,ismaster:i===0,joined:true,
-      skipNext:false,activeBug:false,cuttlefishShield:false};
+      skipNext:false,activeBug:false};
   });
   const puEnabled={};
   POWERUPS.forEach(p=>puEnabled[p.id]=true); // all PU enabled in test mode
@@ -1404,7 +1530,7 @@ function startPlayingScreen(){
   if(testPill)testPill.classList.toggle('show',!!G.isTestMode);
   clearTimer();
   G.sessionStats={dmgDealt:0,dmgReceived:0,highCard:0,turnsPlayed:0,puUsed:0};
-  G.bearMode=false;G.foxMode=false;G.dogMode=false;G.dogPuCount=0;
+  G.bearMode=false;G.dogMode=false;G.dogPuCount=0;
   G.masterOverrideActive=false;G._shownAnims={};
   G._cardPickedOnTurn=-1;G._lastRenderedTurn=-1;
   let _lastStateKey='';let _renderPending=false;let _latestState=null;
@@ -1436,43 +1562,41 @@ function renderState(state){
   const pu=state.activePowerups||{};
   const isMyTurn=!G.isSpectator&&currentPid===G.playerId;
 
-  // Fox: owner plays for fox target
-  const foxActive=pu.fox;
-  if(foxActive&&foxActive.target===currentPid&&foxActive.owner===G.playerId&&!G.foxMode){
-    G.foxMode=true;G.foxTargetPid=currentPid;
-  }
+  // Fox removed
   // TEST MODE: automatically activate master override for non-personal turns; clear it on personal turn
   if(G.isTestMode){
     if(isMyTurn){
       // It's actually my turn (p0) — clear any leftover override
       if(G.masterOverrideActive){G.masterOverrideActive=false;G.masterOverridePid=null;}
-    }else if(!G.foxMode&&!G.masterOverrideActive){
+    }else if(!G.masterOverrideActive){
       G.masterOverrideActive=true;G.masterOverridePid=currentPid;
     }
   }
   // Bear — FIX 7: also activate for fox owner playing for bear target
-  const bearTargetPid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
-  if(pu.bear&&pu.bear.target===bearTargetPid&&(isMyTurn||G.foxMode||G.masterOverrideActive)&&!G.bearMode&&G.bearCardsChosen===0){
+  const bearTargetPid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
+  if(pu.bear&&pu.bear.target===bearTargetPid&&(isMyTurn||G.masterOverrideActive)&&!G.bearMode&&G.bearCardsChosen===0){
     G.bearMode=true;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   }
-  const canPlay=isMyTurn||G.foxMode||G.masterOverrideActive;
+  const canPlay=isMyTurn||G.masterOverrideActive;
 
   // New turn announcement
   if(_lastTurnPid!==currentPid){
     _lastTurnPid=currentPid;G._shownAnims={};
-    if(isMyTurn||G.foxMode){playSound('flip');vibrate([40,30,80]);}
+    if(isMyTurn){playSound('flip');vibrate([40,30,80]);flashTurn();}
   }
+  // Turn name glow for active player
+  const turnNameEl=document.getElementById('turn-name');
+  if(turnNameEl)turnNameEl.classList.toggle('turn-name-glow',isMyTurn);
 
   // Per-turn alerts
   if(!G._shownAnims.kang_alert&&pu.kangaroo?.target===G.playerId){G._shownAnims.kang_alert=true;showAnimalAlert('🦘','TURNO SALTATO!','Il Canguro ti ha scavalcato!','#f0b040');}
-  if(!G._shownAnims.fox_alert&&foxActive?.target===G.playerId&&foxActive?.owner!==G.playerId){G._shownAnims.fox_alert=true;showAnimalAlert('🦊','VOLPE!','La Volpe gioca al posto tuo!','#e67e22');}
   if(!G._shownAnims.bear_alert&&pu.bear?.target===G.playerId&&isMyTurn){G._shownAnims.bear_alert=true;showAnimalAlert('🐻','ORSO!','Devi scegliere 2 carte diverse!','#c0392b');}
   if(!G._shownAnims.owl_alert&&pu.owl?.target===G.playerId&&isMyTurn){G._shownAnims.owl_alert=true;showAnimalAlert('🦉','GUFO!','Non puoi attivare power-up!','#6c5ce7');}
   if(!G._shownAnims.wolf_alert&&pu.wolf&&canPlay){G._shownAnims.wolf_alert=true;showAnimalAlert('🐺','LUPO!','Nessun powerup disponibile questo giro!','#b71c1c');}
   if(!G._shownAnims.ostrich_alert&&pu.ostrich&&canPlay){G._shownAnims.ostrich_alert=true;showAnimalAlert('🪶','STRUZZO!','L\'ultima carta a destra è bloccata!','#d4a040');}
   // FIX G: rhino auto-advance works for normal turn, fox mode, AND masterOverride
-  const rhinoActivePid=G.masterOverrideActive?G.masterOverridePid:(G.foxMode?G.foxTargetPid:G.playerId);
-  const rhinoMyTurn=(isMyTurn||G.masterOverrideActive||G.foxMode)&&pu.rhino?.target===rhinoActivePid;
+  const rhinoActivePid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
+  const rhinoMyTurn=(isMyTurn||G.masterOverrideActive)&&pu.rhino?.target===rhinoActivePid;
   if(!G._shownAnims.rhino_alert&&rhinoMyTurn){G._shownAnims.rhino_alert=true;showAnimalAlert('🦏','RINOCERONTE!','Tutte le carte si attivano automaticamente! Vai ai powerup...','#9e9e9e');
     setTimeout(async()=>{
       await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/rhino':null});
@@ -1482,36 +1606,39 @@ function renderState(state){
     },2300);
   }
 
+  // Hyena: skip card choice, go to PU (damage already dealt in nextTurn)
+  const hyenaSkipPid=state._hyenaSkip;
+  const hyenaMyTurn=(isMyTurn||G.masterOverrideActive)&&hyenaSkipPid===(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  if(!G._shownAnims.hyena_skip&&hyenaMyTurn){G._shownAnims.hyena_skip=true;showAnimalAlert('🦝','IENA!','Le carte si attivano automaticamente! Vai ai powerup...','#fbc02d');
+    setTimeout(async()=>{
+      await dbUpdate(`rooms/${G.roomId}`,{'_hyenaSkip':null});
+      const fresh3=G._lastState||state;
+      if(fresh3&&fresh3.status==='playing') await showPuChoice(fresh3,G.masterOverrideActive?G.masterOverridePid:G.playerId);
+    },2300);
+  }
+
   // Per-turn anim triggers
-  if(canPlay&&!G._shownAnims.rat&&pu.rat&&pu.rat.owner!==G.playerId&&!G.foxMode){G._shownAnims.rat=true;triggerAnim('rat');}
+  if(canPlay&&!G._shownAnims.rat&&pu.rat&&pu.rat.owner!==G.playerId){G._shownAnims.rat=true;triggerAnim('rat');}
   if(canPlay&&!G._shownAnims.cheetah&&pu.cheetah&&!G.timerActive){G._shownAnims.cheetah=true;triggerAnim('cheetah');}
   if(canPlay&&!G._shownAnims.owl&&pu.owl){G._shownAnims.owl=true;triggerAnim('owl');}
   if(canPlay&&!G._shownAnims.crocodile&&pu.crocodile){G._shownAnims.crocodile=true;triggerAnim('crocodile');}
 
   // UI updates
-  document.getElementById('turn-name').textContent=
-    G.foxMode?`${players[foxActive?.owner]?.name}→${players[currentPid]?.name}`:(players[currentPid]?.name||'—');
+  document.getElementById('turn-name').textContent=players[currentPid]?.name||'—';
   // Hide direction bar completely (removed per request)
   const dirBar=document.getElementById('dir-bar');if(dirBar)dirBar.style.display='none';
-  // Hide log during active player's turn or in chaos mode (to prevent reading previous moves)
-  const shouldHideLog=(isMyTurn||G.foxMode||G.masterOverrideActive)||state.mode==='chaos';
-  G._logForcedHide=shouldHideLog;
+  // Log always visible per rules
   const logList=document.getElementById('log-list');
   const logHeader=document.getElementById('log-header');
-  if(logList){
-    if(shouldHideLog){logList.style.display='none';if(logHeader)logHeader.classList.remove('open');G._logOpen=false;}
-    else if(!shouldHideLog&&!logList.style.display||logList.style.display==='none'){
-      if(!G._logForcedHidePrev){logList.style.display=G._logOpen?'block':'none';}
-    }
-  }
-  G._logForcedHidePrev=shouldHideLog;
+  if(logList){logList.style.display='block';}
+  if(logHeader){logHeader.classList.add('open');}
+  G._logOpen=true;
   renderHpStrip(players,order,currentPid,state.initialHp||1000);
   renderPuBanner(pu,canPlay);
 
   const pill=document.getElementById('special-turn-pill');
   if(pill){
     if(G.bearMode&&canPlay){pill.style.display='block';pill.innerHTML=`🐻 ORSO — Scegli carta <span class="bear-cards-left">${G.bearCardsChosen+1}/2</span>`;}
-    else if(G.foxMode){pill.style.display='block';pill.innerHTML=`🦊 VOLPE — Giochi per <b>${players[currentPid]?.name}</b>`;}
     else{pill.style.display='none';}
   }
 
@@ -1528,7 +1655,7 @@ function renderState(state){
   if(mo){
     // In test mode, override is automatic — hide the manual button
     if(G.isTestMode){mo.style.display='none';}
-    else if(G.isMaster&&!isMyTurn&&!G.foxMode&&!G.masterOverrideActive){
+    else if(G.isMaster&&!isMyTurn&&!G.masterOverrideActive){
       mo.style.display='flex';
       document.getElementById('master-override-text').textContent=`Gioca per ${players[currentPid]?.name}`;
     }else{mo.style.display='none';}
@@ -1562,29 +1689,68 @@ function renderState(state){
   }
 }
 
-// ══ HP Strip ══════════════════════════════════════════════════════
+// ══ HP Strip — optimized with DOM diffing ════════════════════════
+let _hpStripCache={};
 function renderHpStrip(players,order,currentPid,initialHp){
-  const strip=document.getElementById('hp-strip');strip.innerHTML='';
+  const strip=document.getElementById('hp-strip');
+  const existingCards=strip.children;
+  const needsRebuild=existingCards.length!==order.filter(pid=>players[pid]).length;
+  
+  if(needsRebuild){
+    strip.innerHTML='';_hpStripCache={};
+  }
+  
+  let idx=0;
   order.forEach(pid=>{
     const p=players[pid];if(!p)return;
     const pct=Math.max(0,Math.min(100,(p.hp/p.maxHp)*100));
     const isDanger=p.alive&&p.hp<(initialHp||p.maxHp)*.2;
     const barColor=pct>50?'var(--heal)':pct>25?'var(--gold)':'var(--red3)';
-    const card=document.createElement('div');
-    card.id=`hp-${pid}`;
-    card.className=`hp-card${!p.alive?' dead':''}${pid===currentPid?' active':''}${isDanger&&p.alive?' danger':''}`;
-    card.innerHTML=`${isDanger&&p.alive?'<div class="danger-skull">💀</div>':''}
-      ${p.activeBug?'<div class="bug-shield">🐛</div>':''}
-      ${p.cuttlefishShield?'<div class="bug-shield">🦑</div>':''}
-      <div class="hpc-name">${p.name}</div>
-      <div class="hpc-val" style="color:${!p.alive?'var(--muted)':pct>50?'var(--text)':pct>25?'var(--gold)':'var(--red3)'}">${p.alive?p.hp:'☠'}</div>
-      <div class="hpc-bar"><div class="hpc-fill" style="width:${pct}%;background:${barColor}"></div></div>`;
-    strip.appendChild(card);
+    const isActive=pid===currentPid;
+    const cache=_hpStripCache[pid]||{};
+    const hpChanged=cache.hp!==p.hp;
+    const stateKey=`${p.alive}-${isActive}-${isDanger}-${p.activeBug}-${pct}`;
+    
+    let card;
+    if(needsRebuild){
+      card=document.createElement('div');
+      card.id=`hp-${pid}`;
+      card.innerHTML=`${isDanger&&p.alive?'<div class="danger-skull">💀</div>':''}
+        ${p.activeBug?'<div class="bug-shield">🐛</div>':''}
+        <div class="hpc-name">${p.name}</div>
+        <div class="hpc-val">${p.alive?p.hp:'☠'}</div>
+        <div class="hpc-bar"><div class="hpc-fill"></div></div>`;
+      strip.appendChild(card);
+    } else {
+      card=existingCards[idx];
+    }
+    
+    if(card){
+      // Only update changed properties
+      const newClass=`hp-card${!p.alive?' dead':''}${isActive?' active':''}${isDanger&&p.alive?' danger':''}`;
+      if(hpChanged&&cache.hp!==undefined){
+        const wasHit=p.hp<cache.hp;
+        card.className=newClass+(wasHit?' hit':' healed');
+      }else if(cache.stateKey!==stateKey){
+        card.className=newClass;
+      }
+      
+      if(cache.hp!==p.hp||cache.alive!==p.alive){
+        const valEl=card.querySelector('.hpc-val');
+        if(valEl){valEl.textContent=p.alive?p.hp:'☠';
+          valEl.style.color=!p.alive?'var(--muted)':pct>50?'var(--text)':pct>25?'var(--gold)':'var(--red3)';}
+        const fillEl=card.querySelector('.hpc-fill');
+        if(fillEl){fillEl.style.width=pct+'%';fillEl.style.background=barColor;}
+      }
+    }
+    
+    _hpStripCache[pid]={hp:p.hp,alive:p.alive,stateKey};
+    idx++;
   });
 }
 
 // ══ PU Banner ═════════════════════════════════════════════════════
-const PU_AFTER_IDS=['bull','hedgehog','turtle','koala','spider','ram','deer','armadillo','chameleon','donkey','viper','crocodile','swordfish','frog','orca','zebra','scarab','horse','monkey','elephant'];
+const PU_AFTER_IDS=['bull','hedgehog','turtle','koala','spider','ram','deer','armadillo','chameleon','donkey','viper','crocodile','swordfish','frog','zebra','scarab','horse','monkey','elephant'];
 function renderPuBanner(pu,canPlay){
   const banner=document.getElementById('pu-banner');
   const entries=pu?Object.entries(pu).filter(([k])=>k!=='_lionPendingDmg'):[];
@@ -1612,7 +1778,7 @@ function renderCards(state,canPlay,currentPid){
   const grid=document.getElementById('cards-grid');grid.innerHTML='';
   const pu=state.activePowerups||{};
   const players=state.players||{};
-  const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  const activePid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
   const iAmActive=canPlay;
 
   document.getElementById('cards-label').textContent=
@@ -1621,7 +1787,8 @@ function renderCards(state,canPlay,currentPid){
 
   // BUG FIX: Rinoceronte - block card selection while auto-advance is pending
   const rhinoBlocked=!!(pu.rhino?.target===activePid&&iAmActive);
-  if(rhinoBlocked){
+  const hyenaBlocked=!!(state._hyenaSkip===activePid&&iAmActive);
+  if(rhinoBlocked||hyenaBlocked){
     document.getElementById('cards-label').textContent='🦏 Rinoceronte — tutte le carte si attivano... attendi';
   }
 
@@ -1632,21 +1799,19 @@ function renderCards(state,canPlay,currentPid){
   if(pu.viper) cards.push({id:'viper-special',value:pu.viper.value||42,assignedTo:'viper',assignedName:'???',badge:'viper',_disguised:true});
   // Butterfly cards - BUG FIX: only show the butterfly card assigned to the current active player
   if(state.butterflyActive&&state.butterflyCards) Object.values(state.butterflyCards).forEach(bc=>{
-    if(bc.assignedTo===activePid) cards.push({...bc,badge:'butterfly',assignedName:'🦋'});
+    if(bc.assignedTo===activePid) cards.push({...bc,badge:'butterfly',assignedName:'🦋',_disguised:true});
   });
   // Chameleon revival card - BUG FIX: only show to the designated target (next player after activator)
   if(pu.chameleon&&!state.chameleonUsed&&pu.chameleon.target===activePid){
     const elim=Object.values(players).filter(p=>!p.alive);
     if(elim.length>0) cards.push({id:'revival-special',value:pu.chameleon.value||rnd(30,80),assignedTo:'revival',assignedName:'Rivivi',badge:'revival'});
   }
-  // Penguin cards (value 0) - disguised as normal card for active player; covered for others
-  if(pu.penguin&&pu.penguin.owner!==activePid) cards.push({id:'penguin-special',value:0,assignedTo:'penguin',assignedName:'???',badge:'penguin',hidden:!iAmActive,_disguised:true});
   // Scorpion cards (value 100) - disguised as normal card for active player; covered for others
   if(pu.scorpion&&pu.scorpion.owner!==activePid) cards.push({id:'scorpion-special',value:100,assignedTo:'scorpion',assignedName:'???',badge:'scorpion',hidden:!iAmActive,_disguised:true});
   // Zebra duplicate card
-  if(pu.zebra?.target===currentPid&&pu.zebra.dupCard) cards.push({...pu.zebra.dupCard,badge:'zebra'});
+  if(pu.zebra?.target===currentPid&&pu.zebra.dupCard) cards.push({...pu.zebra.dupCard,badge:'zebra',_disguised:true});
   // Scarab card
-  if(pu.scarab?.target===currentPid) cards.push({id:'scarab-special',value:pu.scarab.cardValue??'½',assignedTo:'scarab',assignedName:'???',badge:'scarab'});
+  if(pu.scarab?.target===currentPid) cards.push({id:'scarab-special',value:pu.scarab.cardValue??'½',assignedTo:'scarab',assignedName:'???',badge:'scarab',_disguised:true});
   // Walrus badge card: for all non-owner alive players
   if(pu.walrus&&pu.walrus.owner!==activePid){
     const walSum=(state.cards||[]).filter(c=>!c.badge).reduce((s,c)=>s+c.value,0);
@@ -1719,7 +1884,7 @@ function renderCards(state,canPlay,currentPid){
     const isBearDisabled=G.bearMode&&G.bearCardsChosen===1&&card.id===G.bearFirstCardId;
     const isPigeonBlocked=pigeonActive&&idx===pigeonBlockedIdx&&!card.badge;
     const cls=['game-card'];
-    if(!canPlay||isBearDisabled||isOstrichBlocked||rhinoBlocked||isPigeonBlocked)cls.push('disabled');
+    if(!canPlay||isBearDisabled||isOstrichBlocked||rhinoBlocked||hyenaBlocked||isPigeonBlocked)cls.push('disabled');
     if(isCrit&&!forceCovered)cls.push('critical-card');
     if(forceCovered||card.hidden)cls.push('card-covered');
     if(isOstrichBlocked)cls.push('card-covered');
@@ -1727,7 +1892,7 @@ function renderCards(state,canPlay,currentPid){
 
     const isEagle=eagleRevealPid&&eagleRevealPid===card.assignedTo;
     if((forceCovered||(isOstrichBlocked&&!forceCovered)||card.hidden)&&!isEagle){
-      const sym=isPigeonBlocked&&!forceCovered?'🕊️':isOstrichBlocked&&!forceCovered?'🪶':card.badge==='penguin'?'🐧':card.badge==='scorpion'?'🦂':'🐾';
+      const sym=isPigeonBlocked&&!forceCovered?'🕊️':isOstrichBlocked&&!forceCovered?'🪶':'🐾';
       div.innerHTML=`<div class="card-covered-pattern"></div><div class="card-covered-shimmer"></div><div class="card-covered-symbol">${sym}</div>`;
     }else{
       const showThisName=showNames||isEagle;
@@ -1735,23 +1900,26 @@ function renderCards(state,canPlay,currentPid){
       // Badge labels: hide from active player to avoid spoilers
       // Badge labels: completely hidden from active player for disguised cards
       const isDisguised=card._disguised&&iAmActive;
+      // For disguised cards shown to active player, replace special values with fake normal ones
+      const displayValue=isDisguised&&(typeof card.value!=='number')?Math.floor(Math.random()*90+5):card.value;
       const badgeLabels={
         tick:iAmActive?'':'🐜 ZECCA',viper:iAmActive?'':'🐍 VIPERA',
         butterfly:'🦋 BONUS',revival:'💚 VITA',
-        penguin:iAmActive?'':'',scorpion:iAmActive?'':'',
+        scorpion:iAmActive?'':'',
         zebra:iAmActive?'':'🦓',scarab:iAmActive?'':''
       };
       const badgeHtml=(card.badge&&!isDisguised)?`<div class="card-badge badge-${card.badge}">${badgeLabels[card.badge]||''}</div>`:'';
+      const cardVal=isDisguised?displayValue:card.value;
       div.innerHTML=`
-        <div class="card-corner tl">${card.value>=50?'♦':'♣'}</div>
-        <div class="card-corner br">${card.value>=50?'♦':'♣'}</div>
+        <div class="card-corner tl">${(typeof cardVal==='number'?cardVal:50)>=50?'♦':'♣'}</div>
+        <div class="card-corner br">${(typeof cardVal==='number'?cardVal:50)>=50?'♦':'♣'}</div>
         ${isCrit?'<div class="critical-flash">CRITICO</div>':''}
         ${badgeHtml}
-        <div class="card-val-main">${card.value}</div>
+        <div class="card-val-main">${cardVal}</div>
         <div class="card-name-reveal ${nameClass}">${showThisName&&card.assignedName?card.assignedName:''}</div>`;
     }
 
-    if(canPlay&&!isBearDisabled&&!isOstrichBlocked&&!rhinoBlocked&&!isPigeonBlocked){
+    if(canPlay&&!isBearDisabled&&!isOstrichBlocked&&!rhinoBlocked&&!hyenaBlocked&&!isPigeonBlocked){
       div.addEventListener('click',()=>{
         const currentTurnCount=state.turnCount||0;
         const isBearSecondPick=G.bearMode&&G.bearCardsChosen===1;
@@ -1782,7 +1950,7 @@ function renderCards(state,canPlay,currentPid){
 // ══ Resolve card ══════════════════════════════════════════════════
 async function resolveCard(card,state){
   G.pendingConfirm=true;
-  const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  const activePid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
   // Store chosen card for elephant/monkey PU that need unchosen card sum
   const _normalCardsAtPick=(state.cards||[]).filter(c=>!c.badge);
   const _chosenCardValue=card.badge?0:card.value;
@@ -1817,7 +1985,7 @@ async function resolveCard(card,state){
     await checkWin(freshAfterViper);
     // Skip PU choice since player is eliminated
     G.pendingConfirm=false;_cardLocked=false;
-    G.bearMode=false;G.bearCardsChosen=0;G.foxMode=false;G.foxTargetPid=null;
+    G.bearMode=false;G.bearCardsChosen=0;
     G.masterOverrideActive=false;G.masterOverridePid=null;
     const freshViper=G._lastState||freshAfterViper;
     if(freshViper&&freshViper.status==='playing') await nextTurn(freshViper, activePid);
@@ -1850,16 +2018,7 @@ async function resolveCard(card,state){
     await clearAfterBadgePick(pu); // FIX 4+5
     await proceedAfterCard(state,activePid);return;
   }
-  // Penguin card (value 0 - harmless, but hidden until picked)
-  if(card.badge==='penguin'){
-    triggerAnim('penguin');
-    addLog(`<span class='lp'>${players[activePid]?.name}</span> sceglie la carta del <span class='lpu'>🐧 Pinguino</span>: valore 0! Nessun danno.`,'system');
-    toast('🐧 Pinguino! La carta vale 0 — nessun danno!');
-    // Penguin stays active until owner's next turn (not removed here)
-    await dbUpdate(`rooms/${G.roomId}`,{...postUpd});
-    await clearAfterBadgePick(pu); // FIX 4+5
-    await proceedAfterCard(state,activePid);return;
-  }
+
   // Scorpion card (value 100 to SELF)
   if(card.badge==='scorpion'){
     triggerAnim('scorpion');
@@ -1928,25 +2087,18 @@ async function resolveCard(card,state){
     _duckFired=true;
   }
 
-  // Gorilla: specific pre-selected card heals the active player instead of dealing damage
-  // FIX: check stored healCardId instead of assuming first card in array (order differs per client)
-  if(pu.gorilla&&pu.gorilla.owner!==activePid&&pu.gorilla.healCardId){
-    if(card.id===pu.gorilla.healCardId){
+  // Gorilla: first card on the LEFT heals the active player
+  if(pu.gorilla&&pu.gorilla.owner!==activePid){
+    const normalCards=(state.cards||[]).filter(c=>!c.badge);
+    if(normalCards.length>0&&card.id===normalCards[0].id){
       dmgType='heal';
       target=activePid;
       triggerAnim('gorilla');
-      addLog(`<span class='lpu'>🦍 Gorilla</span>: la carta speciale cura invece di danneggiare!`,'powerup');
+      addLog(`<span class='lpu'>🦍 Gorilla</span>: la prima carta a sinistra cura invece di danneggiare!`,'powerup');
     }
   }
 
-  // Orca: card value becomes lowest HP player's HP
-  if(pu.orca){
-    const alivePs=Object.entries(players).filter(([_,p])=>p.alive);
-    const minHp=Math.min(...alivePs.map(([_,p])=>p.hp));
-    dmg=minHp;
-    triggerAnim('orca');
-    addLog(`<span class='lpu'>🐋 Orca</span>: il valore della carta diventa ${dmg} (HP minimo in gioco)!`,'powerup');
-  }
+
 
   // Donkey swap
   if(pu.donkey){
@@ -2002,10 +2154,6 @@ async function resolveCard(card,state){
     triggerAnim('bug');
   }
 
-  // Cuttlefish shield: immune to PU damage (but not direct card damage)
-  // Seppia protects from PU effects like armadillo/ram/hedgehog but NOT from normal card choice
-  const realTarget=bugReflect?activePid:card.assignedTo;
-
   // Mosquito drain: activator deals damage AND heals
   const mosquitoActive=pu.mosquito&&pu.mosquito.owner===activePid;
 
@@ -2038,16 +2186,11 @@ async function resolveCard(card,state){
     const logLines=[]; // collect all log lines, flush in one push at end
 
     if(dmgType==='all'){
-      // Riccio / Orca all-hit — with crocodile and bug checks
+      // All-hit — with crocodile and bug checks
       const alivePs=Object.entries(players).filter(([_,p])=>p.alive).map(([id])=>id);
       for(const apid of alivePs){
-        if(players[apid]?.cuttlefishShield&&apid!==activePid){logLines.push({html:`<span class='lpu'>🦑 Seppia</span> blocca Riccio su <span class='lp'>${players[apid]?.name}</span>!`,type:'system'});continue;}
         if(pu.crocodile?.owner===apid&&apid!==activePid){logLines.push({html:`<span class='lpu'>🐊 Coccodrillo</span> protegge <span class='lp'>${players[apid]?.name}</span>!`,type:'system'});continue;}
-        if(players[apid]?.seaUrchinShield&&apid!==activePid){
-          hpDeltas.push({pid:activePid,delta:-(dmg*2)});
-          logLines.push({html:`<span class='lpu'>🌊 Riccio di Mare</span>: <span class='lp'>${players[apid]?.name}</span> riflette <span class='ld'>${dmg*2}</span> a chi ha attaccato!`,type:'damage'});
-          extraUpd[`players/${apid}/seaUrchinShield`]=false;extraUpd['activePowerups/seaurchin']=null;continue;
-        }
+
         if(players[apid]?.activeBug&&apid!==activePid){
           // FIX: reflect ONLY — do NOT add normal dmg to activePid (apid loop may also include activePid)
           hpDeltas.push({pid:activePid,delta:-(dmg*2)});
@@ -2063,18 +2206,7 @@ async function resolveCard(card,state){
     }else{
       // Primary target
 
-      // Sea Urchin: reflect double damage to attacker (hidden shield)
-      if(players[target]?.seaUrchinShield&&target!==activePid&&dmgType==='damage'){
-        triggerAnim('seaurchin');shakeScreen();
-        hpDeltas.push({pid:activePid,delta:-(dmg*2)});
-        logLines.push({html:`<span class='lpu'>🌊 Riccio di Mare</span>: <span class='lp'>${players[target]?.name}</span> riflette <span class='ld'>${dmg*2}</span> danni a <span class='lp'>${players[activePid]?.name}</span>!`,type:'damage'});
-        extraUpd[`players/${target}/seaUrchinShield`]=false;
-        extraUpd['activePowerups/seaurchin']=null;
-        toast(`🌊 RICCIO DI MARE! ${dmg*2} danni riflessi!`);spawnFloat(`-${dmg*2}`,'red');
-        // No damage to target; they're protected
-      } else {
-        hpDeltas.push({pid:target,delta:dmgType==='heal'?dmg:-dmg});
-      }
+      hpDeltas.push({pid:target,delta:dmgType==='heal'?dmg:-dmg});
 
       // Mosquito drain
       if(mosquitoActive&&dmgType==='damage'){
@@ -2086,14 +2218,10 @@ async function resolveCard(card,state){
 
       // Armadillo
       if(pu.armadillo&&dmgType!=='heal'){
-        if(!players[activePid]?.cuttlefishShield){
-          hpDeltas.push({pid:activePid,delta:-dmg});
-          const armMsg=target===activePid?`danno ×2 su se stesso`:`subisce <span class='ld'>-${dmg}</span>`;
-          logLines.push({html:`<span class='lpu'>🛡️ Armadillo</span>: <span class='lp'>${aName}</span> ${armMsg}!`,type:'damage'});
-          triggerAnim('armadillo');
-        }else{
-          logLines.push({html:`<span class='lpu'>🦑 Seppia</span> blocca l'Armadillo su <span class='lp'>${aName}</span>!`,type:'system'});
-        }
+        hpDeltas.push({pid:activePid,delta:-dmg});
+        const armMsg=target===activePid?`danno ×2 su se stesso`:`subisce <span class='ld'>-${dmg}</span>`;
+        logLines.push({html:`<span class='lpu'>🛡️ Armadillo</span>: <span class='lp'>${aName}</span> ${armMsg}!`,type:'damage'});
+        triggerAnim('armadillo');
       }
 
       // Ram: adjacent — with crocodile/bug checks
@@ -2106,7 +2234,6 @@ async function resolveCard(card,state){
         const prevRam=ord[pi],nextRam=ord[ni];
         const applyRamHit=(rpid)=>{
           if(!players[rpid]?.alive||rpid===target)return;
-          if(players[rpid]?.cuttlefishShield)return;
           if(pu.crocodile?.owner===rpid){logLines.push({html:`<span class='lpu'>🐊 Coccodrillo</span> protegge <span class='lp'>${players[rpid]?.name}</span> dall'Ariete!`,type:'system'});return;}
           if(players[rpid]?.activeBug){
             hpDeltas.push({pid:activePid,delta:-(dmg*2)});
@@ -2130,7 +2257,6 @@ async function resolveCard(card,state){
           const np=ord[(ti+s)%ord.length];
           if(np!==target&&np!==activePid&&players[np]?.alive){
             count++;
-            if(players[np]?.cuttlefishShield)continue;
             if(pu.crocodile?.owner===np){logLines.push({html:`<span class='lpu'>🐊 Coccodrillo</span> protegge <span class='lp'>${players[np]?.name}</span> dal Pesce Spada!`,type:'system'});continue;}
             if(players[np]?.activeBug){
               hpDeltas.push({pid:activePid,delta:-(dmg*2)});
@@ -2179,19 +2305,7 @@ async function resolveCard(card,state){
     // Main log line
     const lc=dmgType==='heal'?'lh':'ld';
     const sym=dmgType==='heal'?'+':'-';
-    // Seahorse: owner gains HP equal to the card value chosen by trigger player
-    if(pu.seahorse&&pu.seahorse.trigger===activePid&&!card.badge){
-      const sOwner=pu.seahorse.owner;
-      const sOwnerHp=players[sOwner]?.hp||0;
-      const sGain=Math.min(card.value,((state.initialHp||300))-sOwnerHp);
-      if(sGain>0&&players[sOwner]?.alive){
-        extraUpd[`players/${sOwner}/hp`]=sOwnerHp+sGain;
-        logLines.push({html:`<span class='lpu'>🐟 Cavalluccio</span>: <span class='lp'>${players[sOwner]?.name}</span> guadagna <span class='lh'>+${sGain}</span> HP!`,type:'heal'});
-        toast(`🐟 Cavalluccio! +${sGain} HP!`);
-      }
-      extraUpd['activePowerups/seahorse']=null;
-      extraUpd['_seahorseActive']=false;
-    }
+
     // Jaguar: when TARGET has the shield, redirect the incoming damage to a random other player
     // desc: "Il prossimo danno che ricevi viene ribaltato su un giocatore casuale"
     if(players[target]?.jaguarShield&&pu.jaguar?.owner===target&&target!==activePid&&dmgType==='damage'&&!card.badge){
@@ -2235,7 +2349,7 @@ async function resolveCard(card,state){
     if(G.bearMode&&G.bearCardsChosen===0){G.bearFirstTarget=card.assignedTo;G.bearFirstCardId=card.id;}
 
     // ── Build clearAfterPU block inline (no extra dbUpdate call) ──
-    const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca','zebra','scarab','horse','duck','monkey','elephant'];
+    const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','zebra','scarab','horse','duck','monkey','elephant'];
     afters.forEach(id=>{if(pu[id])extraUpd[`activePowerups/${id}`]=null;});
     Object.assign(extraUpd,postUpd);
 
@@ -2273,7 +2387,7 @@ async function resolveCard(card,state){
       const freshForElim=G._lastState||state;
       if(freshForElim){await clearPlayerPowerups(activePid,freshForElim);}
       G.pendingConfirm=false;_cardLocked=false;
-      G.bearMode=false;G.bearCardsChosen=0;G.foxMode=false;G.masterOverrideActive=false;
+      G.bearMode=false;G.bearCardsChosen=0;G.masterOverrideActive=false;
       // PERF FIX: use cached state
       const freshNext=G._lastState||freshForElim;
       if(freshNext&&freshNext.status==='playing') await nextTurn(freshNext, activePid);
@@ -2310,7 +2424,7 @@ function computeHpBatch(players, deltas){
   for(const {pid,delta} of deltas){
     const p=working[pid];
     if(!p||!p.alive) continue;
-    const newHp=Math.max(0,Math.min(p.maxHp,p.hp+delta));
+    const newHp=Math.max(0,p.hp+delta); // HP can exceed initial HP per rules
     p.hp=newHp;
     if(newHp===0&&p.alive){p.alive=false;eliminated.push(pid);}
   }
@@ -2358,8 +2472,6 @@ async function clearPlayerPowerups(pid,state){
   }
   // FIX: also clear player-level flags that persist after elimination
   upd[`players/${pid}/jaguarShield`]=false;
-  upd[`players/${pid}/seaUrchinShield`]=false;
-  upd[`players/${pid}/cuttlefishShield`]=false;
   upd[`players/${pid}/activeBug`]=false;
   upd[`players/${pid}/skipNext`]=false;
   if(state?.butterflyActive&&state.butterflyOwner===pid){
@@ -2378,13 +2490,13 @@ async function checkElimAndWin(pid){
 
 // FIX 4+5: clear 'after' PUs that linger if a badge card is picked instead of normal card
 async function clearAfterBadgePick(puState){
-  const toCheck=['zebra','scarab','bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca','horse','duck','monkey','elephant'];
+  const toCheck=['zebra','scarab','bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','horse','duck','monkey','elephant'];
   const upd={};
   toCheck.forEach(id=>{if(puState?.[id])upd[`activePowerups/${id}`]=null;});
   if(Object.keys(upd).length) await dbUpdate(`rooms/${G.roomId}`,upd);
 }
 async function clearAfterPU(pu){
-  const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','orca','zebra','scarab'];
+  const afters=['bull','hedgehog','turtle','koala','armadillo','deer','ram','spider','donkey','crocodile','swordfish','frog','zebra','scarab'];
   const upd={};afters.forEach(id=>{if(pu[id])upd[`activePowerups/${id}`]=null;});
   if(Object.keys(upd).length)await dbUpdate(`rooms/${G.roomId}`,upd);
 }
@@ -2416,9 +2528,7 @@ async function proceedAfterCard(state,activePid){
     return;
   }
 
-  const wasFoxPlay=G.foxMode;
   G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
-  G.foxMode=false;G.foxTargetPid=null;
   G.masterOverrideActive=false;G.masterOverridePid=null;
 
   // Use the `state` parameter directly — it contains the correctly merged post-card state
@@ -2432,13 +2542,7 @@ async function proceedAfterCard(state,activePid){
     await nextTurn(realFresh,activePid);return;
   }
 
-  if(wasFoxPlay){
-    await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/fox':null});
-    addLog(`<span class='lpu'>🦊 Volpe</span>: turno passato`,'system');
-    await nextTurn(G._lastState||fresh,activePid);
-  }else{
-    await showPuChoice(fresh,activePid);
-  }
+  await showPuChoice(fresh,activePid);
 }
 
 // ══ PU choice ═══════════════════════════════════════════════════
@@ -2475,7 +2579,6 @@ async function showPuChoice(state,activePid){
       if(p.id==='viper'&&pu.viper)return false;
       if(p.id==='wolf'&&pu.wolf)return false;
       if(p.id==='ostrich'&&pu.ostrich)return false;
-      if(p.id==='penguin'&&pu.penguin)return false;
       if(p.id==='scorpion'&&pu.scorpion)return false;
       if(p.id==='lion'&&pu.lion)return false;
       if(p.id==='weasel'&&pu.weasel)return false;
@@ -2483,8 +2586,6 @@ async function showPuChoice(state,activePid){
       if(p.id==='pigeon'&&pu.pigeon)return false;
       if(p.id==='walrus'&&pu.walrus)return false;
       if(p.id==='hyena'&&pu.hyena)return false;
-      if(p.id==='magpie'&&pu.magpie)return false;
-      if(p.id==='seahorse'&&pu.seahorse)return false;
       if(p.id==='duck'&&pu.duck)return false;
       return true;
     });
@@ -2529,7 +2630,6 @@ async function showPuChoice(state,activePid){
     if(p.id==='viper'&&pu.viper)return false;
     if(p.id==='wolf'&&pu.wolf)return false;
     if(p.id==='ostrich'&&pu.ostrich)return false;
-    if(p.id==='penguin'&&pu.penguin)return false;
     if(p.id==='scorpion'&&pu.scorpion)return false;
     if(p.id==='lion'&&pu.lion)return false;
     if(p.id==='weasel'&&pu.weasel)return false;
@@ -2538,12 +2638,11 @@ async function showPuChoice(state,activePid){
     if(p.id==='pigeon'&&pu.pigeon)return false;
     if(p.id==='walrus'&&pu.walrus)return false;
     if(p.id==='hyena'&&pu.hyena)return false;
-    if(p.id==='magpie'&&pu.magpie)return false;
-    if(p.id==='seahorse'&&pu.seahorse)return false;
     if(p.id==='duck'&&pu.duck)return false;
     return true;
   });
   const chosen=[...enabled].sort(()=>Math.random()-.5).slice(0,Math.min(puChoiceCount,enabled.length));
+  G._puChoices=chosen; // Store for Dog auto-activate
   const grid=document.getElementById('pu-grid');grid.innerHTML='';
 
   if(weaselActive){
@@ -2585,21 +2684,9 @@ async function confirmPowerup(){
   const pu=G.selectedPU;
   // PERF FIX: use cached state instead of dbGet
   const state=G._lastState||(await dbGet(`rooms/${G.roomId}`));if(!state)return;
-  const activePid=G.foxMode?G.foxTargetPid:(G.masterOverrideActive?G.masterOverridePid:G.playerId);
+  const activePid=G.masterOverrideActive?G.masterOverridePid:G.playerId;
   const stPu=state.activePowerups||{};
-  // Magpie: intercept if activePid is the magpie target
-  if(stPu.magpie&&stPu.magpie.target===activePid&&stPu.magpie.owner!==activePid){
-    const mOwner=stPu.magpie.owner;
-    toast(`🐦‍⬛ Gazza Ladra! ${state.players?.[mOwner]?.name} ruba ${pu.icon} ${pu.name}!`);
-    addLog(`<span class='lpu'>🐦‍⬛ Gazza Ladra</span>: <span class='lp'>${state.players?.[mOwner]?.name}</span> ruba <span class='lpu'>${pu.icon} ${pu.name}</span>!`,'powerup');
-    await dbUpdate(`rooms/${G.roomId}`,{'activePowerups/magpie':null});
-    // PERF FIX: use cached state instead of two sequential dbGets
-    const stateAfterMagpie=G._lastState||state;
-    await activatePu(pu,stateAfterMagpie,mOwner);
-    hidePuSection();
-    await nextTurn(G._lastState||stateAfterMagpie, activePid);
-    return;
-  }
+
   await activatePu(pu,state,activePid);
   triggerAnim(pu.id);
   addLog(`<span class='lp'>${state.players?.[activePid]?.name}</span> attiva <span class='lpu'>${pu.icon} ${pu.name}</span>`,'powerup');
@@ -2607,13 +2694,17 @@ async function confirmPowerup(){
   // Track PU count in Firebase
   if(G.roomId&&activePid) dbUpdate(`rooms/${G.roomId}`,{[`stats/${activePid}/puCount`]:(state?.stats?.[activePid]?.puCount||0)+1}).catch(()=>{});
 
-  // Dog mode: allow 2nd PU choice
-  if(G.dogMode&&G.dogPuCount===0){
-    G.dogPuCount=1;G.selectedPU=null;
-    toast('🐕 Cane! Scegli un secondo potere.');
-    // Re-render PU choices: use cached state (activatePu just wrote to Firebase, listener will update G._lastState)
-    await showPuChoice(G._lastState||state,activePid);
-    return;
+  // Dog: auto-activate the other 2 PUs from the list
+  if(pu.id==='dog'&&G._puChoices){
+    const otherPus=G._puChoices.filter(p=>p.id!=='dog');
+    for(const otherPu of otherPus){
+      const freshState=G._lastState||state;
+      await activatePu(otherPu,freshState,activePid);
+      triggerAnim(otherPu.id);
+      addLog(`<span class='lp'>${state.players?.[activePid]?.name}</span> 🐕 Cane auto-attiva <span class='lpu'>${otherPu.icon} ${otherPu.name}</span>`,'powerup');
+      playSound('pu');G.sessionStats.puUsed++;
+    }
+    toast(`🐕 Cane! Tutti e 3 i poteri attivati!`);
   }
 
   G.dogMode=false;G.dogPuCount=0;
@@ -2655,7 +2746,6 @@ async function activatePu(pu,state,pid,batchUpd=null){
       break;
     case 'bear': upd['activePowerups/bear']={owner:pid,target:nextPid}; break;
     case 'owl':  upd['activePowerups/owl']={target:nextPid}; break;
-    case 'fox':  upd['activePowerups/fox']={owner:pid,target:nextPid}; break;
     case 'shark': {
       const thresh=(state.initialHp||1000)*.15;
       const victims=[];
@@ -2674,7 +2764,9 @@ async function activatePu(pu,state,pid,batchUpd=null){
       break;
     }
     case 'bug': upd[`players/${pid}/activeBug`]=true; break;
-    case 'crocodile': upd['activePowerups/crocodile']={owner:pid}; break;
+    case 'crocodile': upd['activePowerups/crocodile']={owner:pid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto.`,'system');
+      break;
     case 'tick':
       if(state.tickCard){toast('🐜 Zecca già attiva!');return;}
       upd['tickCard']={id:'tick-special',value:rnd(0,100),badge:'tick',assignedTo:'tick'};
@@ -2697,37 +2789,51 @@ async function activatePu(pu,state,pid,batchUpd=null){
       upd['activePowerups/chameleon']={value:rnd(30,80),target:nextPid};
       break;
     }
-    case 'spider':  upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'ram':     upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'donkey':  upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'bull':    upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'hedgehog':upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'turtle':  upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'koala':   upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'deer':    upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
-    case 'armadillo':upd[`activePowerups/${pu.id}`]={target:nextPid}; break;
+    case 'spider':  upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'ram':     upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'donkey':  upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'bull':    upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'hedgehog':upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'turtle':  upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'koala':   upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'deer':    upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
+    case 'armadillo':upd[`activePowerups/${pu.id}`]={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
 
     // === NEW POWERUPS ===
     case 'mosquito': upd['activePowerups/mosquito']={owner:pid}; break;
-    case 'penguin':
-      if(state.activePowerups?.penguin){toast('🐧 Pinguino già attivo!');return;}
-      upd['activePowerups/penguin']={owner:pid};
-      break;
+
     case 'scorpion':
       if(state.activePowerups?.scorpion){toast('🦂 Scorpione già attivo!');return;}
       upd['activePowerups/scorpion']={owner:pid};
       break;
     case 'peacock': {
-      // Randomize all alive players' HP - scale with the game's initialHp
-      const peacockMax=Math.max(50,Math.floor((state.initialHp||300)/2));
+      // Randomize all alive players' HP (1-150 as per rules)
       Object.entries(state.players||{}).forEach(([ppid,pp])=>{
         if(pp.alive){
-          const newHp=rnd(1,peacockMax);
+          const newHp=rnd(1,150);
           upd[`players/${ppid}/hp`]=newHp;
         }
       });
-      toast(`🦚 Pavone! HP di tutti randomizzati (1-${peacockMax})!`);
-      addLog(`<span class='lpu'>🦚 Pavone</span>: HP di tutti randomizzati (1-${peacockMax})!`,'powerup');
+      toast('🦚 Pavone! HP di tutti randomizzati (1-150)!');
+      addLog(`<span class='lpu'>🦚 Pavone</span>: HP di tutti randomizzati (1-150)!`,'powerup');
       break;
     }
     case 'zebra': {
@@ -2740,7 +2846,9 @@ async function activatePu(pu,state,pid,batchUpd=null){
       break;
     }
     case 'scarab': upd['activePowerups/scarab']={target:nextPid,cardValue:rnd(0,100)}; break;
-    case 'swordfish': upd['activePowerups/swordfish']={target:nextPid}; break;
+    case 'swordfish': upd['activePowerups/swordfish']={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
     case 'wolf':
       if(state.activePowerups?.wolf){toast('🐺 Lupo già attivo!');return;}
       upd['activePowerups/wolf']={owner:pid};
@@ -2751,24 +2859,28 @@ async function activatePu(pu,state,pid,batchUpd=null){
       break;
     case 'gorilla': {
       if(state.activePowerups?.gorilla){toast('🦍 Gorilla già attivo!');return;}
-      // FIX: pick a random card ID now and store it — don't rely on [0] which differs per client
-      const gorillaCards=(state.cards||[]).filter(c=>!c.badge);
-      const gorillaTargetCard=gorillaCards.length>0?gorillaCards[rnd(0,gorillaCards.length-1)]:null;
-      upd['activePowerups/gorilla']={owner:pid,healCardId:gorillaTargetCard?.id||null};
+      // Gorilla: first card LEFT heals. Store index 0 as the heal card
+      upd['activePowerups/gorilla']={owner:pid,healIndex:0};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto.`,'system');
       break;
     }
     case 'lion':
       if(state.activePowerups?.lion){toast('🦁 Leone già attivo!');return;}
       upd['activePowerups/lion']={owner:pid};
       break;
-    case 'cuttlefish': upd[`players/${pid}/cuttlefishShield`]=true; upd['activePowerups/cuttlefish']={owner:pid}; break;
-    case 'dog': upd['activePowerups/dog']={owner:pid}; break;
+    case 'dog': {
+      // Dog: activate ALL 3 powerups. The other 2 are chosen alongside dog in showPuChoice.
+      // Store the other 2 PU IDs in the dog state for activation
+      upd['activePowerups/dog']={owner:pid};
+      break;
+    }
     case 'weasel':
       if(state.activePowerups?.weasel){toast('🦦 Donnola già attiva!');return;}
       upd['activePowerups/weasel']={owner:pid};
       break;
-    case 'frog': upd['activePowerups/frog']={target:nextPid}; break;
-    case 'orca': upd['activePowerups/orca']={target:nextPid}; break;
+    case 'frog': upd['activePowerups/frog']={target:nextPid};
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto sul prossimo giocatore.`,'system');
+      break;
 
     // ── 17 NEW POWERUPS ────────────────────────────────────────────
 
@@ -2840,7 +2952,7 @@ async function activatePu(pu,state,pid,batchUpd=null){
         const minHpEntry=batAlive.reduce((best,[bpid,bp])=>bp.hp<best[1]?[bpid,bp]:best,[batAlive[0][0],batAlive[0][1]]);
         const gain=minHpEntry[1].hp;
         const myHp=state.players?.[pid]?.hp||0;
-        const newHp=Math.min(state.initialHp||300, myHp+gain); // FIX: cap at initialHp, not myHp+initialHp
+        const newHp=myHp+gain; // HP can exceed initial HP per rules
         upd[`players/${pid}/hp`]=newHp;
         toast(`🦇 Pipistrello! +${gain} HP da ${minHpEntry[1].name}!`);
         addLog(`<span class='lpu'>🦇 Pipistrello</span>: <span class='lp'>${state.players?.[pid]?.name}</span> guadagna <span class='lh'>+${gain}</span> HP!`,'heal');
@@ -2851,7 +2963,7 @@ async function activatePu(pu,state,pid,batchUpd=null){
 
     case 'horse': {
       upd['activePowerups/horse']={owner:pid};
-      addLog(`<span class='lpu'>🐴 Cavallo</span>: carte con valore pari infliggono danno doppio!`,'system');
+      addLog(`<span class='lp'>${state.players?.[pid]?.name}</span> attiva un potere ❓ nascosto.`,'system');
       break;
     }
 
@@ -2889,31 +3001,18 @@ async function activatePu(pu,state,pid,batchUpd=null){
         const loss=Math.floor(richP.hp/2);
         const gain=Math.ceil(loss/(gAlive.length-1));
         upd[`players/${richPid}/hp`]=richP.hp-loss;
-        gAlive.forEach(([gpid,gp])=>{if(gpid!==richPid){upd[`players/${gpid}/hp`]=Math.min(gp.hp+gain,state.initialHp||300);}});
+        gAlive.forEach(([gpid,gp])=>{if(gpid!==richPid){upd[`players/${gpid}/hp`]=gp.hp+gain;}});
         toast(`🦒 Giraffa! ${richP.name} perde ${loss} HP!`);
         addLog(`<span class='lpu'>🦒 Giraffa</span>: <span class='lp'>${richP.name}</span> perde <span class='ld'>${loss}</span> HP redistribuiti!`,'system');
       }
       break;
     }
 
-    case 'magpie': {
-      upd['activePowerups/magpie']={owner:pid,target:nextPid};
-      addLog(`<span class='lpu'>🐦‍⬛ Gazza Ladra</span>: effetto nascosto attivo...`,'system');
-      break;
-    }
 
-    case 'seaurchin': {
-      upd[`players/${pid}/seaUrchinShield`]=true;
-      upd['activePowerups/seaurchin']={owner:pid};
-      addLog(`<span class='lpu'>🌊 Riccio di Mare</span>: effetto nascosto attivo su <span class='lp'>${state.players?.[pid]?.name}</span>...`,'system');
-      break;
-    }
 
-    case 'seahorse': {
-      upd['activePowerups/seahorse']={owner:pid,trigger:nextPid};
-      addLog(`<span class='lpu'>🐟 Cavalluccio Marino</span>: effetto nascosto...`,'system');
-      break;
-    }
+
+
+
 
     case 'duck': {
       upd['activePowerups/duck']={owner:pid,target:nextPid};
@@ -2959,7 +3058,7 @@ async function activatePu(pu,state,pid,batchUpd=null){
       const monSum=G._lastUnchosenSum||0;
       if(monSum>0){
         const myHp2=state.players?.[pid]?.hp||0;
-        const newHp2=Math.min(myHp2+monSum,state.initialHp||300);
+        const newHp2=myHp2+monSum; // HP can exceed initial HP per rules
         upd[`players/${pid}/hp`]=newHp2;
         toast(`🐒 Scimmia! +${monSum} HP!`);
         addLog(`<span class='lpu'>🐒 Scimmia</span>: <span class='lp'>${state.players?.[pid]?.name}</span> guadagna <span class='lh'>+${monSum}</span> HP!`,'heal');
@@ -3025,19 +3124,13 @@ async function nextTurn(state, fromPid=null){
   }
   if(pu.walrus?.owner===nextPid){upd['activePowerups/walrus']=null;toast('🦭 Tricheco scaduto!');}
   if(pu.duck?.owner===nextPid){upd['activePowerups/duck']=null;toast('🦆 Papera scaduta (non attivata)!');}
-  if(pu.seahorse?.owner===nextPid){upd['activePowerups/seahorse']=null;toast('🐟 Cavalluccio scaduto!');}
-  if(pu.magpie?.owner===nextPid){upd['activePowerups/magpie']=null;toast('🐦‍⬛ Gazza Ladra scaduta (non ha rubato)!');}
   if(pu.jaguar?.owner===nextPid){
     // Jaguar expires: clear shield
     upd['activePowerups/jaguar']=null;
     upd[`players/${nextPid}/jaguarShield`]=false;
     toast('🐈‍⬛ Giaguaro scaduto!');
   }
-  if(pu.seaurchin?.owner===nextPid&&fresh.players?.[nextPid]?.seaUrchinShield){
-    upd['activePowerups/seaurchin']=null;
-    upd[`players/${nextPid}/seaUrchinShield`]=false;
-    toast('🌊 Riccio di Mare scaduto!');
-  }
+
   // Hyena: fires at the trigger player's turn (damages richest player)
   // hpChanges declared later - hyena uses direct upd instead
   if(pu.hyena&&pu.hyena.trigger===nextPid){
@@ -3057,21 +3150,16 @@ async function nextTurn(state, fromPid=null){
       toast(`🦝 Iena! ${hrp.name} subisce -${hyenaSum}!`);
     }
     upd['activePowerups/hyena']=null;
+    upd['_hyenaSkip']=nextPid; // Flag: next player skips card choice (goes to PU phase)
   }
-  // Seahorse: fires at the trigger player's turn (owner gains card value)
-  if(pu.seahorse&&pu.seahorse.trigger===nextPid){
-    // Will be handled AFTER the card is chosen: flag it in state
-    upd['_seahorseActive']=true;
-  }
+
   if(pu.cheetah?.owner===nextPid){upd['activePowerups/cheetah']=null;toast('🐆 Ghepardo scaduto!');}
   if(pu.rat?.owner===nextPid){upd['activePowerups/rat']=null;toast('🐭 Topo scaduto!');}
   if(pu.wolf?.owner===nextPid){upd['activePowerups/wolf']=null;toast('🐺 Lupo scaduto!');}
   if(pu.ostrich?.owner===nextPid){upd['activePowerups/ostrich']=null;toast('🪶 Struzzo scaduto!');}
   if(pu.gorilla?.owner===nextPid){upd['activePowerups/gorilla']=null;toast('🦍 Gorilla scaduto!');}
   if(pu.lion?.owner===nextPid){upd['activePowerups/lion']=null;toast('🦁 Leone scaduto!');}
-  if(pu.cuttlefish?.owner===nextPid){upd['activePowerups/cuttlefish']=null;upd[`players/${nextPid}/cuttlefishShield`]=false;toast('🦑 Seppia scaduta!');}
   if(pu.weasel?.owner===nextPid){upd['activePowerups/weasel']=null;toast('🦦 Donnola scaduta!');}
-  if(pu.penguin?.owner===nextPid){upd['activePowerups/penguin']=null;toast('🐧 Pinguino scaduto!');}
   if(pu.scorpion?.owner===nextPid){upd['activePowerups/scorpion']=null;toast('🦂 Scorpione scaduto!');}
   if(pu.mosquito?.owner===nextPid){/* mosquito stays until it activates during their card choice */}
   if(pu.dog?.owner!==nextPid&&pu.dog){upd['activePowerups/dog']=null;}
@@ -3161,7 +3249,6 @@ async function nextTurn(state, fromPid=null){
     ...upd,
   });
   clearTimer();
-  G.foxMode=false;G.foxTargetPid=null;
   G.masterOverrideActive=false;G.masterOverridePid=null;
   G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   G.dogMode=false;G.dogPuCount=0;
@@ -3259,11 +3346,19 @@ function startTimer(secs,onExpire){
 function clearTimer(){clearTimeout(G.timerTO);G.timerActive=false;const ovl=document.getElementById('cheetah-ovl');if(ovl)ovl.remove();}
 
 // ══ Log ═══════════════════════════════════════════════════════════
+let _logCount=0;
 function renderLog(log){
   const list=document.getElementById('log-list');if(!list)return;
-  if(!log){list.innerHTML='';return;}
+  if(!log){list.innerHTML='';_logCount=0;return;}
   const entries=Array.isArray(log)?log:Object.values(log);
-  list.innerHTML=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,60).map(e=>`<div class="log-entry ${e.type||'system'}">${e.html||''}</div>`).join('');
+  const sorted=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,120);
+  // Only rebuild if count changed (append-only optimization)
+  if(sorted.length===_logCount)return;
+  _logCount=sorted.length;
+  // Use document fragment for single reflow
+  const frag=document.createDocumentFragment();
+  sorted.forEach(e=>{const d=document.createElement('div');d.className=`log-entry ${e.type||'system'}`;d.innerHTML=e.html||'';frag.appendChild(d);});
+  list.innerHTML='';list.appendChild(frag);
 }
 
 // ══ Master override ═══════════════════════════════════════════════
@@ -3329,6 +3424,12 @@ function showGameOver(state){
       <div class="final-name">${p.name}</div>
       <div class="final-hp">${p.alive?p.hp:0} HP</div>
     </div>`).join('');
+  // Render full game log in final stats
+  const finalLogEl=document.getElementById('final-log');
+  if(finalLogEl&&state.log){
+    const logEntries=Object.values(state.log).sort((a,b)=>(a.ts||0)-(b.ts||0));
+    finalLogEl.innerHTML=logEntries.map(e=>`<div class="log-entry ${e.type||'system'}">${e.html||''}</div>`).join('');
+  }
   // Show/hide restart button based on role
   const goBtn=document.getElementById('go-restart-btn');
   const goWait=document.getElementById('go-waiting-msg');
@@ -3373,7 +3474,7 @@ async function doRestart(){
   const hp=parseInt(document.getElementById('restart-hp').value)||1000;
   const room=await dbGet(`rooms/${G.roomId}`);if(!room)return;
   const players={};
-  Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false,cuttlefishShield:false,jaguarShield:false,seaUrchinShield:false};});
+  Object.entries(room.players).forEach(([pid,p])=>{players[pid]={...p,hp,maxHp:hp,alive:true,skipNext:false,activeBug:false,jaguarShield:false};});
   const cards=generateCards(players,room.mode);
   const bans=MODE_BANS[room.mode]||[];
   const puEnabled={};
@@ -3407,7 +3508,7 @@ function goHome(){
   G._gameoverShown=false;clearTimer();dbUnsubAll();
   G.isTestMode=false;G.isMaster=false;G.isSpectator=false;
   G.masterOverrideActive=false;G.masterOverridePid=null;
-  G.foxMode=false;G.foxTargetPid=null;G.bearMode=false;G.bearCardsChosen=0;
+  G.bearMode=false;G.bearCardsChosen=0;
   G.pendingConfirm=false;_cardLocked=false;
   // Reset mode selector UI to classic
   G.gameMode='classic';G.isTestMode=false;
