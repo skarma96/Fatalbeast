@@ -3045,17 +3045,6 @@ function renderState(state){
   if(!G._shownAnims.wolf_alert&&pu.wolf&&canPlay){G._shownAnims.wolf_alert=true;toast('🐺 Lupo! Nessun potere disponibile questo turno.');}
   if(!G._shownAnims.ostrich_alert&&pu.ostrich&&canPlay){G._shownAnims.ostrich_alert=true;if(!document.querySelector('.pua-card'))showAnimalAlert('🦤','DODO!','L\'ultima carta a destra è bloccata!','#d4a040');}
 
-  // Hyena: skip card choice, go to PU (damage already dealt in nextTurn)
-  const hyenaSkipPid=state._hyenaSkip;
-  const hyenaMyTurn=(isMyTurn||G.masterOverrideActive)&&hyenaSkipPid===(G.masterOverrideActive?G.masterOverridePid:G.playerId);
-  if(!G._shownAnims.hyena_skip&&hyenaMyTurn){G._shownAnims.hyena_skip=true;showAnimalAlert('🦝','IENA!','Le carte si attivano automaticamente! Vai ai powerup...','#fbc02d');
-    setTimeout(async()=>{
-      await dbUpdate(`rooms/${G.roomId}`,{'_hyenaSkip':null});
-      const fresh3=G._lastState||state;
-      if(fresh3&&fresh3.status==='playing') await showPuChoice(fresh3,G.masterOverrideActive?G.masterOverridePid:G.playerId);
-    },2300);
-  }
-
   // Per-turn anim triggers
   if(canPlay&&!G._shownAnims.rat&&pu.rat&&pu.rat.owner!==G.playerId){G._shownAnims.rat=true;triggerAnim('rat');}
   if(canPlay&&!G._shownAnims.cheetah&&pu.cheetah&&!G.timerActive){G._shownAnims.cheetah=true;triggerAnim('cheetah');}
@@ -3671,10 +3660,6 @@ async function resolveCard(card,state){
     target=activePid; // redirect to self
     _duckFired=true;
   }
-
-  // Gorilla rimosso
-
-
 
   // Donkey swap
   if(pu.donkey){
@@ -5136,7 +5121,8 @@ async function nextTurn(state, fromPid=null, pendingUpd=null){
   if(pu.walrus?.owner===nextPid){upd['activePowerups/walrus']=null;toast('🦭 Foca scaduto!');}
   if(pu.duck?.owner===nextPid){upd['activePowerups/duck']=null;toast('🦆 Anatra scaduta (non attivata)!');}
   if(pu.medusa?.owner===nextPid){upd['activePowerups/medusa']=null;toast('🐙 Piovra scaduta!');}
-  if(pu.skunk?.owner===nextPid){upd['activePowerups/skunk']=null;upd['skunkCards']=null;toast('🦨 Puzzola scaduta!');}  if(pu.jaguar?.owner===nextPid){
+  if(pu.skunk?.owner===nextPid){upd['activePowerups/skunk']=null;upd['skunkCards']=null;toast('🦨 Puzzola scaduta!');}
+  if(pu.jaguar?.owner===nextPid){
     // Jaguar expires: clear shield
     upd['activePowerups/jaguar']=null;
     upd[`players/${nextPid}/jaguarShield`]=false;
@@ -5182,7 +5168,7 @@ async function nextTurn(state, fromPid=null, pendingUpd=null){
     addLog(`<span class='lpu'>🦘 Canguro</span>: <span class='lp'>${skippedName}</span> salta il turno!`,'system');
     upd['activePowerups/kangaroo']=null;
     upd[`stats/${nextPid}/turnsSkipped`]=(fresh.stats?.[nextPid]?.turnsSkipped||0)+1;
-    upd[`players/${nextPid}/skipNext`]=false; // clear spider if overlapping
+    upd[`players/${nextPid}/skipNext`]=false; // clear any stale skipNext flag
     // Advance to next alive in ord after skipped player
     const skipOrdIdx=ord.indexOf(nextPid);
     nextPid=null;
@@ -5197,21 +5183,8 @@ async function nextTurn(state, fromPid=null, pendingUpd=null){
       if(pu[puId]?.target===skippedByKang) upd[`activePowerups/${puId}`]={...pu[puId],target:nextPid};
     });
   }
-  // Spider skipNext — also uses ord-based next-player search
-  if(fresh.players?.[nextPid]?.skipNext){
-    toast(`🕷️ ${fresh.players[nextPid]?.name} salta il turno.`);
-    upd[`players/${nextPid}/skipNext`]=false;
-    upd[`stats/${nextPid}/turnsSkipped`]=(fresh.stats?.[nextPid]?.turnsSkipped||0)+1;
-    const skipOrdIdx2=ord.indexOf(nextPid);
-    nextPid=null;
-    for(let s=1;s<=ord.length;s++){const c=ord[(skipOrdIdx2+s)%ord.length];if(fresh.players?.[c]?.alive&&upd[`players/${c}/skipNext`]!==true){nextPid=c;break;}}
-    if(!nextPid){await checkWin(fresh);return;}
-    idx=alive.indexOf(nextPid);if(idx<0)idx=0;
-  }
-
   // Generate new cards
   let cards=generateCards(fresh.players,fresh.mode);
-  const hpChanges={};
 
   // Piccione: aggiorna gli indici bloccati sui nuovi cards (BUGFIX: spostato qui, dopo la generazione)
   if(pu.pigeon&&pu.pigeon.owner!==nextPid){
@@ -5232,16 +5205,6 @@ async function nextTurn(state, fromPid=null, pendingUpd=null){
     tickCard={...tickCard,value:newVal};
   }
 
-  // Apply accumulated HP changes
-  for(const [pid,delta] of Object.entries(hpChanges)){
-    const p=fresh.players?.[pid];
-    if(!p?.alive)continue;
-    const newHp=Math.max(0,p.hp+delta);
-    upd[`players/${pid}/hp`]=newHp;
-    upd[`players/${pid}/alive`]=newHp>0;
-    if(newHp===0)setTimeout(()=>triggerEliminationAnim(p.name||'?'),400);
-  }
-
   // Aggiungi separatore di turno nello storico
   const turnNum=(fresh.turnCount||0)+1;
   const turnPlayer=fresh.players?.[nextPid]?.name||'?';
@@ -5257,15 +5220,9 @@ async function nextTurn(state, fromPid=null, pendingUpd=null){
   G.masterOverrideActive=false;G.masterOverridePid=null;
   G.bearMode=false;G.bearCardsChosen=0;G.bearFirstTarget=null;G.bearFirstCardId=null;
   G.dogMode=false;G.dogPuCount=0;
-  // BUG FIX 2: check win including ALL changes — hpChanges (rhino) AND pendingUpd (shark, lion, gorilla etc.)
+  // BUG FIX: check win including ALL changes from pendingUpd (shark, lion, gorilla, mantis, etc.)
   {
     const computedForWin={...fresh,players:{...fresh.players}};
-    // Apply rhino/direct hpChanges
-    Object.entries(hpChanges).forEach(([pid,delta])=>{
-      const p=fresh.players?.[pid];if(!p?.alive)return;
-      const newHp=Math.max(0,(p.hp||0)+delta);
-      computedForWin.players[pid]={...p,hp:newHp,alive:newHp>0};
-    });
     // Apply pendingUpd player changes (shark/lion/gorilla/mantis/etc. eliminations)
     if(pendingUpd){
       Object.entries(pendingUpd).forEach(([k,v])=>{
@@ -5367,17 +5324,17 @@ function renderLog(log){
   if(!log){list.innerHTML='';_logCount=0;_logRenderedKeys.clear();_lastLogKey='';return;}
   const entries=Array.isArray(log)?log:Object.values(log);
   const sorted=entries.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,80);
-  const newKey=sorted.map(e=>e.ts+'_'+e.type).join('|');
+  const newKey=sorted.map(e=>e.ts+'_'+e.type+'_'+(e.html||'').slice(0,12)).join('|');
   if(newKey===_lastLogKey)return;
   _lastLogKey=newKey;
   _logCount=sorted.length;
-  // PERF: incremental prepend — only add new entries at top, remove overflow
+  // PERF: incremental prepend — use ts+html slice as unique key to avoid same-ms collision
   const existingKeys=new Set(Array.from(list.children).map(el=>el.dataset.k));
-  const newEntries=sorted.filter(e=>!existingKeys.has(String(e.ts)));
+  const newEntries=sorted.filter(e=>!existingKeys.has(String(e.ts)+'_'+(e.html||'').slice(0,12)));
   if(newEntries.length===0&&list.children.length===sorted.length)return;
   // Prepend new entries
   const frag=document.createDocumentFragment();
-  newEntries.forEach(e=>{const d=document.createElement('div');d.className=`log-entry ${e.type||'system'}`;d.innerHTML=e.html||'';d.dataset.k=String(e.ts);frag.appendChild(d);});
+  newEntries.forEach(e=>{const d=document.createElement('div');d.className=`log-entry ${e.type||'system'}`;d.innerHTML=e.html||'';d.dataset.k=String(e.ts)+'_'+(e.html||'').slice(0,12);frag.appendChild(d);});
   if(newEntries.length>0)list.insertBefore(frag,list.firstChild);
   // Trim excess (keep max 80)
   while(list.children.length>80)list.removeChild(list.lastChild);
@@ -5388,7 +5345,9 @@ async function masterPlayForCurrent(){
   const state=await dbGet(`rooms/${G.roomId}`);if(!state)return;
   const ord=state.playerOrder||[];
   const alive=ord.filter(p=>state.players?.[p]?.alive);
-  const cpid=alive[state.currentTurnIndex%alive.length];
+  // Use same ord-based scan as nextTurn to find current player reliably
+  const safeIdx=Math.min(state.currentTurnIndex||0,alive.length-1);
+  const cpid=alive[safeIdx<0?0:safeIdx]||alive[0];
   if(!cpid)return;
   G.masterOverrideActive=true;G.masterOverridePid=cpid;
   toast(`⚡ Giochi per ${state.players[cpid]?.name}`);
@@ -5546,8 +5505,8 @@ async function doRestart(){
     players,playerOrder:room.playerOrder,
     cards,activePowerups:{},puEnabled,log:{},stats:{},
     tickCard:null,moscaCard:null,butterflyActive:false,butterflyCards:null,butterflyOwner:null,
-    chameleonUsed:false,winner:null,
-    _zeckaPendingDmg:null,_lionPendingDmg:null,
+    skunkCards:null,chameleonUsed:false,winner:null,
+    _zeckaPendingDmg:null,_lionPendingDmg:null,_hyenaSkip:null,
   });
   G._gameoverShown=false;closeOverlay('overlay-restart');startPlayingScreen();
 }
